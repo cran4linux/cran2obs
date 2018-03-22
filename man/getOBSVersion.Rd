@@ -11,7 +11,7 @@ getOBSVersion(pkg, quiet = TRUE)
 \arguments{
 \item{pkg}{A character string containing the name of a R package as found in CRAN}
 
-\item{quiet}{Should progression info be given or not, default = true}
+\item{quiet}{If set to FALSE some progression info is given, default = TRUE.}
 }
 \value{
 A list with components file containing the source file name and

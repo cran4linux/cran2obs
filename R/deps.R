@@ -31,10 +31,10 @@ cleanDeps <- function(){
 
 #' This function generates an analogous matrix to available.packages()
 #' but for all the packages in OBS
-#' @param
+#' @param  If set to FALSE some progression info is given, default = TRUE.
 #' @return Matrix of all R packages avaialble in OBS devel:languages:R:released
 #' @export
-available.packages.OBS <- function(){
+available.packages.OBS <- function(quiet=TRUE){
     ## the names first
     obspkgs <- system("osc ls devel:languages:R:released", intern=TRUE)
     ## contains some additional stuff only related to compiling some packages
@@ -46,7 +46,7 @@ available.packages.OBS <- function(){
     ## R-base-java is not a CRAN package.
     
     cranpkgnames <- gsub("R-", "", obspkgs)
-    obsinfo <- sapply(cranpkgnames, getOBSVersion)
+    obsinfo <- sapply(cranpkgnames, getOBSVersion, quiet=TRUE)
 
     obspkgs <- cbind(obspkgs, obsinfo["OBSFile",], obsinfo["OBSVersion",])
 }
@@ -56,7 +56,7 @@ available.packages.OBS <- function(){
 #' information off OBS
 #' This function is not exactly cheap run-time wise. Around 0.5s per package.
 #' @param pkg A character string containing the name of a R package as found in CRAN
-#' @param quiet Should progression info be given or not, default = true
+#' @param quiet If set to FALSE some progression info is given, default = TRUE.
 #' @return A list with components file containing the source file name and
 #' version containing the version.
 #' @export
@@ -75,6 +75,6 @@ getOBSVersion <- function ( pkg, quiet=TRUE ) {
 showOBSstatus <- function(){
     cranpkgs <- cleanDeps()
     obspkgs <- available.packages.OBS(quiet=TRUE)
-    merge( oscpkgs, cranpkgs, by="row.names" , all.x=TRUE )
+    merge( obspkgs, cranpkgs, by="row.names" , all.x=TRUE )
 }
     

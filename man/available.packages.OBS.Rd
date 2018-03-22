@@ -5,7 +5,10 @@
 \title{This function generates an analogous matrix to available.packages()
 but for all the packages in OBS}
 \usage{
-available.packages.OBS()
+available.packages.OBS(quiet = TRUE)
+}
+\arguments{
+\item{If}{set to FALSE some progression info is given, default = TRUE.}
 }
 \value{
 Matrix of all R packages avaialble in OBS devel:languages:R:released
