@@ -46,7 +46,7 @@ available.packages.OBS <- function(quiet=TRUE){
     ## R-base-java is not a CRAN package.
     
     cranpkgnames <- gsub("R-", "", obspkgs)
-    obsinfo <- sapply(cranpkgnames, getOBSVersion, quiet=TRUE)
+    obsinfo <- sapply(cranpkgnames, getOBSVersion, quiet=quiet)
 
     obspkgs <- cbind(obspkgs, obsinfo["OBSFile",], obsinfo["OBSVersion",])
 }
@@ -70,11 +70,12 @@ getOBSVersion <- function ( pkg, quiet=TRUE ) {
 
 #' This functions shows a table for all packages in OBS with version numbers
 #' of CRAN and OBS
-#' return OBSstatus A dataframe containing esp. version information from CRAN for all OBS packages 
+#' return OBSstatus A dataframe containing esp. version information from CRAN for all OBS packages
+#' @param quiet If set to FALSE some progression info is given, default = TRUE.
 #' @export
-showOBSstatus <- function(){
+showOBSstatus <- function(quiet=TRUE){
     cranpkgs <- cleanDeps()
-    obspkgs <- available.packages.OBS(quiet=TRUE)
+    obspkgs <- available.packages.OBS(quiet=quiet)
     merge( obspkgs, cranpkgs, by="row.names" , all.x=TRUE )
 }
     
