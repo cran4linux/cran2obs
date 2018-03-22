@@ -31,7 +31,7 @@ cleanDeps <- function(){
 
 #' This function generates an analogous matrix to available.packages()
 #' but for all the packages in OBS
-#' @param  If set to FALSE some progression info is given, default = TRUE.
+#' @param quiet If set to FALSE some progression info is given, default = TRUE.
 #' @return Matrix of all R packages avaialble in OBS devel:languages:R:released
 #' @export
 available.packages.OBS <- function(quiet=TRUE){
@@ -48,7 +48,7 @@ available.packages.OBS <- function(quiet=TRUE){
     cranpkgnames <- gsub("R-", "", obspkgs)
     obsinfo <- sapply(cranpkgnames, getOBSVersion, quiet=quiet)
 
-    obspkgs <- cbind(obspkgs, obsinfo["OBSFile",], obsinfo["OBSVersion",])
+    obspkgs <- cbind(OBSpkg=obspkgs, File=obsinfo["OBSFile",], OBSVersion=obsinfo["OBSVersion",])
 }
 
 
@@ -76,6 +76,7 @@ getOBSVersion <- function ( pkg, quiet=TRUE ) {
 showOBSstatus <- function(quiet=TRUE){
     cranpkgs <- cleanDeps()
     obspkgs <- available.packages.OBS(quiet=quiet)
-    merge( obspkgs, cranpkgs, by="row.names" , all.x=TRUE )
+    status <- merge( obspkgs, cranpkgs, by="row.names" , all.x=TRUE )
+    status$Row.names <- NULL
 }
     

@@ -4,7 +4,7 @@ Version: 0.0.1
 Authors@R: person("Detlef", "Steuer", email = "steuer@hsu-hh.de", role = c("aut", "cre"))
 Description: The package contains functions to generate and work with rpm packages
     for OpenSUSE from CRAN. 
-Depends: tools
+Depends: tools, dplyr
 License: GPL (>=2)
 Encoding: UTF-8
 LazyData: true

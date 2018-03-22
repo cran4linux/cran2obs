@@ -8,7 +8,7 @@ but for all the packages in OBS}
 available.packages.OBS(quiet = TRUE)
 }
 \arguments{
-\item{If}{set to FALSE some progression info is given, default = TRUE.}
+\item{quiet}{If set to FALSE some progression info is given, default = TRUE.}
 }
 \value{
 Matrix of all R packages avaialble in OBS devel:languages:R:released
