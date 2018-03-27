@@ -3,7 +3,7 @@
 #' Because recommended packages may be assumed to be installed
 #' in a OpenSUSE installation with R, these are removed together with
 #' base packages from the dependencies.
-#' @param
+#' 
 #' @return A matrix containing available packages with a new column
 #' 'recDep' containing all recursive dependencies
 #' @export
@@ -71,7 +71,7 @@ getOBSVersion <- function ( pkg, quiet=TRUE ) {
 #' This functions shows a table for all packages in OBS with version numbers
 #' of CRAN and OBS
 #' return OBSstatus A dataframe containing esp. version information from CRAN for all OBS packages
-#' @param quiet If set to FALSE some progression info is given, default = TRUE.
+#' @param quiet If set to FALSE some progresso info is given, default = TRUE.
 #' @export
 showOBSstatus <- function(quiet=TRUE){
     cranpkgs <- cleanDeps()
