@@ -2,5 +2,6 @@
 
 export(available.packages.OBS)
 export(cleanDeps)
+export(depUnion)
 export(getOBSVersion)
 export(showOBSstatus)

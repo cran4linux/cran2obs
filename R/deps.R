@@ -80,3 +80,22 @@ showOBSstatus <- function(quiet=TRUE){
     status$Row.names <- NULL
 }
     
+#' This function generates the complete set of dependencies, give a
+#' vector of package names.
+#' This is useful i.e. to build rstudio, to have a simple way
+#' to generate the complete list of recursive dependencies.
+#' @param pkglist A vector of package names
+#' @param ap A data structure like returned from cleanDeps, must
+#' contain a column "recDep" containing recursive dependencies for
+#' a given package. If NULL will be generated.
+#' @export
+depUnion <- function(pkglist, ap=NULL) {
+    if (is.null(ap)) ap <- cleanDeps()
+    if (sum( pkglist %in% ap[,"Package"] ) < length(pkglist )) {
+        stop("Information on dependencies missing for some packages")
+    }
+    allDeps <- unique(
+        unlist(
+            strsplit(
+                paste(ap[pkglist, "recDep"], collapse=" "), " " )))
+}
