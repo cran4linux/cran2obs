@@ -78,6 +78,7 @@ showOBSstatus <- function(quiet=TRUE){
     obspkgs <- available.packages.OBS(quiet=quiet)
     status <- merge( obspkgs, cranpkgs, by="row.names" , all.x=TRUE )
     status$Row.names <- NULL
+    status
 }
     
 #' This function generates the complete set of dependencies, give a
