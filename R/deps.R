@@ -44,11 +44,14 @@ available.packages.OBS <- function(quiet=TRUE){
     ## R-base not an R package
     obspkgs <- obspkgs[-which(obspkgs == "R-base-java")]
     ## R-base-java is not a CRAN package.
+
+    ##obspkgs <- obspkgs[1:10] 
+    ##debugging
     
     cranpkgnames <- gsub("R-", "", obspkgs)
-    obsinfo <- sapply(cranpkgnames, getOBSVersion, quiet=quiet)
+    obsinfo <- sapply(cranpkgnames, getOBSVersion, USE.NAMES=FALSE)
 
-    obspkgs <- cbind(OBSpkg=obspkgs, File=obsinfo["OBSFile",], OBSVersion=obsinfo["OBSVersion",])
+    obspkgs <- cbind(OBSpkg=obspkgs, File=obsinfo[1,], OBSVersion=obsinfo[2,])
 }
 
 
@@ -63,20 +66,26 @@ available.packages.OBS <- function(quiet=TRUE){
 getOBSVersion <- function ( pkg, quiet=TRUE ) {
     if (! quiet) cat("Checking ", pkg, "\n")
     lst <- system( paste("osc ls devel:languages:R:released R-", pkg, sep="", collapse="") , intern=TRUE )
-    srcfile <- lst[grep(paste("^",pkg,sep="", collapse=""), lst)]
+    srcfile <- lst[grep(paste("^",pkg,sep="", collapse=""), lst)][1]
+    ## the last [1] is needed if a package is linked to factory. In lst the files
+    ## can appear multiple times then.
     srcversion <- strsplit(gsub(".tar.gz", "", srcfile), "_")[[1]][2]
-    list(OBSFile=srcfile, OBSVersion=srcversion)
+    c(srcfile, srcversion)
 }
 
 #' This functions shows a table for all packages in OBS with version numbers
 #' of CRAN and OBS
 #' return OBSstatus A dataframe containing esp. version information from CRAN for all OBS packages
 #' @param quiet If set to FALSE some progresso info is given, default = TRUE.
+#' @param cran If not NULL a matrix like returned from cleanDeps() must be given. If NULL cleanDeps()
+#' is called.
+#' @param obs If not NULL a matrix like returned from available.packages.OBS() must be given. If NULL
+#' that function is called.
 #' @export
-showOBSstatus <- function(quiet=TRUE){
-    cranpkgs <- cleanDeps()
-    obspkgs <- available.packages.OBS(quiet=quiet)
-    status <- merge( obspkgs, cranpkgs, by="row.names" , all.x=TRUE )
+showOBSstatus <- function(quiet=TRUE, cran=NULL, obs=NULL){
+    if (is.null(cran)) cran <- cleanDeps()
+    if (is.null(obs))  obs <- available.packages.OBS(quiet=quiet)
+    status <- merge( obs, cran, by="row.names" , all.x=TRUE )
     status$Row.names <- NULL
     status
 }
