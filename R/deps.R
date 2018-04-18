@@ -122,7 +122,7 @@ depUnion <- function(pkglist, ap=NULL) {
 #' @param obscodir Directory where the local copy of the OBS package shall be created
 createNewOBSPackage <- function( obsproject, obscodir="~/OBS/", pkg ){
 
-    opkgs <- paste0("R-", pkg)
+    opkg <- paste0("R-", pkg)
     
     cmd <- paste0("cd ", obscodir, obsproject, " && osc mkpac " , opkg)
     cmdresult <- system(cmd, intern=TRUE)
@@ -136,10 +136,15 @@ createNewOBSPackage <- function( obsproject, obscodir="~/OBS/", pkg ){
     cmd <- paste0("cp ~/rpmbuild/SOURCES/", pkg,"*tar.gz ~/rpmbuild/SPECS/", opkg,".spec ", obscodir, obsproject, "/", opkg)
     cmdresult <- system(cmd, intern=TRUE)
 
-    cmd <- paste0("cd ", obscodir, obsproject, " && osc addremove")
+    cmd <- paste0("cd ", obscodir, obsproject,"/",opkg," && osc addremove")
     cmdresult <- system(cmd, intern=TRUE)
 
-    cmd <- paste0("osc ci -m 'new package ", opkg,"'")
+    cmd <- paste0("cd ", obscodir, obsproject,"/",opkg," && osc ci -m 'new package ", opkg,"'")
     cmdresult <- system(cmd, intern=TRUE)
 }
 
+#deplength <- sapply( allDep[, "recDep"], function(x) length(strsplit(x," ")[[1]])) 
+#for (pno in which(deplength==0)[1:50]) {
+#    createNewOBSPackage( "home:dsteuer:CRANtest", pkg=allDep[pno, "Package"])
+#    Sys.sleep(10)
+#    }
