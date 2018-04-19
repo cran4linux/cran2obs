@@ -120,6 +120,7 @@ depUnion <- function(pkglist, ap=NULL) {
 #' This function creates an OBS package from an R package
 #' @param obsproject Project in OBS where packages are taken from.
 #' @param obscodir Directory where the local copy of the OBS package shall be created
+#' @export
 createNewOBSPackage <- function( obsproject, obscodir="~/OBS/", pkg ){
 
     opkg <- paste0("R-", pkg)

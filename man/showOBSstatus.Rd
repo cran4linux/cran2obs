@@ -6,10 +6,16 @@
 of CRAN and OBS
 return OBSstatus A dataframe containing esp. version information from CRAN for all OBS packages}
 \usage{
-showOBSstatus(quiet = TRUE)
+showOBSstatus(quiet = TRUE, cran = NULL, obs = NULL)
 }
 \arguments{
-\item{quiet}{If set to FALSE some progression info is given, default = TRUE.}
+\item{quiet}{If set to FALSE some progresso info is given, default = TRUE.}
+
+\item{cran}{If not NULL a matrix like returned from cleanDeps() must be given. If NULL cleanDeps()
+is called.}
+
+\item{obs}{If not NULL a matrix like returned from available.packages.OBS() must be given. If NULL
+that function is called.}
 }
 \description{
 This functions shows a table for all packages in OBS with version numbers

@@ -5,9 +5,12 @@
 \title{This function generates an analogous matrix to available.packages()
 but for all the packages in OBS}
 \usage{
-available.packages.OBS(quiet = TRUE)
+available.packages.OBS(obsproject = "devel:languages:R:released",
+  quiet = TRUE)
 }
 \arguments{
+\item{obsproject}{Project in OBS where packages are taken from.}
+
 \item{quiet}{If set to FALSE some progression info is given, default = TRUE.}
 }
 \value{

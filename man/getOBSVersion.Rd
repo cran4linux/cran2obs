@@ -6,10 +6,12 @@
 information off OBS
 This function is not exactly cheap run-time wise. Around 0.5s per package.}
 \usage{
-getOBSVersion(pkg, quiet = TRUE)
+getOBSVersion(pkg, obsproject = "devel:languages:R:released", quiet = TRUE)
 }
 \arguments{
 \item{pkg}{A character string containing the name of a R package as found in CRAN}
+
+\item{obsproject}{Project in OBS where packages are taken from.}
 
 \item{quiet}{If set to FALSE some progression info is given, default = TRUE.}
 }
