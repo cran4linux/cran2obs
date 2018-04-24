@@ -144,6 +144,7 @@ createNewOBSPackage <- function( obsproject, obscodir="~/OBS/", pkg ){
     cmdresult <- system(cmd, intern=TRUE)
 }
 
+# knownproblemlist <- c("ABC.RAP", "abnormality", "amelie", "autoencoder","BGGE")
 #deplength <- sapply( allDep[, "recDep"], function(x) length(strsplit(x," ")[[1]])) 
 #for (pno in which(deplength==0)[1:50]) {
 #    createNewOBSPackage( "home:dsteuer:CRANtest", pkg=allDep[pno, "Package"])
