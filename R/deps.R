@@ -94,6 +94,7 @@ showOBSstatus <- function(quiet=TRUE, cran=NULL, obs=NULL){
     if (is.null(obs))  obs <- available.packages.OBS(obsproject="devel:languages:R:released", quiet=quiet)
     status <- merge( obs, cran, by="row.names" , all.x=TRUE )
     status$Row.names <- NULL
+    for (col in 1:dim(status)[2]) status[,col] <- as.character(status[,col])  
     status
 }
     
@@ -120,6 +121,7 @@ depUnion <- function(pkglist, ap=NULL) {
 #' This function creates an OBS package from an R package
 #' @param obsproject Project in OBS where packages are taken from.
 #' @param obscodir Directory where the local copy of the OBS package shall be created
+#' @param pkg Package name 
 #' @export
 createNewOBSPackage <- function( obsproject, obscodir="~/OBS/", pkg ){
 
@@ -144,9 +146,42 @@ createNewOBSPackage <- function( obsproject, obscodir="~/OBS/", pkg ){
     cmdresult <- system(cmd, intern=TRUE)
 }
 
+#' This function updates a project already existing in OBS
+#' @param obsproject Project in OBS where packages are taken from.
+#' @param obscodir Directory where the local copy of the OBS package shall be created
+#' @param pkg Package name 
+#' @export
+updateOBSPackage <- function( obsproject, obscodir="~/OBS/",pkg) {
+    opkg <- paste0("R-", pkg)
+    
+    cmd <- paste0("rm ", obscodir, obsproject, "/" , opkg, "/",pkg,"*tar.gz")
+    cmdresult <- system(cmd, intern=TRUE)
+
+    cmd <- paste0("rm -f ~/rpmbuild/SOURCES/", pkg,"*tar.gz")
+    cmdresult <- system(cmd, intern=TRUE)
+
+    cmd <- paste0("rm -f ~/rpmbuild/SPECS/", opkg,".spec")
+    cmdresult <- system(cmd, intern=TRUE)
+
+    cmd <- paste0("R2rpm --verbose --debug --no-check --no-suggest -p ",pkg)
+    cmdresult <- system(cmd, intern=TRUE)
+
+    cmd <- paste0("cp ~/rpmbuild/SOURCES/", pkg,"*tar.gz ~/rpmbuild/SPECS/", opkg,".spec ", obscodir, obsproject, "/", opkg)
+    cmdresult <- system(cmd, intern=TRUE)
+
+    cmd <- paste0("cd ", obscodir, obsproject,"/",opkg," && osc addremove")
+    cmdresult <- system(cmd, intern=TRUE)
+
+    cmd <- paste0("cd ", obscodir, obsproject,"/",opkg," && osc ci -m 'new package ", opkg,"'")
+    cmdresult <- system(cmd, intern=TRUE)
+
+}
+
 # knownproblemlist <- c("ABC.RAP", "abnormality", "amelie", "autoencoder","BGGE")
 #deplength <- sapply( allDep[, "recDep"], function(x) length(strsplit(x," ")[[1]])) 
 #for (pno in which(deplength==0)[1:50]) {
 #    createNewOBSPackage( "home:dsteuer:CRANtest", pkg=allDep[pno, "Package"])
 #    Sys.sleep(10)
-#    }
+                                        #    }
+
+
