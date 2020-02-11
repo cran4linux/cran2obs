@@ -29,3 +29,4 @@ If R-* packages are in Factory, they should be in Maintenance, too.
 But I never managed to get even R-base into Maintenance. And that would
 be really useful!
 
+For installation of packages a format like tex-packages ""zypper in 'tex(multirow.sty)'" could be possible: zypper install 'R(jsonlite)' 
