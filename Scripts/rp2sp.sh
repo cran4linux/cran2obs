@@ -14,7 +14,7 @@ function setup {
 
     osc mkpac R-$PACK
     cd R-$PACK
-    R2spec --no-check --no-suggest -p $PACK
+    R2rpm --verbose --debug --no-check --no-suggest -p $PACK
     cp ~/rpmbuild/SPECS/R-$PACK.spec .
     cp ~/rpmbuild/SOURCES/${PACK}*.tar.gz .
     # Testbuild
