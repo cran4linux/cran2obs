@@ -9,6 +9,8 @@ This is not even work-in-progress, it is just the beginning of some work.
 
 - osc , interface to OBS
 - R2spec , generates spec files from R packages description
+  R2spec, resp. R2rpm use locally installed files to build the spec
+  using a testbuild.
 - rpmbuild , low level rpm build tool, used by R2spec
 
 ## Scripts
