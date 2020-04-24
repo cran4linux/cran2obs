@@ -3,6 +3,7 @@
 # Must:  ~/.oscrc contains valid username for OBS
 # R2spec must be installed
 # osc must be installed
+# call: rp2sp.sh <packname> [setup|build|push]
 
 PACK=$1
 # PACK may not already exist in OBS
