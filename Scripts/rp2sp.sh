@@ -19,13 +19,13 @@ function setup {
     cp ~/rpmbuild/SPECS/R-$PACK.spec .
     cp ~/rpmbuild/SOURCES/${PACK}*.tar.gz .
     # Testbuild
-    osc build R-$PACK.spec
+    osc build --ccache R-$PACK.spec
     cd -
 }
 
 function build {
     cd ~/OBS/devel\:languages\:R\:released/R-$PACK
-    osc build --no-init R-$PACK.spec
+    osc build --ccache --no-init R-$PACK.spec
     cd -
 }
 
