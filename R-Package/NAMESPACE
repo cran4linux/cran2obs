@@ -2,8 +2,10 @@
 
 export(available.packages.OBS)
 export(cleanDeps)
+export(cleanList)
 export(createNewOBSPackage)
 export(depUnion)
+export(desc2spec)
 export(getOBSVersion)
 export(showOBSstatus)
 export(updateOBSPackage)
