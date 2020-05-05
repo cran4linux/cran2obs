@@ -17,7 +17,9 @@ devtools::install_github("dsteuer/CRAN2OBS")
 External dependencies
 ---------------------
 
-- rpmbuild
+- rpmbuild, rpmbuild requires the directories
+  $RPMBULDROOT/{SOURCES, SPECS, BUILD, BUILDROOT, OTHER, RPMS, SRPMS}
+  to exist
 
 Intended use
 ------------
@@ -49,7 +51,6 @@ Implementation decisions
   beginning, not only if you try to build these dependencies piece by piece.
 - Requires: R-base, BuildRequires: R-base-devel are always addded
 - Still to decide: Remove the 'Group:' tag?
-
 
 
 ### Author
