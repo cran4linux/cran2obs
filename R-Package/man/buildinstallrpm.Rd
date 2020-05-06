@@ -7,10 +7,12 @@ build and locally install the corresponding rpm package}
 \usage{
 buildinstallrpm(packname, rpmbuildroot = "~/rpmbuild/")
 }
+\arguments{
+\item{rpmbuildroot}{The directory where rpmbuild should do its work}
+}
 \value{
 No value
 }
 \description{
-buildinstallrpm takes a R package name and tries to
-build and locally install the corresponding rpm package
+#' @param packname A package name of a package in a R repo like CRAN
 }

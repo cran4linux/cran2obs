@@ -1,23 +1,32 @@
 #' buildinstallrpm takes a R package name and tries to
 #' build and locally install the corresponding rpm package
+#'
+#' #' @param packname A package name of a package in a R repo like CRAN
+#' @param rpmbuildroot The directory where rpmbuild should do its work
+#' 
 #' @return No value
 #' @export
 buildinstallrpm <- function(packname, rpmbuildroot="~/rpmbuild/" ){
-    errorlog <- "bi.err"
+    log <- "bi.err"
     cat("Begin building", packname, "\n")
-    cat("Begin building", packname, "\n", file=errorlog, append=TRUE)
-    cat(Sys.time(), "\n", file=errorlog, append=TRUE)
+    cat("Begin building", packname, "\n", file=log, append=TRUE)
+    cat(as.character( Sys.time()), "\n", file=log, append=TRUE)
     result <- desc2spec(packname, rpmbuildroot=rpmbuildroot)
     if (grepl(".spec", result, fixed=TRUE)) { #success, now install built rpm
-        command <- paste("rpm --install --force ", rpmbuildroot, "RPMS/x86_64/R-", packname,"*.rpm 2>&1", sep="") 
-        result <- system(command, intern=TRUE)
-        for (line in result) cat(line, "\n", file=errorlog, append=TRUE)
+        cat("Successfully built ", packname, " rpm\n", file=log, append=TRUE)
+        rpmname <- paste(rpmbuildroot,"RPMS/x86_64/R-", packname,"*.rpm", sep="")
+        ## Installation only works, if R runs as root. You habe been warned
+        suppressWarnings(
+            result <- system2("rpm", args=c("--install --force", rpmname),stdout=TRUE, stderr=TRUE)
+        )
+        for (line in result) cat(line, "\n", file=log, append=TRUE)
     } else {
         cat("Failed to build and install ", packname, "\n")
+        cat("Failed to build and install ", packname, "\n", file=log, append=TRUE)
     }
     cat("Finished ",packname,"\n")
-    cat("Finished ",packname,"\n", file=errorlog, append=TRUE)
-    cat(Sys.time(), "\n", file=errorlog, append=TRUE)
+    cat("Finished ",packname,"\n", file=log, append=TRUE)
+    cat(as.character(Sys.time()), "\n", file=log, append=TRUE)
 }
 
 #' desc2spec takes the name of an R package and generates a spec file
@@ -26,12 +35,15 @@ buildinstallrpm <- function(packname, rpmbuildroot="~/rpmbuild/" ){
 #' rpmbuild puts it. The %check section is deliberately empty. We rely
 #' on the checks on CRAN.
 #'
+#' @param packname A package name of a package in a R repo like CRAN
+#' @param rpmbuildroot The directory where rpmbuild should do its work
+#' 
 #' @return The path to the generated specfile.
 #' @export
 desc2spec <- function(packname, rpmbuildroot="~/rpmbuild/") {
     errorlog <- "desc2spec.err"
     cat("Building ", packname, "\n", file=errorlog, append=TRUE)
-    cat("Begin ", Sys.time(), "\n", file=errorlog, append=TRUE)
+    cat("Begin ", as.character(Sys.time()), "\n", file=errorlog, append=TRUE)
 
     if (! file.exists(system.file("specfile.tpl", package="CRAN2OBS"))){
         stop("Specfile template not found. Exit.")
@@ -51,6 +63,7 @@ desc2spec <- function(packname, rpmbuildroot="~/rpmbuild/") {
                       paste(rpmbuildroot,"SOURCES/",source0, sep=""))
     }
     
+### extract DESCRIPTION file, read it, erase it
     untar( paste(rpmbuildroot,"SOURCES/",source0, sep=""), paste(packname,"/DESCRIPTION",sep="") )
     
     description <- readLines(paste(packname,"/DESCRIPTION",sep=""))
@@ -86,7 +99,7 @@ desc2spec <- function(packname, rpmbuildroot="~/rpmbuild/") {
 
     descstart <- grep("Description:", description, fixed=TRUE)
     descend <- descstart + grep( "^[A-Z][a-z]+:", description[descstart+1:length(description)])[1] -1
-    description.str <- paste( description[ descstart:descend ] )
+    description.str <- trimws(paste( description[ descstart:descend ] ), which="both")
     description.str[1] <- gsub("Description: ", "", description.str[1])
     ## still needs formating! textwrap for R?
     
@@ -120,22 +133,34 @@ desc2spec <- function(packname, rpmbuildroot="~/rpmbuild/") {
             cat( line, "\n", file=specfile, append=TRUE)
         }
     }
-# stop("Forced break to inspect spec file")
+
 ### call rpmbuild
     buildcommand <- paste( "rpmbuild -ba ", specfile ," &> ", specfile, ".log", sep="")
-    system(buildcommand )
 
-    rpmlog <- readLines( paste( specfile, ".log", sep=""))
+    suppressWarnings(
+        rpmlog <- system2("rpmbuild", args=c("-ba", specfile), stdout=TRUE, stderr=TRUE)
+    ## the first build will fail by construction.
+    ## the output of rpmbuild allows to build the %file section
+    ## in the spec
+    )
 
+    ## but we have to look for other errors preventing successful second run
+    
     if ( length( grep( "Failed build dependencies", rpmlog, fixed=TRUE)) >0 ) { ### missing dependencies, no chance
-        cat( "The following dependencies must be installed to build R-", packname, "\n", sep="")
-        cat( "The following dependencies must be installed to build R-", packname, "\n", sep="", file=errorlog, append=TRUE)
+        cat( "The following missing dependencies must be installed to build R-", packname, "\n", sep="")
+        cat( "The following missing dependencies must be installed to build R-", packname, "\n", sep="", file=errorlog, append=TRUE)
         for (line in rpmlog) if ( grepl( "needed", line, fixed=TRUE)) {
                                  cat( line,"\n")
                                  cat( line,"\n", file=errorlog, append=TRUE)
-                                 cat("Failed ", Sys.time(), "\n", file=errorlog, append=TRUE)
+                                 cat("Failed ", as.character(Sys.time()), "\n", file=errorlog, append=TRUE)
                              }
-        stop("Missing dependencies!")
+        return("Failed: Missing dependencies first run rpmbuild")
+    }
+
+    if (length( grep("Bad exit status", rpmlog, fixed=TRUE)) > 0 ) {
+        cat( "Bad exit status from build R-", packname, "\n", sep="")
+        cat( "Bad exit status from build R-", packname, "\n", sep="", file=errorlog, append=TRUE)
+        return("Failed: Bad exit status")
     }
 
 ### At this point something was build. But as the specfile.tpl has an empty file section.
@@ -170,9 +195,9 @@ desc2spec <- function(packname, rpmbuildroot="~/rpmbuild/") {
     }
 
 ### second build!
-    system(buildcommand )
+    rpmlog <- system2("rpmbuild", args=c("-ba", specfile), stdout=TRUE, stderr=TRUE )
 
-    rpmlog <- readLines( paste( specfile, ".log", sep=""))
+#    rpmlog <- readLines( paste( specfile, ".log", sep=""))
     if (length( grep( "Wrote:", rpmlog, fixed=TRUE)) == 2) {
         cat("Successfully created rpm package\n")
         cat("Successfully created rpm package\n", file=errorlog, append=TRUE)
@@ -180,11 +205,11 @@ desc2spec <- function(packname, rpmbuildroot="~/rpmbuild/") {
         for (line in  rpmlog[grep("Wrote:", rpmlog, fixed=TRUE)]){
             cat(line, "\n", file=errorlog, append=TRUE)
         }
-        cat("Succeded ", Sys.time(), "\n", file=errorlog, append=TRUE)
+        cat("Succeded ", as.character(Sys.time()), "\n", file=errorlog, append=TRUE)
     }
     else {
-        cat( "Some unknown error!", packname, "\n", sep="")
-        stop("Some unknown error, probably external libraries missing as dependencies in spec")
+        cat( "Failed to build ", packname, " in second run rpmbuild\n", sep="")
+        return("Failed: Unknown error second run rpmbuild")
     }
     return(specfile)
 }

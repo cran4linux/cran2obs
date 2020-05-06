@@ -10,6 +10,11 @@ on the checks on CRAN.}
 \usage{
 desc2spec(packname, rpmbuildroot = "~/rpmbuild/")
 }
+\arguments{
+\item{packname}{A package name of a package in a R repo like CRAN}
+
+\item{rpmbuildroot}{The directory where rpmbuild should do its work}
+}
 \value{
 The path to the generated specfile.
 }

@@ -4,8 +4,10 @@
 #' in a OpenSUSE installation with R, these are removed together with
 #' base packages from the dependencies.
 #' 
-#' @return A matrix containing available packages with a new column
-#' 'recDep' containing all recursive dependencies
+#' @return A dataframe containing available packages with new columns
+#' 'recDep' containing all recursive dependencies and 'depLen' containing
+#' the number of recursive dependencies
+#' 
 #' @export
 cleanDeps <- function(){
     ap <- available.packages()
@@ -25,8 +27,11 @@ cleanDeps <- function(){
     depn <- lapply( dep, function(x) x <- x[ ! x %in% rmpkgs  ]  )
     ## remove rmpkgs from dependency list
     
-    ap <- cbind(ap, recDep=as.vector(unlist(lapply(depn, paste0, collapse=" "))))
+    ap <- data.frame(ap, recDep=as.vector(unlist(lapply(depn, paste0, collapse=" "))))
     ## new column with recursive dependencies
+
+    ap <- cbind(ap, depLen= sapply( my.ap[,"recDep"], function(x) length( strsplit( x, " ")[[1]] )))
+    ## new column with number of dependencies
 }
 
 #' This function generates an analogous matrix to available.packages()
