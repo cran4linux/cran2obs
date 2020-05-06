@@ -30,7 +30,7 @@ cleanDeps <- function(){
     ap <- data.frame(ap, recDep=as.vector(unlist(lapply(depn, paste0, collapse=" "))))
     ## new column with recursive dependencies
 
-    ap <- cbind(ap, depLen= sapply( my.ap[,"recDep"], function(x) length( strsplit( x, " ")[[1]] )))
+    ap <- cbind(ap, depLen= sapply( ap[,"recDep"], function(x) length( strsplit( x, " ")[[1]] )))
     ## new column with number of dependencies
 }
 
