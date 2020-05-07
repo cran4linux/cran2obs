@@ -21,8 +21,8 @@ buildinstallrpm <- function(packname, rpmbuildroot="~/rpmbuild/" ){
         )
         for (line in result) cat(line, "\n", file=log, append=TRUE)
     } else {
-        cat("Failed to build and install ", packname, "\n")
-        cat("Failed to build and install ", packname, "\n", file=log, append=TRUE)
+        cat("Failed to build and install ", packname, "\n", result, "\n")
+        cat("Failed to build and install ", packname, "\n", result, "\n", file=log, append=TRUE)
     }
     cat("Finished ",packname,"\n")
     cat("Finished ",packname,"\n", file=log, append=TRUE)
@@ -51,9 +51,16 @@ desc2spec <- function(packname, rpmbuildroot="~/rpmbuild/") {
     spectpl <- readLines(system.file("specfile.tpl", package="CRAN2OBS"))
     
     ap <- available.packages(repos="https://cloud.r-project.org")
+
+    if (! packname %in% ap[,"Package"]) {
+        cat("Seems ", packname, " no longer exists on CRAN\n")
+        cat("Seems ", packname, " no longer exists on CRAN\n", file=errorlog, append=TRUE)
+        return(paste("Failed: Package", packname, " no longer on CRAN"))
+    }
     
     version <- ap[Package=packname,"Version"]
-        
+    
+    
     source0 <-  paste(packname,"_",version,".tar.gz",sep="")
     version <- gsub("-",".",ap[Package=packname,"Version"])
     ## version must be normalized for rpm
