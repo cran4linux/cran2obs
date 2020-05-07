@@ -36,7 +36,7 @@ Requires:	 R-base
 BuildRequires:   texlive
 BuildRequires:	 texinfo
 BuildRequires:   fdupes
-BuildRequires:   R-base-devel
+BuildRequires:   R-base
 {{builddepends}}
 {{needscompilation}}
 
