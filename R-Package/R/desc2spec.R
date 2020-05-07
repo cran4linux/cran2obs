@@ -24,7 +24,7 @@ buildinstallrpm <- function(packname, rpmbuildroot="~/rpmbuild/" ){
         cat("Failed to build and install ", packname, "\n", result, "\n")
         cat("Failed to build and install ", packname, "\n", result, "\n", file=log, append=TRUE)
     }
-    cat("Finished ",packname,"\n")
+    cat("Finished ",packname,"\n\n")
     cat("Finished ",packname,"\n", file=log, append=TRUE)
     cat(as.character(Sys.time()), "\n", file=log, append=TRUE)
 }
