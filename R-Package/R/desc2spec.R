@@ -1,53 +1,28 @@
-#' createrpm takes a R package name and tries to
-#' build the corresponding rpm package
-#'
-#' #' @param packname A package name of a package in a R repo like CRAN
-#' @param rpmbuildroot The directory where rpmbuild should do its work
-#' 
-#' @return No value
-#' @export
-createrpm <- function(packname, rpmbuildroot="~/rpmbuild/" ){
-    log <- "bi.err"
-    cat("Begin building", packname, "\n")
-    cat("Begin building", packname, "\n", file=log, append=TRUE)
-    cat(as.character( Sys.time()), "\n", file=log, append=TRUE)
-    result <- desc2spec(packname, rpmbuildroot=rpmbuildroot)
-    rpmname <- ""
-    if (grepl(".spec", result, fixed=TRUE)) { #success, now install built rpm
-        cat("Successfully built ", packname, " rpm\n", file=log, append=TRUE)
-        rpmname <- paste(rpmbuildroot,"RPMS/x86_64/R-", packname,"*.rpm", sep="")
-    } else {
-        cat("Failed to build ", packname, "\n", result, "\n")
-        cat("Failed to build ", packname, "\n", result, "\n", file=log, append=TRUE)
-    }
-    cat("Finished ",packname,"\n\n")
-    cat("Finished ",packname,"\n", file=log, append=TRUE)
-    cat(as.character(Sys.time()), "\n", file=log, append=TRUE)
-    return(list(pkg=packname, result.spec=result, rpm=rpmname))
-}
-
-#' desc2spec takes the name of an R package and generates a spec file
-#' to be used in OBS. The external tool rpmbuild is used to build
-#' the OpenSUSE package. The resulting spec file will reside where
-#' rpmbuild puts it. The %check section is deliberately empty. We rely
-#' on the checks on CRAN.
+#' createEmptySpec takes the name of an R package and creates an specfile
+#' with empty file section from its DESCRIPTION file.
 #'
 #' @param packname A package name of a package in a R repo like CRAN
-#' @param rpmbuildroot The directory where rpmbuild should do its work
+#' @param rpmbuildroot The directory where rpmbuild should do its work.
+#' Sources of packages reside in rpmbuildroot/SOURCES, SPECS in rpmbuildroot/SPECS
+#' @param ap A dataframe like the result of available.packages() or cleanDeps()
+#' createEmptySpec uses Version and NeedsCompilation of that dataframe.
 #' 
-#' @return The path to the generated specfile.
+#' @return The path to the generated specfile, if creation succeeded,
+#' a character string beginning with Failed: in case of an error.
+#' 
 #' @export
-desc2spec <- function(packname, rpmbuildroot="~/rpmbuild/") {
+
+createEmptySpec <- function(packname, rpmbuildroot="~/rpmbuild/",
+                            ap = data.frame(available.packages(repos="https://cloud.r-project.org"))) {
     errorlog <- "desc2spec.err"
     cat("Building ", packname, "\n", file=errorlog, append=TRUE)
-    cat("Begin ", as.character(Sys.time()), "\n", file=errorlog, append=TRUE)
-
+    
     if (! file.exists(system.file("specfile.tpl", package="CRAN2OBS"))){
         stop("Specfile template not found. Exit.")
     }
     spectpl <- readLines(system.file("specfile.tpl", package="CRAN2OBS"))
     
-    ap <- available.packages(repos="https://cloud.r-project.org")
+                                        #    ap <- available.packages(repos="https://cloud.r-project.org")
 
     if (! packname %in% ap[,"Package"]) {
         cat("Seems ", packname, " no longer exists on CRAN\n")
@@ -55,15 +30,14 @@ desc2spec <- function(packname, rpmbuildroot="~/rpmbuild/") {
         return(paste("Failed: Package", packname, " no longer on CRAN"))
     }
     
-    version <- ap[Package=packname,"Version"]
-    
+    version <- ap[ap$Package == packname, "Version"]
     
     source0 <-  paste(packname,"_",version,".tar.gz",sep="")
     specfile <- paste(rpmbuildroot,"SPECS/R-",packname,".spec",sep="")
-    rpmname <- paste(rpmbuildroot,"RPMS/x86_64/R-", packname,"-",version,"-0.rpm", sep="")
     
-    version <- gsub("-",".",ap[Package=packname,"Version"])
+    version <- gsub("-",".",ap[ap$Package == packname,"Version"])
     ## version must be normalized for rpm
+    rpmname <- paste(rpmbuildroot,"RPMS/x86_64/R-", packname,"-",version,"-0.rpm", sep="")
     
     if (! file.exists( paste(rpmbuildroot,"SOURCES/",source0, sep=""))) {
         download.file(paste("https://cloud.r-project.org/src/contrib/", source0, sep=""),
@@ -76,17 +50,18 @@ desc2spec <- function(packname, rpmbuildroot="~/rpmbuild/") {
     
     description <- readLines(desc.file)
     
-    if (grepl("Encoding: ", description)) {
+    if ( length(grep("Encoding: ", description, fixed=TRUE) > 0)) {
         ## some DESCRIPTIONs seem to be encoded differently, i.e leerSIECyL
-        encoding <- triws( gsub("Encoding: ","",description[grep("Encoding: ", description, fixed=TRUE)]), which="both"  )
-        if (encoding == "latin1") {
+        encoding <- trimws( gsub("Encoding: ","",description[grep("Encoding: ", description, fixed=TRUE)]), which="both"  )
+        if (encoding %in% c("latin1")) {
             system2("recode", args=c("..UTF-8", descfile ) )
             ## re-read re-encoded DESCRITION
             description <- readLines(desc.file) 
+        }
     }
     
     unlink(packname,recursive=TRUE)
-    ### unclutter!
+    ## immediatelay unclutter!
     
 ### template and descrition have been read in
 ### now populate the specfile tempalte
@@ -94,13 +69,13 @@ desc2spec <- function(packname, rpmbuildroot="~/rpmbuild/") {
     spectpl <- gsub( "{{year}}", format( Sys.time(), "%Y" ), spectpl, fixed=TRUE)    
     spectpl <- gsub( "{{packname}}", packname, spectpl, fixed=TRUE)
     spectpl <- gsub( "{{version}}", version, spectpl, fixed=TRUE)	
-
+    
     summary.str <- sub( "Title: ", "", description[ grep("Title:", description) ], fixed=TRUE)
     spectpl <- gsub( "{{summary}}", summary.str, spectpl, fixed=TRUE)
-
+    
     license <- sub( "License: ", "", description[ grep("License:", description) ], fixed=TRUE)
     spectpl <- gsub( "{{license}}", license, spectpl, fixed=TRUE)
-
+    
     spectpl <- gsub( "{{source0}}", source0, spectpl, fixed=TRUE)
     deps <-  cleanList( packname, "depends" )
     if (length(deps) >0) {
@@ -114,22 +89,18 @@ desc2spec <- function(packname, rpmbuildroot="~/rpmbuild/") {
     } else {
         suggests <- c()
     }
-
+    
     descstart <- grep("Description:", description, fixed=TRUE)
     descend <- descstart + grep( "^[A-Z][a-z]+:", description[descstart+1:length(description)])[1] -1
     description.str <- trimws(paste( description[ descstart:descend ] ), which="both")
     description.str[1] <- gsub("Description: ", "", description.str[1])
     ## still needs formating! textwrap for R?
     
-    needs.compilation <- ap[Package=packname, "NeedsCompilation"]
-
-
-#    cat("specfile goes here ",specfile, "\n")
+    needs.compilation <- ap[ap$Package == packname, "NeedsCompilation"]
+    
     if (file.exists(specfile)) unlink(specfile)  ## We generate a new file! This is not update!
     cat("# Automatically generated by CRAN2OBS::desc2spec\n", file=specfile)
-#    for (line in spectpl) {
-#        cat( line, "\n")
-#    }
+    
     for (line in spectpl) {
         if ( grepl( "{{depends}}", line, fixed=TRUE)) {
             if (length(deps) > 0) {
@@ -138,7 +109,7 @@ desc2spec <- function(packname, rpmbuildroot="~/rpmbuild/") {
         } else if ( grepl( "{{builddepends}}", line, fixed=TRUE)) {
             if  (length(deps) > 0)  {
                 for (item in deps) cat( "BuildRequires:\t", item, "\n", sep="", file=specfile, append=TRUE)
-                } else { next }
+            } else { next }
         } else if ( grepl( "{{suggests}}", line, fixed=TRUE) ) {
             if (length(suggests) > 0)  {
                 for (item in suggests) cat( "Recommends:\t", item, "\n",  sep="", file=specfile, append=TRUE)
@@ -151,10 +122,28 @@ desc2spec <- function(packname, rpmbuildroot="~/rpmbuild/") {
             cat( line, "\n", file=specfile, append=TRUE)
         }
     }
+    return(specfile)
+}
+
+#' desc2spec takes the name of an R package and generates a spec file
+#' to be used in OBS. The external tool rpmbuild is used to build
+#' the OpenSUSE package. The resulting spec file will reside where
+#' rpmbuild puts it. The %check section is deliberately empty. We rely
+#' on the checks on CRAN.
+#'
+#' @param packname A package name of a package in a R repo like CRAN
+#' @param rpmbuildroot The directory where rpmbuild should do its work
+#' 
+#' @return The path to the generated specfile.
+#' @export
+desc2spec <- function(packname, rpmbuildroot="~/rpmbuild/", ap = data.frame(available.packages(repos="https://cloud.r-project.org"))) {
+    errorlog <- "desc2spec.err"
+    cat("Building ", packname, "\n", file=errorlog, append=TRUE)
+
+    specfile <- createEmptySpec(packname, rpmbuildroot, ap)
 
 ### call rpmbuild
-    buildcommand <- paste( "rpmbuild -ba ", specfile ," &> ", specfile, ".log", sep="")
-
+###  osc build --local-package  --ccache R-abc.data.spec 2>&1 
     suppressWarnings(
         rpmlog <- system2("rpmbuild", args=c("-ba", specfile), stdout=TRUE, stderr=TRUE)
     ## the first build will fail by construction.
@@ -170,7 +159,7 @@ desc2spec <- function(packname, rpmbuildroot="~/rpmbuild/") {
         for (line in rpmlog) if ( grepl( "needed", line, fixed=TRUE)) {
                                  cat( line,"\n")
                                  cat( line,"\n", file=errorlog, append=TRUE)
-                                 cat("Failed ", as.character(Sys.time()), "\n", file=errorlog, append=TRUE)
+                                 cat("Failed: Missing dependencies first run rpmbuild\n", file=errorlog, append=TRUE)
                              }
         return("Failed: Missing dependencies first run rpmbuild")
     }

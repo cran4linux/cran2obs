@@ -11,8 +11,9 @@ base packages from the dependencies.}
 cleanDeps()
 }
 \value{
-A matrix containing available packages with a new column
-'recDep' containing all recursive dependencies
+A dataframe containing available packages with new columns
+'recDep' containing all recursive dependencies and 'depLen' containing
+the number of recursive dependencies
 }
 \description{
 This function returns a structure like available.package()

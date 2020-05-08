@@ -22,7 +22,7 @@ cleanDeps <- function(){
                              (rmpkgs[, "Priority"] == "recommended")), "Package"]
     ## base and recommended always already installed
 
-    ap <- ap[, c("Package", "Version", "License", "License_is_FOSS", "License_restricts_use", "OS_type", "NeedsCompilation")]
+    ap <- ap[, c("Package", "Version", "License", "NeedsCompilation")]
     
     depn <- lapply( dep, function(x) x <- x[ ! x %in% rmpkgs  ]  )
     ## remove rmpkgs from dependency list
