@@ -7,18 +7,21 @@ with empty file section from its DESCRIPTION file.}
 \usage{
 createEmptySpec(
   packname,
-  rpmbuildroot = "~/rpmbuild/",
+  pacdir = paste0("~/steuer/OBS/", "home:dsteuer:AutomaticCRAN/R-", packname),
+  download.cache = "~/rpmbuild/SOURCES/",
   ap = data.frame(available.packages(repos = "https://cloud.r-project.org"))
 )
 }
 \arguments{
 \item{packname}{A package name of a package in a R repo like CRAN}
 
-\item{rpmbuildroot}{The directory where rpmbuild should do its work.
-Sources of packages reside in rpmbuildroot/SOURCES, SPECS in rpmbuildroot/SPECS}
+\item{download.cache}{Directory where sources are stored}
 
 \item{ap}{A dataframe like the result of available.packages() or cleanDeps()
-createEmptySpec uses Version and NeedsCompilation of that dataframe.}
+createEmptySpec uses Package, Version, and NeedsCompilation of that dataframe.}
+
+\item{targetdir}{The directory where rpmbuild should do its work.
+Sources of packages reside in rpmbuildroot/SOURCES, SPECS in rpmbuildroot/SPECS}
 }
 \value{
 The path to the generated specfile, if creation succeeded,

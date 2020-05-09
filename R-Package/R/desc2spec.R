@@ -1,18 +1,53 @@
+#' createOrUpdate checks if a package already exists either as local
+#' OBS pac or remote pac on build.opensuse.org
+#'
+#' @param packname CRAN R package name
+#' @param remoteproj Existing project to buid packages for in OBS (build.opensuse.org)
+#'
+#' @return Version number of package in OBS or "missing" 
+#' @export
+
+statusOBS <- function(packname, remoteproj="home:dsteuer:AutomaticCRAN/"){
+    suppressWarnings(
+        osclist <- system2("osc", args=c("ls", paste0(remoteproj,"R-",packname)), stdout=TRUE, stderr=TRUE)
+    )
+    if ( is.null( attributes( osclist))) {
+        return( versionFromTgz(packname, osclist[1]) )
+    } else {
+        return("missing")
+    }
+}
+
+#' versionFromTgz extracts the version info, normalizes it and return
+#' a charater string containing that version
+#'
+#' @param packname CRAN package name
+#' @param tgzname filename to extract version from
+#'
+#' @return Version string
+#' export
+
+versionFromTgz <- function(packname, tgzname){
+    gsub( ".tar.gz", "", gsub( paste0( packname, "-"), "", tgzname))
+}
+
 #' createEmptySpec takes the name of an R package and creates an specfile
 #' with empty file section from its DESCRIPTION file.
 #'
 #' @param packname A package name of a package in a R repo like CRAN
-#' @param rpmbuildroot The directory where rpmbuild should do its work.
+#' @param targetdir The directory where rpmbuild should do its work.
 #' Sources of packages reside in rpmbuildroot/SOURCES, SPECS in rpmbuildroot/SPECS
+#' @param download.cache Directory where sources are stored
 #' @param ap A dataframe like the result of available.packages() or cleanDeps()
-#' createEmptySpec uses Version and NeedsCompilation of that dataframe.
+#' createEmptySpec uses Package, Version, and NeedsCompilation of that dataframe.
 #' 
 #' @return The path to the generated specfile, if creation succeeded,
 #' a character string beginning with Failed: in case of an error.
 #' 
 #' @export
 
-createEmptySpec <- function(packname, rpmbuildroot="~/rpmbuild/",
+createEmptySpec <- function(packname, pacdir=paste0("~/steuer/OBS/","home:dsteuer:AutomaticCRAN/R-",packname),
+                            download.cache="~/rpmbuild/SOURCES",
                             ap = data.frame(available.packages(repos="https://cloud.r-project.org"))) {
     errorlog <- "desc2spec.err"
     cat("Building ", packname, "\n", file=errorlog, append=TRUE)
@@ -20,10 +55,9 @@ createEmptySpec <- function(packname, rpmbuildroot="~/rpmbuild/",
     if (! file.exists(system.file("specfile.tpl", package="CRAN2OBS"))){
         stop("Specfile template not found. Exit.")
     }
+    
     spectpl <- readLines(system.file("specfile.tpl", package="CRAN2OBS"))
     
-                                        #    ap <- available.packages(repos="https://cloud.r-project.org")
-
     if (! packname %in% ap[,"Package"]) {
         cat("Seems ", packname, " no longer exists on CRAN\n")
         cat("Seems ", packname, " no longer exists on CRAN\n", file=errorlog, append=TRUE)
@@ -32,21 +66,31 @@ createEmptySpec <- function(packname, rpmbuildroot="~/rpmbuild/",
     
     version <- ap[ap$Package == packname, "Version"]
     
-    source0 <-  paste(packname,"_",version,".tar.gz",sep="")
-    specfile <- paste(rpmbuildroot,"SPECS/R-",packname,".spec",sep="")
+    source0 <-  paste0(packname,"_",version,".tar.gz")
+    specfile <- paste0(pacdir,"/R-",packname,".spec")
     
     version <- gsub("-",".",ap[ap$Package == packname,"Version"])
     ## version must be normalized for rpm
-    rpmname <- paste(rpmbuildroot,"RPMS/x86_64/R-", packname,"-",version,"-0.rpm", sep="")
+    #rpmname <- paste(rpmbuildroot,"RPMS/x86_64/R-", packname,"-",version,"-0.rpm", sep="")
     
-    if (! file.exists( paste(rpmbuildroot,"SOURCES/",source0, sep=""))) {
-        download.file(paste("https://cloud.r-project.org/src/contrib/", source0, sep=""),
-                      paste(rpmbuildroot,"SOURCES/",source0, sep=""))
+    if (! file.exists( file.path(download.cache,source0))) {
+        if ( download.file(paste0("https://cloud.r-project.org/src/contrib/", source0),
+                            paste0( download.cache, "/", source0)) != 0){
+            cat("Seems ", packname, " no source on CRAN\n")
+            cat("Seems ", packname, " no source on CRAN\n", file=errorlog, append=TRUE)
+            return(paste("Failed: Package", packname, " download failed from CRAN"))
+        }
     }
+    if (! file.copy(file.path(download.cache,source0), file.path(pacdir,source0))){
+        cat("Seems ", packname, " setup of pac failed\n")
+        cat("Seems ", packname, " setup of pac failed\n", file=errorlog, append=TRUE)
+        return(paste("Failed: Package", packname, " setup of pac failed"))
+    }
+    
     
 ### extract DESCRIPTION file, read it, erase it
     desc.file <- paste(packname,"/DESCRIPTION",sep="")
-    untar( paste(rpmbuildroot,"SOURCES/",source0, sep=""), desc.file )
+    untar( file.path(pacdir,source0), desc.file )
     
     description <- readLines(desc.file)
     
@@ -98,8 +142,8 @@ createEmptySpec <- function(packname, rpmbuildroot="~/rpmbuild/",
     
     needs.compilation <- ap[ap$Package == packname, "NeedsCompilation"]
     
-    if (file.exists(specfile)) unlink(specfile)  ## We generate a new file! This is not update!
-    cat("# Automatically generated by CRAN2OBS::desc2spec\n", file=specfile)
+    #if (file.exists(specfile)) unlink(specfile)  ## We generate a new file! This is not update!
+    cat("# Automatically generated by CRAN2OBS::createOBSpac\n", file=specfile)
     
     for (line in spectpl) {
         if ( grepl( "{{depends}}", line, fixed=TRUE)) {
@@ -124,6 +168,145 @@ createEmptySpec <- function(packname, rpmbuildroot="~/rpmbuild/",
     }
     return(specfile)
 }
+
+#' createOBSpac takes the name of an R package and creates a 
+#' new project in OBS. spec file
+#' to be used in OBS. The external tool rpmbuild is used to build
+#' the OpenSUSE package. The resulting spec file will reside where
+#' rpmbuild puts it. The %check section is deliberately empty. We rely
+#' on the checks on CRAN.
+#'
+#' @param packname A package name of a package in a R repo like CRAN
+#' @param rpmbuildroot The directory where rpmbuild should do its work
+#' 
+#' @return The path to the generated specfile.
+#' @export
+createOBSpac <- function(packname, localOBSdir="~/OBS",remoteproj="home:dsteuer:AutomaticCRAN", ap = data.frame(available.packages(repos="https://cloud.r-project.org"))) {
+    
+    log <- "createOBSpac.log"
+    cat("Building ", packname, "\n", file=log, append=TRUE)
+
+    if (! packname %in% ap[,"Package"]) {
+        cat("Seems ", packname, " does not exist on CRAN\n")
+        cat("Seems ", packname, " does not exist on CRAN\n", file=log, append=TRUE)
+        return(paste("Failed: Package", packname, " not on CRAN"))
+    }
+    
+    obsstatus <- statusOBS(packname, remoteproj)
+    if (obsstatus != "missing") {
+        cat("Failed: ", packname, " exists in OBS. createOBSpac does no updates!", file=log, append=TRUE)
+        return("Failed: createOBSpac does no OBS updates!")
+    }
+
+    pacdir <-  file.path( localOBSdir, remoteproj, paste0( "R-", packname))
+    if ( dir.exists( pacdir )){
+        cat("Failed: ", packname, " exists in local OBS. createOBSpac does no updates!", file=log, append=TRUE)
+        return("Failed: createOBSpac does no local updates!")
+    } else { ## create dir to hold package for OBS
+        cmd <- paste("\"", "cd", file.path( localOBSdir, remoteproj), " ; osc mkpac ",paste0( "R-", packname)  , "\"")
+        result <- system2(  "bash",  args = c("-c", cmd), stdout=TRUE, stderr=TRUE)
+        if( ! is.null(attributes(result))) {
+            cat(result)
+            cat(packname, " could not setup packname\n")
+            cat(packname, " could not setup packname\n", file=log, append=TRUE)
+            return(paste("Failed: Package", packname, " could not setup pacdir"))
+        }
+    }
+    
+    specfile <- createEmptySpec(packname, pacdir, download.cache="~/rpmbuild/SOURCES" , ap)
+    if (! grepl(".spec", specfile)){ ##failure
+        cat("Failed: ", packname, " no specfile created. Error was ", specfile, "\n", file=log, append=TRUE)
+        return("Failed: could not create specfile")
+    }
+
+### call osc
+    cmd <- paste("\""," cd", pacdir, "; osc build --prefer-packages=~/rpmbuild/RPMS/x86_64 --local-package --ccache", specfile, "\"" )
+    suppressWarnings(
+        buildlog <- system2("bash", args=c("-c", cmd), stdout=TRUE, stderr=TRUE)
+        ## the first build will fail by construction.
+        ## the output of rpmbuild allows to build the %file section
+        ## in the spec
+        ## seemingly osc produces no buildlog if build locally?
+    )
+
+    ## but we have to look for other errors preventing successful second run
+    ## first remove useless time stamps
+    buildlog <- trimws(gsub("^\\[.*\\]","",buildlog), which="left")
+    
+    if ( length( grep( "Failed build dependencies", buildlog, fixed=TRUE)) >0 ) { ### missing dependencies, no chance
+        cat( "The following missing dependencies must be installed to build R-", packname, "\n", sep="")
+        cat( "The following missing dependencies must be installed to build R-", packname, "\n", sep="", file=log, append=TRUE)
+        for (line in rpmlog) if ( grepl( "needed", line, fixed=TRUE)) {
+                                 cat( line,"\n")
+                                 cat( line,"\n", file=log, append=TRUE)
+                                 cat("Failed: Missing dependencies first run rpmbuild\n", file=log, append=TRUE)
+                             }
+        return(paste0("Failed: ",packname ," Missing dependencies first run rpmbuild"))
+    }
+
+    if (length( grep("Bad exit status", buildlog, fixed=TRUE)) > 0 ) {
+        cat( "Bad exit status from build R-", packname, "\n", sep="")
+        cat( "Bad exit status from build R-", packname, "\n", sep="", file=log, append=TRUE)
+        return(paste0("Failed: ", packname, " Bad exit status"))
+    }
+
+### At this point something was build. But as the specfile.tpl has an empty file section.
+### that part must be constructed from error logs. Therfore we know the error structure
+### and where to find it.
+#    for (line in (buildlog[(length(buildlog)-30):length(buildlog)])) cat(line, "\n")
+    
+    buildlog <- buildlog[ ( grep( "RPM build errors", buildlog, fixed=TRUE)+2):( length(buildlog)-5) ]
+    buildlog <- gsub( paste0( "/usr/lib64/R/library/", packname, "/"), "", buildlog)
+
+#    for (line in buildlog) cat(line, "\n")
+    
+    dirlist <- NULL
+    for (line in buildlog){
+        if ( grepl( "/", line, fixed=TRUE) ) { ## a file in a subdirectory, extract the unique directories
+            nextdir <- unlist( strsplit( line, "/") )[1]
+            if (! nextdir %in% dirlist){
+                dirlist <- c( dirlist, nextdir )
+                if (grepl( "html", line, fixed=TRUE) | grepl( "help", line, fixed=TRUE)) {
+                    cat( "%doc %{rlibdir}/%{packname}/", nextdir, "\n", sep="", file=specfile, append=TRUE)
+                } else {
+                    cat( "%{rlibdir}/%{packname}/", nextdir, "\n", sep="", file=specfile, append=TRUE)
+                }
+            }
+        } else { ## a file
+            if ( grepl( "LICENSE", line, fixed=TRUE)) {
+                cat( "%license %{rlibdir}/%{packname}/", line, "\n", sep="", file=specfile, append=TRUE )
+            } else if (grepl( "DESCRIPTION", line, fixed=TRUE)) {
+                cat( "%doc %{rlibdir}/%{packname}/", line, "\n", sep="", file=specfile, append=TRUE )
+            } else if (grepl( "NEWS", line, fixed=TRUE)) {
+                cat( "%doc %{rlibdir}/%{packname}/", line, "\n", sep="", file=specfile, append=TRUE )
+            } else {
+                cat( "%{rlibdir}/%{packname}/", line, "\n", sep="", file=specfile, append=TRUE)
+            }
+        }
+    }
+### here the %file section is fully populated
+
+### second build!
+    cmd <- paste("\""," cd", pacdir, "; osc build --keep-pkgs=~/rpmbuild/RPMS/x86_64 --prefer-packages=~/rpmbuild/RPMS/x86_64 --local-package --ccache", paste0("R-",packname,".spec"), "\"" )
+    buildlog <- system2("bash" , args=c("-c", cmd), stdout=TRUE, stderr=TRUE)
+
+    if (length( grep( "Wrote:", buildlog, fixed=TRUE)) == 2) {
+        cat("Success: ", packname, " rpm package created\n")
+        cat("Success: ", packname, " rpm package created\n", file=log, append=TRUE)
+        print(buildlog[grep("Wrote:", buildlog, fixed=TRUE)])
+        for (line in  buildlog[grep("Wrote:", buildlog, fixed=TRUE)]){
+            cat(line, "\n", file=log, append=TRUE)
+        }
+        cat("Success: ", packname, " rpm package created\n", file=log, append=TRUE)
+    }
+    else {
+        cat( "Failed to build ", packname, " in second osc build\n", sep="")
+        return("Failed: Unknown error second run osc")
+    }
+### At this point osc successfully generated a package
+    return(version)
+}
+
 
 #' desc2spec takes the name of an R package and generates a spec file
 #' to be used in OBS. The external tool rpmbuild is used to build
