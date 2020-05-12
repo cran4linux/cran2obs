@@ -169,19 +169,25 @@ createEmptySpec <- function(packname, pacdir=paste0("~/steuer/OBS/","home:dsteue
     return(specfile)
 }
 
-#' createOBSpac takes the name of an R package and creates a 
-#' new project in OBS. spec file
-#' to be used in OBS. The external tool rpmbuild is used to build
-#' the OpenSUSE package. The resulting spec file will reside where
-#' rpmbuild puts it. The %check section is deliberately empty. We rely
+#' createOBSspec takes the name of an R package and creates a 
+#' spec file to be used in OBS.
+#' The external tool osc is used to build
+#' the OpenSUSE package. The resulting spec file will reside in a
+#' package dir under a local checkout of a remote proj.
+#' The %check section is deliberately empty. We rely
 #' on the checks on CRAN.
 #'
 #' @param packname A package name of a package in a R repo like CRAN
 #' @param rpmbuildroot The directory where rpmbuild should do its work
+#' @param localOBSdir The top level directory of a checkout of the project
+#' you want to create your package in. 
+#' @param remoteproj Name of the OBS project
+#' @param ap A dataframe containing info like from available.packages or cleanDeps.
 #' 
 #' @return The path to the generated specfile.
 #' @export
-createOBSpac <- function(packname, localOBSdir="~/OBS",remoteproj="home:dsteuer:AutomaticCRAN", ap = data.frame(available.packages(repos="https://cloud.r-project.org"))) {
+createOBSpac <- function(packname, localOBSdir="~/OBS",remoteproj="home:dsteuer:AutomaticCRAN",
+                         ap = data.frame(available.packages(repos="https://cloud.r-project.org"))) {
     
     log <- "createOBSpac.log"
     cat("Building ", packname, "\n", file=log, append=TRUE)
@@ -199,6 +205,7 @@ createOBSpac <- function(packname, localOBSdir="~/OBS",remoteproj="home:dsteuer:
     }
 
     pacdir <-  file.path( localOBSdir, remoteproj, paste0( "R-", packname))
+
     if ( dir.exists( pacdir )){
         cat("Failed: ", packname, " exists in local OBS. createOBSpac does no updates!", file=log, append=TRUE)
         return("Failed: createOBSpac does no local updates!")
@@ -253,13 +260,10 @@ createOBSpac <- function(packname, localOBSdir="~/OBS",remoteproj="home:dsteuer:
 ### At this point something was build. But as the specfile.tpl has an empty file section.
 ### that part must be constructed from error logs. Therfore we know the error structure
 ### and where to find it.
-#    for (line in (buildlog[(length(buildlog)-30):length(buildlog)])) cat(line, "\n")
     
     buildlog <- buildlog[ ( grep( "RPM build errors", buildlog, fixed=TRUE)+2):( length(buildlog)-5) ]
     buildlog <- gsub( paste0( "/usr/lib64/R/library/", packname, "/"), "", buildlog)
 
-#    for (line in buildlog) cat(line, "\n")
-    
     dirlist <- NULL
     for (line in buildlog){
         if ( grepl( "/", line, fixed=TRUE) ) { ## a file in a subdirectory, extract the unique directories
@@ -287,7 +291,8 @@ createOBSpac <- function(packname, localOBSdir="~/OBS",remoteproj="home:dsteuer:
 ### here the %file section is fully populated
 
 ### second build!
-    cmd <- paste("\""," cd", pacdir, "; osc build --keep-pkgs=~/rpmbuild/RPMS/x86_64 --prefer-packages=~/rpmbuild/RPMS/x86_64 --local-package --ccache", paste0("R-",packname,".spec"), "\"" )
+    cmd <- paste("\""," cd", pacdir, "; osc build --keep-pkgs=~/rpmbuild/RPMS/x86_64 --prefer-packages=~/rpmbuild/RPMS/x86_64 --local-package --ccache",
+                 paste0("R-",packname,".spec"), "\"" )
     buildlog <- system2("bash" , args=c("-c", cmd), stdout=TRUE, stderr=TRUE)
 
     if (length( grep( "Wrote:", buildlog, fixed=TRUE)) == 2) {
@@ -304,7 +309,28 @@ createOBSpac <- function(packname, localOBSdir="~/OBS",remoteproj="home:dsteuer:
         return("Failed: Unknown error second run osc")
     }
 ### At this point osc successfully generated a package
+### TODO Check, if the rpm -q --provides package command only show expected provdides
+#### see R-gdata incident
     return(version)
+}
+
+#' dropFileSection removes the filelist from a character array
+#' representing a spec file. Keep the first line of the file list.
+#'
+#' @param speclines character vector with lines holding a specfile
+#'
+#' @value character vector like the input minus file list
+#'
+#' @expoprt
+
+dropFileSection <- function(speclines){
+    FilesLine <- grep("%files",speclines,fixed=TRUE)
+    if (length(begOfFiles) != 1) {
+        stop("No or more than one %files section! Don't know what to do.")
+    } else {
+        speclines[begOfFiles+1]="%dir %{rlibdir}/%{packname}"
+    }
+    return(speclines[1:(begOfFiles+1)])
 }
 
 
