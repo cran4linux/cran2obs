@@ -220,11 +220,13 @@ createOBSpac <- function(packname, localOBSdir="~/OBS",remoteproj="home:dsteuer:
         }
     }
     
-    specfile <- createEmptySpec(packname, pacdir, download.cache="~/rpmbuild/SOURCES" , ap)
-    if (! grepl(".spec", specfile)){ ##failure
+    result <- createEmptySpec(packname, pacdir, download.cache="~/rpmbuild/SOURCES" , ap)
+    if (! grepl(".spec", result)){ ##failure
         cat("Failed: ", packname, " no specfile created. Error was ", specfile, "\n", file=log, append=TRUE)
         return("Failed: could not create specfile")
     }
+    specfile <- result
+    speclines <- readLines(con=specfile)
 
 ### call osc
     cmd <- paste("\""," cd", pacdir, "; osc build --prefer-packages=~/rpmbuild/RPMS/x86_64 --local-package --ccache", specfile, "\"" )
@@ -238,6 +240,7 @@ createOBSpac <- function(packname, localOBSdir="~/OBS",remoteproj="home:dsteuer:
 
     ## but we have to look for other errors preventing successful second run
     ## first remove useless time stamps
+
     buildlog <- trimws(gsub("^\\[.*\\]","",buildlog), which="left")
     
     if ( length( grep( "Failed build dependencies", buildlog, fixed=TRUE)) >0 ) { ### missing dependencies, no chance
@@ -259,35 +262,11 @@ createOBSpac <- function(packname, localOBSdir="~/OBS",remoteproj="home:dsteuer:
 
 ### At this point something was build. But as the specfile.tpl has an empty file section.
 ### that part must be constructed from error logs. Therfore we know the error structure
-### and where to find it.
-    
-    buildlog <- buildlog[ ( grep( "RPM build errors", buildlog, fixed=TRUE)+2):( length(buildlog)-5) ]
-    buildlog <- gsub( paste0( "/usr/lib64/R/library/", packname, "/"), "", buildlog)
+### and where to find the unpackaged files list.
 
-    dirlist <- NULL
-    for (line in buildlog){
-        if ( grepl( "/", line, fixed=TRUE) ) { ## a file in a subdirectory, extract the unique directories
-            nextdir <- unlist( strsplit( line, "/") )[1]
-            if (! nextdir %in% dirlist){
-                dirlist <- c( dirlist, nextdir )
-                if (grepl( "html", line, fixed=TRUE) | grepl( "help", line, fixed=TRUE)) {
-                    cat( "%doc %{rlibdir}/%{packname}/", nextdir, "\n", sep="", file=specfile, append=TRUE)
-                } else {
-                    cat( "%{rlibdir}/%{packname}/", nextdir, "\n", sep="", file=specfile, append=TRUE)
-                }
-            }
-        } else { ## a file
-            if ( grepl( "LICENSE", line, fixed=TRUE)) {
-                cat( "%license %{rlibdir}/%{packname}/", line, "\n", sep="", file=specfile, append=TRUE )
-            } else if (grepl( "DESCRIPTION", line, fixed=TRUE)) {
-                cat( "%doc %{rlibdir}/%{packname}/", line, "\n", sep="", file=specfile, append=TRUE )
-            } else if (grepl( "NEWS", line, fixed=TRUE)) {
-                cat( "%doc %{rlibdir}/%{packname}/", line, "\n", sep="", file=specfile, append=TRUE )
-            } else {
-                cat( "%{rlibdir}/%{packname}/", line, "\n", sep="", file=specfile, append=TRUE)
-            }
-        }
-    }
+    filelist<- extractFilesFromLog(buildlog)
+    speclines <- c(speclines , filelist)
+    writeLines(speclines, specfile)
 ### here the %file section is fully populated
 
 ### second build!
@@ -333,6 +312,48 @@ dropFileSection <- function(speclines){
     return(speclines[1:(begOfFiles+1)])
 }
 
+#' extractFilesFromLog takes the lines of an osc build log and
+#' extrats the list of unpackaged files. Times must be stripped
+#' already.
+#'
+#' @param buildlog Character vector containing the lines of an osc
+#' build log
+#'
+#' @return Character vector containing entries for the files section,
+#'
+#' @export
+
+extractFilesFromLog <- function(buildlog){
+    buildlog <- buildlog[ ( grep( "RPM build errors", buildlog, fixed=TRUE)+2):( length(buildlog)-5) ]
+    buildlog <- gsub( paste0( "/usr/lib64/R/library/", packname, "/"), "", buildlog)
+
+    filelist <- c()
+    dirlist <- NULL
+    for (line in buildlog){
+        if ( grepl( "/", line, fixed=TRUE) ) { ## a file in a subdirectory, extract the unique directories
+            nextdir <- unlist( strsplit( line, "/") )[1]
+            if (! nextdir %in% dirlist){
+                dirlist <- c( dirlist, nextdir )
+                if (grepl( "html", line, fixed=TRUE) | grepl( "help", line, fixed=TRUE)) {
+                    filelist <- c( filelist, paste0("%doc %{rlibdir}/%{packname}/", nextdir))
+                } else {
+                    filelist <- c( filelist, paste0("%{rlibdir}/%{packname}/", nextdir))
+                }
+            }
+        } else { ## a file
+            if ( grepl( "LICEN", line, fixed=TRUE)) {
+                filelist <- c( filelist, paste0( "%license %{rlibdir}/%{packname}/", line))
+            } else if (grepl( "DESCRIPTION", line, fixed=TRUE)) {
+                filelist <- c( filelist, cat( "%doc %{rlibdir}/%{packname}/", line))
+            } else if (grepl( "NEWS", line, fixed=TRUE)) {
+                filelist <- c( filelist, cat( "%doc %{rlibdir}/%{packname}/", line))
+            } else {
+                filelist <- c( filelist, cat( "%{rlibdir}/%{packname}/", line))
+            }
+        }
+    }
+    return(filelist)
+}
 
 #' desc2spec takes the name of an R package and generates a spec file
 #' to be used in OBS. The external tool rpmbuild is used to build
