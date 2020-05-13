@@ -186,6 +186,7 @@ createEmptySpec <- function(packname, pacdir=paste0("~/steuer/OBS/","home:dsteue
 #' 
 #' @return The path to the generated specfile.
 #' @export
+
 createOBSpac <- function(packname, localOBSdir="~/OBS",remoteproj="home:dsteuer:AutomaticCRAN",
                          ap = data.frame(available.packages(repos="https://cloud.r-project.org"))) {
     
