@@ -60,3 +60,5 @@ rm -f %{buildroot}%{rlibdir}/R.css
 
 %files
 %dir %{rlibdir}/%{packname}
+
+%changelog
