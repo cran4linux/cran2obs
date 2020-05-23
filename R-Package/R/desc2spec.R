@@ -76,13 +76,14 @@ desc2spec <- function(packname, rpmbuildroot="~/rpmbuild/") {
     
     description <- readLines(desc.file)
     
-    if (grepl("Encoding: ", description)) {
+    if (any(grepl("Encoding: ", description))) {
         ## some DESCRIPTIONs seem to be encoded differently, i.e leerSIECyL
         encoding <- triws( gsub("Encoding: ","",description[grep("Encoding: ", description, fixed=TRUE)]), which="both"  )
         if (encoding == "latin1") {
             system2("recode", args=c("..UTF-8", descfile ) )
             ## re-read re-encoded DESCRITION
             description <- readLines(desc.file) 
+        }
     }
     
     unlink(packname,recursive=TRUE)
@@ -153,10 +154,12 @@ desc2spec <- function(packname, rpmbuildroot="~/rpmbuild/") {
     }
 
 ### call rpmbuild
-    buildcommand <- paste( "rpmbuild -ba ", specfile ," &> ", specfile, ".log", sep="")
-
     suppressWarnings(
-        rpmlog <- system2("rpmbuild", args=c("-ba", specfile), stdout=TRUE, stderr=TRUE)
+        rpmlog <- system2("rpmbuild", 
+                          args   = c("-ba", specfile),
+                          env    = "LANG=en;",
+                          stdout = TRUE,
+                          stderr = TRUE)
     ## the first build will fail by construction.
     ## the output of rpmbuild allows to build the %file section
     ## in the spec
@@ -184,9 +187,12 @@ desc2spec <- function(packname, rpmbuildroot="~/rpmbuild/") {
 ### At this point something was build. But as the specfile.tpl has an empty file section.
 ### that part must be constructed from error logs
     
-    rpmlog <- trimws( rpmlog[ (grep( "RPM build errors", rpmlog, fixed=TRUE)+2):length(rpmlog)], which="left")
+    # Double sub-setting needed because "Installed (but unpackaged) file(s) found" isn't
+    # necessarily right under "RPM build errors"...
+    rpmlog <- rpmlog[ (grep( "RPM build errors", rpmlog, fixed=TRUE)+1):length(rpmlog)]
+    rpmlog <- trimws( rpmlog[ (grep( "Installed (but unpackaged) file(s) found", rpmlog, fixed=TRUE)+1):length(rpmlog)], which="left")
     rpmlog <- gsub(paste("/usr/lib64/R/library/",packname,"/",sep=""), "", rpmlog)
-
+    
     dirlist <- NULL
     for (line in rpmlog){
         if ( grepl( "/", line, fixed=TRUE) ) { ## a file in a subdirectory, extract the unique directories
@@ -213,7 +219,11 @@ desc2spec <- function(packname, rpmbuildroot="~/rpmbuild/") {
     }
 
 ### second build!
-    rpmlog <- system2("rpmbuild", args=c("-ba", specfile), stdout=TRUE, stderr=TRUE )
+    rpmlog <- system2("rpmbuild", 
+                    args   = c("-ba", specfile),
+                    env    = "LANG=en;",
+                    stdout = TRUE,
+                    stderr = TRUE)
 
 #    rpmlog <- readLines( paste( specfile, ".log", sep=""))
     if (length( grep( "Wrote:", rpmlog, fixed=TRUE)) == 2) {
