@@ -25,7 +25,7 @@ statusOBS <- function(packname, remoteproj="home:dsteuer:AutomaticCRAN/"){
 #' @param tgzname filename to extract version from
 #'
 #' @return Version string
-#' export
+#' @export
 
 versionFromTgz <- function(packname, tgzname){
     gsub( ".tar.gz", "", gsub( paste0( packname, "-"), "", tgzname))
@@ -299,9 +299,9 @@ createOBSpac <- function(packname, localOBSdir="~/OBS",remoteproj="home:dsteuer:
 #'
 #' @param speclines character vector with lines holding a specfile
 #'
-#' @value character vector like the input minus file list
+#' @return character vector like the input minus file list
 #'
-#' @expoprt
+#' @export
 
 dropFileSection <- function(speclines){
     FilesLine <- grep("%files",speclines,fixed=TRUE)

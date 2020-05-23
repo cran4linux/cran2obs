@@ -14,7 +14,6 @@ versionFromTgz(packname, tgzname)
 }
 \value{
 Version string
-export
 }
 \description{
 versionFromTgz extracts the version info, normalizes it and return
