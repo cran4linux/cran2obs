@@ -154,10 +154,12 @@ desc2spec <- function(packname, rpmbuildroot="~/rpmbuild/") {
     }
 
 ### call rpmbuild
-    buildcommand <- paste( "rpmbuild -ba ", specfile ," &> ", specfile, ".log", sep="")
-
     suppressWarnings(
-        rpmlog <- system2("rpmbuild", args=c("-ba", specfile), stdout=TRUE, stderr=TRUE)
+        rpmlog <- system2("rpmbuild", 
+                          args   = c("-ba", specfile),
+                          env    = "LANG=en;",
+                          stdout = TRUE,
+                          stderr = TRUE)
     ## the first build will fail by construction.
     ## the output of rpmbuild allows to build the %file section
     ## in the spec
@@ -214,7 +216,11 @@ desc2spec <- function(packname, rpmbuildroot="~/rpmbuild/") {
     }
 
 ### second build!
-    rpmlog <- system2("rpmbuild", args=c("-ba", specfile), stdout=TRUE, stderr=TRUE )
+    rpmlog <- system2("rpmbuild", 
+                    args   = c("-ba", specfile),
+                    env    = "LANG=en;",
+                    stdout = TRUE,
+                    stderr = TRUE)
 
 #    rpmlog <- readLines( paste( specfile, ".log", sep=""))
     if (length( grep( "Wrote:", rpmlog, fixed=TRUE)) == 2) {
