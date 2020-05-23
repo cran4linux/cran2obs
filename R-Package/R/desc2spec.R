@@ -97,7 +97,7 @@ createEmptySpec <- function(packname, pacdir=paste0("~/steuer/OBS/","home:dsteue
     if ( length(grep("Encoding: ", description, fixed=TRUE) > 0)) {
         ## some DESCRIPTIONs seem to be encoded differently, i.e leerSIECyL
         encoding <- trimws( gsub("Encoding: ","",description[grep("Encoding: ", description, fixed=TRUE)]), which="both"  )
-        if (encoding %in% c("latin1")) {
+        if (encoding %in% c("latin1", "latin2")) {
             system2("recode", args=c("..UTF-8", descfile ) )
             ## re-read re-encoded DESCRITION
             description <- readLines(desc.file) 
