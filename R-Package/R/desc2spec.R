@@ -76,13 +76,14 @@ desc2spec <- function(packname, rpmbuildroot="~/rpmbuild/") {
     
     description <- readLines(desc.file)
     
-    if (grepl("Encoding: ", description)) {
+    if (any(grepl("Encoding: ", description))) {
         ## some DESCRIPTIONs seem to be encoded differently, i.e leerSIECyL
         encoding <- triws( gsub("Encoding: ","",description[grep("Encoding: ", description, fixed=TRUE)]), which="both"  )
         if (encoding == "latin1") {
             system2("recode", args=c("..UTF-8", descfile ) )
             ## re-read re-encoded DESCRITION
             description <- readLines(desc.file) 
+        }
     }
     
     unlink(packname,recursive=TRUE)
