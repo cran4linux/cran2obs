@@ -187,9 +187,12 @@ desc2spec <- function(packname, rpmbuildroot="~/rpmbuild/") {
 ### At this point something was build. But as the specfile.tpl has an empty file section.
 ### that part must be constructed from error logs
     
-    rpmlog <- trimws( rpmlog[ (grep( "RPM build errors", rpmlog, fixed=TRUE)+2):length(rpmlog)], which="left")
+    # Double sub-setting needed because "Installed (but unpackaged) file(s) found" isn't
+    # necessarily right under "RPM build errors"...
+    rpmlog <- rpmlog[ (grep( "RPM build errors", rpmlog, fixed=TRUE)+1):length(rpmlog)]
+    rpmlog <- trimws( rpmlog[ (grep( "Installed (but unpackaged) file(s) found", rpmlog, fixed=TRUE)+1):length(rpmlog)], which="left")
     rpmlog <- gsub(paste("/usr/lib64/R/library/",packname,"/",sep=""), "", rpmlog)
-
+    
     dirlist <- NULL
     for (line in rpmlog){
         if ( grepl( "/", line, fixed=TRUE) ) { ## a file in a subdirectory, extract the unique directories
