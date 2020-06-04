@@ -8,7 +8,11 @@ the OpenSUSE package. The resulting spec file will reside where
 rpmbuild puts it. The %check section is deliberately empty. We rely
 on the checks on CRAN.}
 \usage{
-desc2spec(packname, rpmbuildroot = "~/rpmbuild/")
+desc2spec(
+  packname,
+  rpmbuildroot = "~/rpmbuild/",
+  ap = data.frame(available.packages(repos = "https://cloud.r-project.org"))
+)
 }
 \arguments{
 \item{packname}{A package name of a package in a R repo like CRAN}

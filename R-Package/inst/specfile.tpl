@@ -30,11 +30,11 @@ License:        {{license}}
 URL:            http://cran.r-project.org/web/packages/%{packname}
 Source:         {{source0}}
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
-Requires:	 R-base
+Requires:        R-base
 {{depends}}
 # Package suggestions
 BuildRequires:   texlive
-BuildRequires:	 texinfo
+BuildRequires:   texinfo
 BuildRequires:   fdupes
 BuildRequires:   R-base
 {{builddepends}}
@@ -55,10 +55,10 @@ mkdir -p %{buildroot}%{rlibdir}
 test -d %{packname}/src && (cd %{packname}/src; rm -f *.o *.so)
 rm -f %{buildroot}%{rlibdir}/R.css
 
-
 #%check
 #%{_bindir}/R CMD check %{packname}
 
-
 %files
 %dir %{rlibdir}/%{packname}
+
+%changelog
