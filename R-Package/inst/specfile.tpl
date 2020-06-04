@@ -32,8 +32,16 @@ Source:         {{source0}}
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 Requires:        R-base
 {{depends}}
-# Package suggestions
-BuildRequires:   texlive
+
+%if 0%{?sle_version} > 120400 || 0%{?is_opensuse}
+# Three others commonly needed
+BuildRequires:  tex(ae.sty)
+BuildRequires:  tex(fancyvrb.sty)
+BuildRequires:  tex(inconsolata.sty)
+BuildRequires:  tex(natbib.sty)
+%else
+BuildRequires:  texlive
+%endif
 BuildRequires:   texinfo
 BuildRequires:   fdupes
 BuildRequires:   R-base
