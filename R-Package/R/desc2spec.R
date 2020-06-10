@@ -1,10 +1,10 @@
-#' createOrUpdate checks if a package already exists either as local
+#' statusOBS checks if a package already exists either as local
 #' OBS pac or remote pac on build.opensuse.org
 #'
-#' @param packname CRAN R package name
+#' @param one packname CRAN R package name
 #' @param remoteproj Existing project to buid packages for in OBS (build.opensuse.org)
 #'
-#' @return Version number of package in OBS or "missing" 
+#' @return Version number of package in OBS or NA
 #' @export
 
 statusOBS <- function(packname, remoteproj="home:dsteuer:AutomaticCRAN/"){
@@ -14,7 +14,7 @@ statusOBS <- function(packname, remoteproj="home:dsteuer:AutomaticCRAN/"){
     if ( is.null( attributes( osclist))) {
         return( versionFromTgz(packname, osclist[1]) )
     } else {
-        return("missing")
+        return(NA)
     }
 }
 
@@ -200,7 +200,7 @@ createOBSpac <- function(packname, localOBSdir="~/OBS",remoteproj="home:dsteuer:
     }
     
     obsstatus <- statusOBS(packname, remoteproj)
-    if (obsstatus != "missing") {
+    if (! is.na(obsstatus) ) {
         cat("Failed: ", packname, " exists in OBS. createOBSpac does no updates!", file=log, append=TRUE)
         return("Failed: createOBSpac does no OBS updates!")
     }
