@@ -37,4 +37,4 @@ CRAN-version LocalOBSVErsion RemoteOBSVersion (costly to retrieve)
 (May be a fourth state in d:l:R:r?)
 
 We pay with increased storage use locally. All of remote CRAN will
-finally be on the local machine.
+finally be on the local machine, if built from scratch.
