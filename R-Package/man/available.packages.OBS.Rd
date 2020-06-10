@@ -5,7 +5,7 @@
 \title{This function generates an analogous matrix to available.packages()
 but for all the packages in OBS}
 \usage{
-available.packages.OBS(obsproject = "devel:languages:R:released", quiet = TRUE)
+available.packages.OBS(obsproject = "home:dsteuer:AutomaticCRAN", quiet = TRUE)
 }
 \arguments{
 \item{obsproject}{Project in OBS where packages are taken from.}
@@ -13,7 +13,7 @@ available.packages.OBS(obsproject = "devel:languages:R:released", quiet = TRUE)
 \item{quiet}{If set to FALSE some progression info is given, default = TRUE.}
 }
 \value{
-Matrix of all R packages avaialble in OBS devel:languages:R:released
+Matrix of all R packages avaialble in obsproject.
 }
 \description{
 This function generates an analogous matrix to available.packages()

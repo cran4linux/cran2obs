@@ -2,7 +2,7 @@
 % Please edit documentation in R/deps.R
 \name{cleanDeps}
 \alias{cleanDeps}
-\title{This function returns a structure like available.package()
+\title{cleanDeps returns a structure like available.package()
 but including recursive dependencies (Depends, Imports, LinkingTo).
 Because recommended packages may be assumed to be installed
 in a OpenSUSE installation with R, these are removed together with
@@ -16,7 +16,7 @@ A dataframe containing available packages with new columns
 the number of recursive dependencies
 }
 \description{
-This function returns a structure like available.package()
+cleanDeps returns a structure like available.package()
 but including recursive dependencies (Depends, Imports, LinkingTo).
 Because recommended packages may be assumed to be installed
 in a OpenSUSE installation with R, these are removed together with

@@ -2,20 +2,20 @@
 % Please edit documentation in R/desc2spec.R
 \name{statusOBS}
 \alias{statusOBS}
-\title{createOrUpdate checks if a package already exists either as local
+\title{statusOBS checks if a package already exists either as local
 OBS pac or remote pac on build.opensuse.org}
 \usage{
 statusOBS(packname, remoteproj = "home:dsteuer:AutomaticCRAN/")
 }
 \arguments{
-\item{packname}{CRAN R package name}
-
 \item{remoteproj}{Existing project to buid packages for in OBS (build.opensuse.org)}
+
+\item{one}{packname CRAN R package name}
 }
 \value{
-Version number of package in OBS or "missing"
+Version number of package in OBS or NA
 }
 \description{
-createOrUpdate checks if a package already exists either as local
+statusOBS checks if a package already exists either as local
 OBS pac or remote pac on build.opensuse.org
 }

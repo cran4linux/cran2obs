@@ -2,8 +2,8 @@
 % Please edit documentation in R/deps.R
 \name{getOBSVersion}
 \alias{getOBSVersion}
-\title{This function takes the name of an R package (from CRAN) and receives the corresponding
-information off OBS
+\title{getOBSVersion takes the name of an R package (from CRAN) and receives the corresponding
+information off of OBS
 This function is not exactly cheap run-time wise. Around 0.5s per package.}
 \usage{
 getOBSVersion(pkg, obsproject = "devel:languages:R:released", quiet = TRUE)
@@ -20,7 +20,7 @@ A list with components file containing the source file name and
 version containing the version.
 }
 \description{
-This function takes the name of an R package (from CRAN) and receives the corresponding
-information off OBS
+getOBSVersion takes the name of an R package (from CRAN) and receives the corresponding
+information off of OBS
 This function is not exactly cheap run-time wise. Around 0.5s per package.
 }
