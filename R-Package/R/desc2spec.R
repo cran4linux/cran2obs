@@ -81,12 +81,12 @@ createEmptySpec <- function(packname, pacdir=paste0("~/steuer/OBS/","home:dsteue
             return(paste("Failed: Package", packname, " download failed from CRAN"))
         }
     }
-    if (! file.copy(file.path(download.cache,source0), file.path(pacdir,source0))){
+
+    if (! file.copy( file.path(download.cache,source0), file.path(pacdir,source0), overwrite=TRUE )){
         cat("Seems ", packname, " setup of pac failed\n")
         cat("Seems ", packname, " setup of pac failed\n", file=errorlog, append=TRUE)
         return(paste("Failed: Package", packname, " setup of pac failed"))
     }
-    
     
 ### extract DESCRIPTION file, read it, erase it
     desc.file <- paste(packname,"/DESCRIPTION",sep="")
@@ -230,7 +230,7 @@ createOBSpac <- function(packname, localOBSdir="~/OBS",remoteproj="home:dsteuer:
     speclines <- readLines(con=specfile)
 
 ### call osc
-    cmd <- paste("\""," cd", pacdir, "; osc build --prefer-packages=~/rpmbuild/RPMS/x86_64 --local-package --ccache", specfile, "\"" )
+    cmd <- paste("\""," cd", pacdir, "; osc build --prefer-pkgs=~/rpmbuild/RPMS/x86_64 --local-package --ccache", specfile, "\"" )
     suppressWarnings(
         buildlog <- system2("bash", args=c("-c", cmd), stdout=TRUE, stderr=TRUE)
         ## the first build will fail by construction.
@@ -238,6 +238,7 @@ createOBSpac <- function(packname, localOBSdir="~/OBS",remoteproj="home:dsteuer:
         ## in the spec
         ## seemingly osc produces no buildlog if build locally?
     )
+    writeLines(buildlog, con=file.path(pacdir,"step1.log"))
 
     ## but we have to look for other errors preventing successful second run
     ## first remove useless time stamps
@@ -265,16 +266,19 @@ createOBSpac <- function(packname, localOBSdir="~/OBS",remoteproj="home:dsteuer:
 ### that part must be constructed from error logs. Therfore we know the error structure
 ### and where to find the unpackaged files list.
 
-    filelist<- extractFilesFromLog(buildlog)
+    filelist <- extractFilesFromLog(buildlog, packname)
+    writeLines(filelist, file.path(pacdir,"filelist"))
+    
     speclines <- c(speclines , filelist)
     writeLines(speclines, specfile)
 ### here the %file section is fully populated
 
 ### second build!
-    cmd <- paste("\""," cd", pacdir, "; osc build --keep-pkgs=~/rpmbuild/RPMS/x86_64 --prefer-packages=~/rpmbuild/RPMS/x86_64 --local-package --ccache",
+    cmd <- paste("\""," cd", pacdir, "; osc build --keep-pkgs=~/rpmbuild/RPMS/x86_64 --prefer-pkgs=~/rpmbuild/RPMS/x86_64 --local-package --ccache",
                  paste0("R-",packname,".spec"), "\"" )
     buildlog <- system2("bash" , args=c("-c", cmd), stdout=TRUE, stderr=TRUE)
-
+    writeLines(buildlog, con=file.path(pacdir,"step2.log"))
+    
     if (length( grep( "Wrote:", buildlog, fixed=TRUE)) == 2) {
         cat("Success: ", packname, " rpm package created\n")
         cat("Success: ", packname, " rpm package created\n", file=log, append=TRUE)
@@ -291,7 +295,7 @@ createOBSpac <- function(packname, localOBSdir="~/OBS",remoteproj="home:dsteuer:
 ### At this point osc successfully generated a package
 ### TODO Check, if the rpm -q --provides package command only show expected provdides
 #### see R-gdata incident
-    return(version)
+    return(ap[ap$Package == packname, "Version"])
 }
 
 #' dropFileSection removes the filelist from a character array
@@ -324,7 +328,7 @@ dropFileSection <- function(speclines){
 #'
 #' @export
 
-extractFilesFromLog <- function(buildlog){
+extractFilesFromLog <- function(buildlog, packname){
     buildlog <- buildlog[ ( grep( "RPM build errors", buildlog, fixed=TRUE)+2):( length(buildlog)-5) ]
     buildlog <- gsub( paste0( "/usr/lib64/R/library/", packname, "/"), "", buildlog)
 
@@ -345,11 +349,11 @@ extractFilesFromLog <- function(buildlog){
             if ( grepl( "LICEN", line, fixed=TRUE)) {
                 filelist <- c( filelist, paste0( "%license %{rlibdir}/%{packname}/", line))
             } else if (grepl( "DESCRIPTION", line, fixed=TRUE)) {
-                filelist <- c( filelist, cat( "%doc %{rlibdir}/%{packname}/", line))
+                filelist <- c( filelist, paste0( "%doc %{rlibdir}/%{packname}/", line))
             } else if (grepl( "NEWS", line, fixed=TRUE)) {
-                filelist <- c( filelist, cat( "%doc %{rlibdir}/%{packname}/", line))
+                filelist <- c( filelist, paste0( "%doc %{rlibdir}/%{packname}/", line))
             } else {
-                filelist <- c( filelist, cat( "%{rlibdir}/%{packname}/", line))
+                filelist <- c( filelist, paste0( "%{rlibdir}/%{packname}/", line))
             }
         }
     }

@@ -116,7 +116,7 @@ CranOBSstatus <- function(quiet=TRUE, cran=NULL, obs=NULL){
 #' @export
 createOBSstatus <- function(quiet=TRUE, cran=NULL, obs=NULL){
     if (is.null(cran)) cran <- cleanDeps()
-    if (is.null(obs))  obs <- available.packages.OBS(obsproject="devel:languages:R:released", quiet=quiet)
+    if (is.null(obs))  obs <- available.packages.OBS(obsproject="home:dsteuer:AutomaticCRAN", quiet=quiet)
     status <- merge( obs, cran, by="row.names" , all.x=TRUE )
     status$Row.names <- NULL
     for (col in 1:dim(status)[2]) status[,col] <- as.character(status[,col])  
