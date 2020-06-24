@@ -1,4 +1,4 @@
-#' This function returns a structure like available.package()
+#' cleanDeps returns a structure like available.package()
 #' but including recursive dependencies (Depends, Imports, LinkingTo).
 #' Because recommended packages may be assumed to be installed
 #' in a OpenSUSE installation with R, these are removed together with
@@ -38,9 +38,9 @@ cleanDeps <- function(){
 #' but for all the packages in OBS
 #' @param obsproject Project in OBS where packages are taken from.
 #' @param quiet If set to FALSE some progression info is given, default = TRUE.
-#' @return Matrix of all R packages avaialble in OBS devel:languages:R:released
+#' @return Matrix of all R packages avaialble in obsproject.
 #' @export
-available.packages.OBS <- function(obsproject="devel:languages:R:released", quiet=TRUE){
+available.packages.OBS <- function(obsproject="home:dsteuer:AutomaticCRAN", quiet=TRUE){
     ## the names first
     cmd <- paste("osc ls", obsproject, sep=" ", collapse="")
     obspkgs <- system(cmd, intern=TRUE)
@@ -48,7 +48,7 @@ available.packages.OBS <- function(obsproject="devel:languages:R:released", quie
     obspkgs <- obspkgs[grep("R-", obspkgs)]
     ## all packages start with "R-" by convention, see page in build service
     if (obsproject == "devel:languages:R:released") {
-        ## other OBS Project shouldn't contain non-R
+        ## other OBS Project shouldn't contain non-CRAN R packages
         obspkgs <- obspkgs[-which(obspkgs=="R-base")]
         ## R-base not an R package
         obspkgs <- obspkgs[-which(obspkgs == "R-base-java")]
@@ -65,8 +65,8 @@ available.packages.OBS <- function(obsproject="devel:languages:R:released", quie
 }
 
 
-#' This function takes the name of an R package (from CRAN) and receives the corresponding
-#' information off OBS
+#' getOBSVersion takes the name of an R package (from CRAN) and receives the corresponding
+#' information off of OBS
 #' This function is not exactly cheap run-time wise. Around 0.5s per package.
 #' @param pkg A character string containing the name of a R package as found in CRAN
 #' @param obsproject Project in OBS where packages are taken from.
@@ -85,22 +85,42 @@ getOBSVersion <- function ( pkg, obsproject="devel:languages:R:released", quiet=
     c(srcfile, srcversion)
 }
 
-#' This functions shows a table for all packages in OBS with version numbers
+#' CranOBSstatus enriches cleanDeps for all packages in CRAN with their version numbers
+#' in OBS
+#' @param quiet If set to FALSE some progress info is given, default = TRUE.
+#' @param cran If not NULL a matrix like returned from cleanDeps() must be given. If NULL cleanDeps()
+#' is called.
+#' @param obs If not NULL a matrix like returned from available.packages.OBS() must be given. If NULL
+#' that function is called.
+#' @return A dataframe like cleanDeps with additional infos for OBS packages
+#' 
+#' @export
+CranOBSstatus <- function(quiet=TRUE, cran=NULL, obs=NULL){
+    if (is.null(cran)) cran <- cleanDeps()
+    if (is.null(obs))  obs <- available.packages.OBS(obsproject="devel:languages:R:released", quiet=quiet)
+    status <- merge( cran, obs, by="row.names" , all.x=TRUE )
+    status$Row.names <- NULL
+    for (col in 1:dim(status)[2]) status[,col] <- as.character(status[,col])  
+    return(status)
+}
+
+
+#' createOBSstatus creates a table for all packages in OBS with version numbers
 #' of CRAN and OBS
 #' return OBSstatus A dataframe containing esp. version information from CRAN for all OBS packages
-#' @param quiet If set to FALSE some progresso info is given, default = TRUE.
+#' @param quiet If set to FALSE some progress info is given, default = TRUE.
 #' @param cran If not NULL a matrix like returned from cleanDeps() must be given. If NULL cleanDeps()
 #' is called.
 #' @param obs If not NULL a matrix like returned from available.packages.OBS() must be given. If NULL
 #' that function is called.
 #' @export
-showOBSstatus <- function(quiet=TRUE, cran=NULL, obs=NULL){
+createOBSstatus <- function(quiet=TRUE, cran=NULL, obs=NULL){
     if (is.null(cran)) cran <- cleanDeps()
-    if (is.null(obs))  obs <- available.packages.OBS(obsproject="devel:languages:R:released", quiet=quiet)
+    if (is.null(obs))  obs <- available.packages.OBS(obsproject="home:dsteuer:AutomaticCRAN", quiet=quiet)
     status <- merge( obs, cran, by="row.names" , all.x=TRUE )
     status$Row.names <- NULL
     for (col in 1:dim(status)[2]) status[,col] <- as.character(status[,col])  
-    status
+    return(status)
 }
     
 #' This function generates the complete set of dependencies, give a

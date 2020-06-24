@@ -1,10 +1,10 @@
-#' createOrUpdate checks if a package already exists either as local
+#' statusOBS checks if a package already exists either as local
 #' OBS pac or remote pac on build.opensuse.org
 #'
 #' @param packname CRAN R package name
 #' @param remoteproj Existing project to buid packages for in OBS (build.opensuse.org)
 #'
-#' @return Version number of package in OBS or "missing" 
+#' @return Version number of package in OBS or NA
 #' @export
 
 statusOBS <- function(packname, remoteproj="home:dsteuer:AutomaticCRAN/"){
@@ -14,7 +14,7 @@ statusOBS <- function(packname, remoteproj="home:dsteuer:AutomaticCRAN/"){
     if ( is.null( attributes( osclist))) {
         return( versionFromTgz(packname, osclist[1]) )
     } else {
-        return("missing")
+        return(NA)
     }
 }
 
@@ -25,7 +25,7 @@ statusOBS <- function(packname, remoteproj="home:dsteuer:AutomaticCRAN/"){
 #' @param tgzname filename to extract version from
 #'
 #' @return Version string
-#' export
+#' @export
 
 versionFromTgz <- function(packname, tgzname){
     gsub( ".tar.gz", "", gsub( paste0( packname, "-"), "", tgzname))
@@ -94,10 +94,10 @@ createEmptySpec <- function(packname, pacdir=paste0("~/steuer/OBS/","home:dsteue
     
     description <- readLines(desc.file)
     
-    if ( length(grep("Encoding: ", description, fixed=TRUE) > 0)) {
+    if ( any(grep("Encoding: ", description, fixed=TRUE))) {
         ## some DESCRIPTIONs seem to be encoded differently, i.e leerSIECyL
         encoding <- trimws( gsub("Encoding: ","",description[grep("Encoding: ", description, fixed=TRUE)]), which="both"  )
-        if (encoding %in% c("latin1")) {
+        if (encoding %in% c("latin1", "latin2")) {
             system2("recode", args=c("..UTF-8", descfile ) )
             ## re-read re-encoded DESCRITION
             description <- readLines(desc.file) 
@@ -200,7 +200,7 @@ createOBSpac <- function(packname, localOBSdir="~/OBS",remoteproj="home:dsteuer:
     }
     
     obsstatus <- statusOBS(packname, remoteproj)
-    if (obsstatus != "missing") {
+    if (! is.na(obsstatus) ) {
         cat("Failed: ", packname, " exists in OBS. createOBSpac does no updates!", file=log, append=TRUE)
         return("Failed: createOBSpac does no OBS updates!")
     }
@@ -380,7 +380,11 @@ desc2spec <- function(packname, rpmbuildroot="~/rpmbuild/", ap = data.frame(avai
 ### call rpmbuild
 ###  osc build --local-package  --ccache R-abc.data.spec 2>&1 
     suppressWarnings(
-        rpmlog <- system2("rpmbuild", args=c("-ba", specfile), stdout=TRUE, stderr=TRUE)
+        rpmlog <- system2("rpmbuild", 
+                          args   = c("-ba", specfile),
+                          env    = "LANG=en;",
+                          stdout = TRUE,
+                          stderr = TRUE)
     ## the first build will fail by construction.
     ## the output of rpmbuild allows to build the %file section
     ## in the spec
@@ -408,7 +412,10 @@ desc2spec <- function(packname, rpmbuildroot="~/rpmbuild/", ap = data.frame(avai
 ### At this point something was build. But as the specfile.tpl has an empty file section.
 ### that part must be constructed from error logs
     
-    rpmlog <- trimws( rpmlog[ (grep( "RPM build errors", rpmlog, fixed=TRUE)+2):length(rpmlog)], which="left")
+    # Double sub-setting needed because "Installed (but unpackaged) file(s) found" isn't
+    # necessarily right under "RPM build errors"...
+    rpmlog <- rpmlog[ (grep( "RPM build errors", rpmlog, fixed=TRUE)+1):length(rpmlog)]
+    rpmlog <- trimws( rpmlog[ (grep( "Installed (but unpackaged) file(s) found", rpmlog, fixed=TRUE)+1):length(rpmlog)], which="left")
     rpmlog <- gsub(paste("/usr/lib64/R/library/",packname,"/",sep=""), "", rpmlog)
 
     dirlist <- NULL
@@ -437,8 +444,12 @@ desc2spec <- function(packname, rpmbuildroot="~/rpmbuild/", ap = data.frame(avai
     }
 
 ### second build!
-    rpmlog <- system2("rpmbuild", args=c("-ba", specfile), stdout=TRUE, stderr=TRUE )
-
+    rpmlog <- system2("rpmbuild", 
+                      args   = c("-ba", specfile),
+                      env    = "LANG=en;",
+                      stdout = TRUE,
+                      stderr = TRUE)
+    
 #    rpmlog <- readLines( paste( specfile, ".log", sep=""))
     if (length( grep( "Wrote:", rpmlog, fixed=TRUE)) == 2) {
         cat("Successfully created rpm package\n")
