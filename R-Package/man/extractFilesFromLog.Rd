@@ -6,7 +6,7 @@
 extrats the list of unpackaged files. Times must be stripped
 already.}
 \usage{
-extractFilesFromLog(buildlog)
+extractFilesFromLog(buildlog, packname)
 }
 \arguments{
 \item{buildlog}{Character vector containing the lines of an osc
