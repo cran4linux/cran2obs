@@ -2,11 +2,12 @@
 % Please edit documentation in R/desc2spec.R
 \name{createOBSpac}
 \alias{createOBSpac}
-\title{createOBSpac takes the name of an R package and creates a 
-new project in OBS. spec file
-to be used in OBS. The external tool rpmbuild is used to build
-the OpenSUSE package. The resulting spec file will reside where
-rpmbuild puts it. The %check section is deliberately empty. We rely
+\title{createOBSspec takes the name of an R package and creates a 
+spec file to be used in OBS.
+The external tool osc is used to build
+the OpenSUSE package. The resulting spec file will reside in a
+package dir under a local checkout of a remote proj.
+The %check section is deliberately empty. We rely
 on the checks on CRAN.}
 \usage{
 createOBSpac(
@@ -19,16 +20,24 @@ createOBSpac(
 \arguments{
 \item{packname}{A package name of a package in a R repo like CRAN}
 
+\item{localOBSdir}{The top level directory of a checkout of the project
+you want to create your package in.}
+
+\item{remoteproj}{Name of the OBS project}
+
+\item{ap}{A dataframe containing info like from available.packages or cleanDeps.}
+
 \item{rpmbuildroot}{The directory where rpmbuild should do its work}
 }
 \value{
 The path to the generated specfile.
 }
 \description{
-createOBSpac takes the name of an R package and creates a 
-new project in OBS. spec file
-to be used in OBS. The external tool rpmbuild is used to build
-the OpenSUSE package. The resulting spec file will reside where
-rpmbuild puts it. The %check section is deliberately empty. We rely
+createOBSspec takes the name of an R package and creates a 
+spec file to be used in OBS.
+The external tool osc is used to build
+the OpenSUSE package. The resulting spec file will reside in a
+package dir under a local checkout of a remote proj.
+The %check section is deliberately empty. We rely
 on the checks on CRAN.
 }

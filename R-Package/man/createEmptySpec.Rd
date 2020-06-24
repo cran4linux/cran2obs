@@ -8,7 +8,7 @@ with empty file section from its DESCRIPTION file.}
 createEmptySpec(
   packname,
   pacdir = paste0("~/steuer/OBS/", "home:dsteuer:AutomaticCRAN/R-", packname),
-  download.cache = "~/rpmbuild/SOURCES/",
+  download.cache = "~/rpmbuild/SOURCES",
   ap = data.frame(available.packages(repos = "https://cloud.r-project.org"))
 )
 }
