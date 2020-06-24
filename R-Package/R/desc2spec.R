@@ -267,7 +267,6 @@ createOBSpac <- function(packname, localOBSdir="~/OBS",remoteproj="home:dsteuer:
 ### and where to find the unpackaged files list.
 
     filelist <- extractFilesFromLog(buildlog, packname)
-    writeLines(filelist, file.path(pacdir,"filelist"))
     
     speclines <- c(speclines , filelist)
     writeLines(speclines, specfile)
@@ -277,8 +276,7 @@ createOBSpac <- function(packname, localOBSdir="~/OBS",remoteproj="home:dsteuer:
     cmd <- paste("\""," cd", pacdir, "; osc build --keep-pkgs=~/rpmbuild/RPMS/x86_64 --prefer-pkgs=~/rpmbuild/RPMS/x86_64 --local-package --ccache",
                  paste0("R-",packname,".spec"), "\"" )
     buildlog <- system2("bash" , args=c("-c", cmd), stdout=TRUE, stderr=TRUE)
-    writeLines(buildlog, con=file.path(pacdir,"step2.log"))
-    
+
     if (length( grep( "Wrote:", buildlog, fixed=TRUE)) == 2) {
         cat("Success: ", packname, " rpm package created\n")
         cat("Success: ", packname, " rpm package created\n", file=log, append=TRUE)
