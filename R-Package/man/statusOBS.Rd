@@ -5,7 +5,7 @@
 \title{statusOBS checks if a package already exists either as local
 OBS pac or remote pac on build.opensuse.org}
 \usage{
-statusOBS(packname, remoteproj = "home:dsteuer:AutomaticCRAN/")
+statusOBS(pkg, remoteproj = "home:dsteuer:AutomaticCRAN")
 }
 \arguments{
 \item{remoteproj}{Existing project to buid packages for in OBS (build.opensuse.org)}

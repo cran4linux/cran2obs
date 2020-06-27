@@ -20,6 +20,7 @@ External dependencies
 - rpmbuild, rpmbuild requires the directories
   $RPMBULDROOT/{SOURCES, SPECS, BUILD, BUILDROOT, OTHER, RPMS, SRPMS}
   to exist
+- osc 
 
 Intended use
 ------------

@@ -5,12 +5,12 @@
 \title{versionFromTgz extracts the version info, normalizes it and return
 a charater string containing that version}
 \usage{
-versionFromTgz(packname, tgzname)
+versionFromTgz(pkg, tgzname)
 }
 \arguments{
-\item{packname}{CRAN package name}
-
 \item{tgzname}{filename to extract version from}
+
+\item{packname}{CRAN package name}
 }
 \value{
 Version string

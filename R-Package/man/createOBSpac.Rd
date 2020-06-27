@@ -18,7 +18,7 @@ createOBSpac(
 )
 }
 \arguments{
-\item{packname}{A package name of a package in a R repo like CRAN}
+\item{packname}{Name of a package in a R repo like CRAN}
 
 \item{localOBSdir}{The top level directory of a checkout of the project
 you want to create your package in.}

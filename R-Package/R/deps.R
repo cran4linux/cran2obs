@@ -92,10 +92,12 @@ getOBSVersion <- function ( pkg, obsproject="devel:languages:R:released", quiet=
 #' is called.
 #' @param obs If not NULL a matrix like returned from available.packages.OBS() must be given. If NULL
 #' that function is called.
+#' @param oldstatus If not NULL the name of a csv file containing the result of the latest run of this
+#' function. It is used to cut down the time accessing OBS to find which packages are uptodate already.
 #' @return A dataframe like cleanDeps with additional infos for OBS packages
 #' 
 #' @export
-CranOBSstatus <- function(quiet=TRUE, cran=NULL, obs=NULL){
+CranOBSstatus <- function(quiet=TRUE, cran=NULL, obs=NULL, oldstatus=NULL){
     if (is.null(cran)) cran <- cleanDeps()
     if (is.null(obs))  obs <- available.packages.OBS(obsproject="devel:languages:R:released", quiet=quiet)
     status <- merge( cran, obs, by="row.names" , all.x=TRUE )

@@ -5,7 +5,7 @@
 \title{CranOBSstatus enriches cleanDeps for all packages in CRAN with their version numbers
 in OBS}
 \usage{
-CranOBSstatus(quiet = TRUE, cran = NULL, obs = NULL)
+CranOBSstatus(quiet = TRUE, cran = NULL, obs = NULL, oldstatus = NULL)
 }
 \arguments{
 \item{quiet}{If set to FALSE some progress info is given, default = TRUE.}
@@ -15,6 +15,9 @@ is called.}
 
 \item{obs}{If not NULL a matrix like returned from available.packages.OBS() must be given. If NULL
 that function is called.}
+
+\item{oldstatus}{If not NULL the name of a csv file containing the result of the latest run of this
+function. It is used to cut down the time accessing OBS to find which packages are uptodate already.}
 }
 \value{
 A dataframe like cleanDeps with additional infos for OBS packages

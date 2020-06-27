@@ -7,12 +7,12 @@
 #' @return Version number of package in OBS or NA
 #' @export
 
-statusOBS <- function(packname, remoteproj="home:dsteuer:AutomaticCRAN/"){
+statusOBS <- function(pkg, remoteproj="home:dsteuer:AutomaticCRAN"){
     suppressWarnings(
-        osclist <- system2("osc", args=c("ls", paste0(remoteproj,"R-",packname)), stdout=TRUE, stderr=TRUE)
+        osclist <- system2("osc", args=c("ls", paste0(remoteproj,"/R-",pkg)), stdout=TRUE, stderr=TRUE)
     )
     if ( is.null( attributes( osclist))) {
-        return( versionFromTgz(packname, osclist[1]) )
+        return( versionFromTgz(pkg, osclist[grep("tar.gz",osclist)]) )
     } else {
         return(NA)
     }
@@ -27,8 +27,8 @@ statusOBS <- function(packname, remoteproj="home:dsteuer:AutomaticCRAN/"){
 #' @return Version string
 #' @export
 
-versionFromTgz <- function(packname, tgzname){
-    gsub( ".tar.gz", "", gsub( paste0( packname, "-"), "", tgzname))
+versionFromTgz <- function(pkg, tgzname){
+    gsub( ".tar.gz", "", gsub( paste0( pkg, "_"), "", tgzname))
 }
 
 #' createEmptySpec takes the name of an R package and creates an specfile
@@ -120,7 +120,7 @@ createEmptySpec <- function(packname, pacdir=paste0("~/steuer/OBS/","home:dsteue
     license <- sub( "License: ", "", description[ grep("License:", description) ], fixed=TRUE)
     spectpl <- gsub( "{{license}}", license, spectpl, fixed=TRUE)
     
-    spectpl <- gsub( "{{source0}}", source0, spectpl, fixed=TRUE)
+    spectpl <- gsub( "{{source0}}", paste0( packname, "_%{version}.tar.gz"), spectpl, fixed=TRUE)
     deps <-  cleanList( packname, "depends" )
     if (length(deps) >0) {
         deps <- paste( "R-", deps, sep="")
@@ -169,6 +169,218 @@ createEmptySpec <- function(packname, pacdir=paste0("~/steuer/OBS/","home:dsteue
     return(specfile)
 }
 
+#' updateOBSpgk takes the name of an R package with newer
+#' version CRAN and tries to update with minimal changes to
+#' the existing spec.
+#'
+#' @param pkg Name of a package in a R repo like CRAN
+#' @param rpmbuildroot The directory where rpmbuild should do its work
+#' @param localOBSdir The top level directory of a checkout of the project
+#' you want to create your package in. 
+#' @param remoteproj Name of the OBS project
+#' @param ap A dataframe containing info like from available.packages or cleanDeps.
+#' 
+#' @return The path to the generated specfile.
+#' @export
+updateOBSpkg <-  function(pkg, localOBSdir="~/OBS",remoteproj="home:dsteuer:AutomaticCRAN",download.cache="~/rpmbuild/SOURCES",
+                         ap = data.frame(available.packages(repos="https://cloud.r-project.org"))) {
+    
+    log <- "updateOBSpkg.log"
+    cat("Building ", pkg, "\n", file=log, append=TRUE)
+
+    if (! pkg %in% ap[,"Package"]) {
+        cat("Seems ", pkg, " does not exist on CRAN\n")
+        cat("Seems ", pkg, " does not exist on CRAN\n", file=log, append=TRUE)
+        return(paste("Failed: Package", pkg, " not on CRAN"))
+    }
+    
+    obsversion <- statusOBS(pkg, remoteproj)
+    
+    if (is.na(obsversion) ) {
+        cat("Failed: ", pkg, " does not exist in OBS. updateOBSpkg only does updates!", file=log, append=TRUE)
+        return("Failed: updateOBSpkg only does updates!")
+    }
+
+    pkgdir <-  file.path( localOBSdir, remoteproj, paste0( "R-", pkg))
+
+    if ( dir.exists( pkgdir )){
+        cmd <- paste( "\"", "cd", file.path( localOBSdir, remoteproj), " ; osc up ", paste0( "R-", pkg), "\"")
+        result <- system2( "bash", args = c("-c", cmd), stdout=TRUE, stderr=TRUE)
+        if( ! is.null(attributes(result))) {
+            cat(result)
+            cat(pkg, " could not update local OBS pkg\n")
+            cat(pkg, " could not update local OBS pkg\n", file=log, append=TRUE)
+            return(paste("Failed: Package", pkg, " could not update OBS co"))
+        }
+
+    } else { ## create dir to hold package for OBS
+        cmd <- paste("\"", "cd", file.path( localOBSdir, remoteproj), " ; osc co ",paste0( "R-", pkg)  , "\"")
+        result <- system2(  "bash",  args = c("-c", cmd), stdout=TRUE, stderr=TRUE)
+        if( ! is.null(attributes(result))) {
+            cat(result)
+            cat(pkg, " could not checkout from OBS\n")
+            cat(pkg, " could not checkout from OBS\n", file=log, append=TRUE)
+            return( paste("Failed: Package", pkg, " could not checkout from OBS"))
+        }
+    }
+    ## hier ist die aktuelle Version von OBS ausgecheckt
+    ## Download new sources
+    
+    version <- ap[ ap$Package == pkg, "Version"]
+    source0 <-  paste0( pkg, "_", version, ".tar.gz")
+    specfile <- paste0( pkgdir, "/R-", pkg, ".spec")
+    version <- gsub( "-", ".", version)
+
+    if (! file.exists( file.path(download.cache,source0))) {
+        if ( download.file(paste0("https://cloud.r-project.org/src/contrib/", source0),
+                            paste0( download.cache, "/", source0)) != 0){
+            cat("Seems ", pkg, " no source on CRAN\n")
+            cat("Seems ", pkg, " no source on CRAN\n", file=errorlog, append=TRUE)
+            return(paste("Failed: Package", pkg, " download failed from CRAN"))
+        }
+    }
+
+    if (! file.copy( file.path(download.cache,source0), file.path(pkgdir,source0), overwrite=TRUE )){
+        cat("Seems ", pkg, " setup of pac failed\n")
+        cat("Seems ", pkg, " setup of pac failed\n", file=errorlog, append=TRUE)
+        return(paste("Failed: Package", pkg, " setup of pac failed"))
+    }
+
+    file.remove(file.path(pkgdir, paste0(pkg,"_",obsversion,".tar.gz"))) 
+    ## new sources are in place in local OBS
+
+    speclines <- readLines(specfile)
+    ## first try, just replace the version
+    speclines[ grep( "Version:", speclines)] <- paste0("Version:        ", version)
+    speclines[ grep( "Source:",  speclines)] <- paste0("Source:         ", paste0(pkg,"_%{version}.tar.gz"))
+    writeLines(speclines, specfile)
+
+    ##cat("Specfile: ", specfile, "\n")
+    
+    ## time to build
+    cmd <- paste("\""," cd", pkgdir,
+                 "; osc build --prefer-pkgs=/home/steuer/rpmbuild/RPMS/x86_64 --keep-pkgs=/home/steuer/rpmbuild/RPMS/x86_64 --local-package --ccache", specfile, "\"" )
+    suppressWarnings(
+        buildlog <- system2("bash", args=c("-c", cmd), stdout=TRUE, stderr=TRUE)
+        ## after minor updates expect success!
+    )
+    writeLines(buildlog, con=file.path(pkgdir,"updatestep1.log"))
+    buildlog <- trimws(gsub("^\\[.*\\]","",buildlog), which="left")
+    
+    if ( length( grep( "Failed build dependencies", buildlog, fixed=TRUE)) >0 ) { ### missing dependencies, no chance
+        cat( "The following missing dependencies must be installed to build R-", pkg, "\n", sep="")
+        cat( "The following missing dependencies must be installed to build R-", pkg, "\n", sep="", file=log, append=TRUE)
+        for (line in buildlog) if ( grepl( "needed", line, fixed=TRUE)) {
+                                 cat( line,"\n")
+                                 cat( line,"\n", file=log, append=TRUE)
+                                 cat("Failed: Missing dependencies first run rpmbuild\n", file=log, append=TRUE)
+                             }
+        return(paste0("Failed: ", pkg," Missing dependencies after update"))
+    }
+
+    if (length( grep("Bad exit status", buildlog, fixed=TRUE)) > 0 ) {
+        cat( "Bad exit status from build R-", pkg, "\n", sep="")
+        cat( "Bad exit status from build R-", pkg, "\n", sep="", file=log, append=TRUE)
+        return(paste0("Failed: ", pkg, " Bad exit status"))
+    }
+    ## no fatal flaws, may be lucky?
+
+    if (length( grep( "Wrote:", buildlog, fixed=TRUE)) == 2) {
+        cat("Success: ", pkg, " rpm package created\n")
+        cat("Success: ", pkg, " rpm package created\n", file=log, append=TRUE)
+        print(buildlog[grep("Wrote:", buildlog, fixed=TRUE)])
+        for (line in  buildlog[grep("Wrote:", buildlog, fixed=TRUE)]){
+            cat(line, "\n", file=log, append=TRUE)
+        }
+        cat("Success: ", pkg, " rpm package created\n", file=log, append=TRUE)
+        return(ap[ap$Package == packname, "Version"])
+    }
+    ## if we land here the very simplest strategy of just replacing version number
+    ## and sources didn't work. But no missing dependencies or compile errors either.
+
+    ## try to rebuild the %files section
+    speclines <- dropFileSection(speclines)
+    writeLines(speclines, specfile)
+    
+    cmd <- paste("\""," cd", pkgdir,
+                 "; osc build --prefer-pkgs=/home/steuer/rpmbuild/RPMS/x86_64 --keep-pkgs=/home/steuer/rpmbuild/RPMS/x86_64 --local-package --ccache", specfile, "\"" )
+    suppressWarnings(
+        buildlog <- system2("bash", args=c("-c", cmd), stdout=TRUE, stderr=TRUE)
+        ## the first build will fail by construction.
+        ## the output of rpmbuild allows to build the %file section
+        ## in the spec
+        ## seemingly osc produces no buildlog if build locally?
+    )
+    writeLines(buildlog, con=file.path(pkgdir,"recreatefiles.log"))
+    buildlog <- trimws(gsub("^\\[.*\\]","",buildlog), which="left")
+    
+    if ( length( grep( "Failed build dependencies", buildlog, fixed=TRUE)) >0 ) { ### missing dependencies, no chance
+        cat( "The following missing dependencies must be installed to build R-", pkg, "\n", sep="")
+        cat( "The following missing dependencies must be installed to build R-", pkg, "\n", sep="", file=log, append=TRUE)
+        for (line in buildlog) if ( grepl( "needed", line, fixed=TRUE)) {
+                                 cat( line,"\n")
+                                 cat( line,"\n", file=log, append=TRUE)
+                                 cat("Failed: Missing dependencies first run rpmbuild\n", file=log, append=TRUE)
+                             }
+        return(paste0("Failed: ", pkg," Missing dependencies after update"))
+    }
+
+    if (length( grep("Bad exit status", buildlog, fixed=TRUE)) > 0 ) {
+        cat( "Bad exit status from build R-", pkg, "\n", sep="")
+        cat( "Bad exit status from build R-", pkg, "\n", sep="", file=log, append=TRUE)
+        return(paste0("Failed: ", pkg, " Bad exit status"))
+    }
+    ## no fatal flaws, may be lucky this time?
+    filelist <- extractFilesFromLog(buildlog, pkg)
+    version <- gsub("-",".",ap[ap$Package == pkg, "Version"])
+    gsub(version, "%{version}",filelist) # if there are files with version in name, this will be caught, see abcrlda
+    
+    speclines <- c(speclines , filelist)
+    writeLines(speclines, specfile)
+    
+    cmd <- paste("\""," cd", pkgdir,
+                 "; osc build --prefer-pkgs=/home/steuer/rpmbuild/RPMS/x86_64 --keep-pkgs=/home/steuer/rpmbuild/RPMS/x86_64 --local-package --ccache", specfile, "\"" )
+    suppressWarnings(
+        buildlog <- system2("bash", args=c("-c", cmd), stdout=TRUE, stderr=TRUE)
+        ## after minor updates expect success!
+    )
+
+    writeLines(buildlog, con=file.path(pkgdir,"updatestep2.log"))
+    buildlog <- trimws(gsub("^\\[.*\\]","",buildlog), which="left")
+    
+    if ( length( grep( "Failed build dependencies", buildlog, fixed=TRUE)) >0 ) { ### missing dependencies, no chance
+        cat( "The following missing dependencies must be installed to build R-", pkg, "\n", sep="")
+        cat( "The following missing dependencies must be installed to build R-", pkg, "\n", sep="", file=log, append=TRUE)
+        for (line in buildlog) if ( grepl( "needed", line, fixed=TRUE)) {
+                                 cat( line,"\n")
+                                 cat( line,"\n", file=log, append=TRUE)
+                                 cat("Failed: Missing dependencies first run rpmbuild\n", file=log, append=TRUE)
+                             }
+        return(paste0("Failed: ", pkg," Missing dependencies after update"))
+    }
+
+    if (length( grep("Bad exit status", buildlog, fixed=TRUE)) > 0 ) {
+        cat( "Bad exit status from build R-", pkg, "\n", sep="")
+        cat( "Bad exit status from build R-", pkg, "\n", sep="", file=log, append=TRUE)
+        return(paste0("Failed: ", pkg, " Bad exit status"))
+    }
+    ## no fatal flaws, may be lucky?
+
+    if (length( grep( "Wrote:", buildlog, fixed=TRUE)) == 2) {
+        cat("Success: ", pkg, " rpm package created\n")
+        cat("Success: ", pkg, " rpm package created\n", file=log, append=TRUE)
+        print(buildlog[grep("Wrote:", buildlog, fixed=TRUE)])
+        for (line in  buildlog[grep("Wrote:", buildlog, fixed=TRUE)]){
+            cat(line, "\n", file=log, append=TRUE)
+        }
+        cat("Success: ", pkg, " rpm package created\n", file=log, append=TRUE)
+        return(ap[ap$Package == packname, "Version"])
+    }
+    # out of luck, manual intervention needed
+    cat( "Failed to build ", packname, " in second osc build\n", sep="")
+    return("Failed: Unknown updating")
+}
+
 #' createOBSspec takes the name of an R package and creates a 
 #' spec file to be used in OBS.
 #' The external tool osc is used to build
@@ -177,7 +389,7 @@ createEmptySpec <- function(packname, pacdir=paste0("~/steuer/OBS/","home:dsteue
 #' The %check section is deliberately empty. We rely
 #' on the checks on CRAN.
 #'
-#' @param packname A package name of a package in a R repo like CRAN
+#' @param packname Name of a package in a R repo like CRAN
 #' @param rpmbuildroot The directory where rpmbuild should do its work
 #' @param localOBSdir The top level directory of a checkout of the project
 #' you want to create your package in. 
@@ -194,6 +406,7 @@ createOBSpac <- function(packname, localOBSdir="~/OBS",remoteproj="home:dsteuer:
     cat("Building ", packname, "\n", file=log, append=TRUE)
 
     if (! packname %in% ap[,"Package"]) {
+
         cat("Seems ", packname, " does not exist on CRAN\n")
         cat("Seems ", packname, " does not exist on CRAN\n", file=log, append=TRUE)
         return(paste("Failed: Package", packname, " not on CRAN"))
@@ -228,7 +441,7 @@ createOBSpac <- function(packname, localOBSdir="~/OBS",remoteproj="home:dsteuer:
     }
     specfile <- result
     speclines <- readLines(con=specfile)
-
+    
 ### call osc
     cmd <- paste("\""," cd", pacdir, "; osc build --prefer-pkgs=~/rpmbuild/RPMS/x86_64 --local-package --ccache", specfile, "\"" )
     suppressWarnings(
@@ -267,6 +480,8 @@ createOBSpac <- function(packname, localOBSdir="~/OBS",remoteproj="home:dsteuer:
 ### and where to find the unpackaged files list.
 
     filelist <- extractFilesFromLog(buildlog, packname)
+    version <- gsub("-",".",ap[ap$Package == packname, "Version"])
+    gsub(version, "%{version}",filelist) # if there are files with version in name, this will be caught, see abcrlda
     
     speclines <- c(speclines , filelist)
     writeLines(speclines, specfile)
@@ -306,13 +521,13 @@ createOBSpac <- function(packname, localOBSdir="~/OBS",remoteproj="home:dsteuer:
 #' @export
 
 dropFileSection <- function(speclines){
-    FilesLine <- grep("%files",speclines,fixed=TRUE)
-    if (length(begOfFiles) != 1) {
+    filesLine <- grep("%files",speclines,fixed=TRUE)
+    if (length(filesLine) != 1) {
         stop("No or more than one %files section! Don't know what to do.")
     } else {
-        speclines[begOfFiles+1]="%dir %{rlibdir}/%{packname}"
+        speclines[filesLine+1]="%dir %{rlibdir}/%{packname}"
     }
-    return(speclines[1:(begOfFiles+1)])
+    return(speclines[1:(filesLine+1)])
 }
 
 #' extractFilesFromLog takes the lines of an osc build log and
