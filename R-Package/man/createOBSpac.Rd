@@ -2,8 +2,8 @@
 % Please edit documentation in R/desc2spec.R
 \name{createOBSpac}
 \alias{createOBSpac}
-\title{createOBSspec takes the name of an R package and creates a 
-spec file to be used in OBS.
+\title{createOBSpac takes the name of an R package and creates a 
+package directory to be used in OBS.
 The external tool osc is used to build
 the OpenSUSE package. The resulting spec file will reside in a
 package dir under a local checkout of a remote proj.
@@ -33,8 +33,8 @@ you want to create your package in.}
 The path to the generated specfile.
 }
 \description{
-createOBSspec takes the name of an R package and creates a 
-spec file to be used in OBS.
+createOBSpac takes the name of an R package and creates a 
+package directory to be used in OBS.
 The external tool osc is used to build
 the OpenSUSE package. The resulting spec file will reside in a
 package dir under a local checkout of a remote proj.

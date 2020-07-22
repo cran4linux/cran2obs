@@ -11,7 +11,8 @@ buildforfiles(
   logfile = "buildlog",
   localOBSdir = "~/OBS",
   remoteproj = "home:dsteuer:AutomaticCRAN",
-  download.cache = "~/rpmbuild/SOURCES"
+  download.cache = "~/rpmbuild/SOURCES",
+  ap = data.frame(available.packages(repos = "https://cloud.r-project.org"))
 )
 }
 \arguments{

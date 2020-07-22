@@ -2,7 +2,7 @@
 % Please edit documentation in R/desc2spec.R
 \name{updateOBSpkg}
 \alias{updateOBSpkg}
-\title{updateOBSpgk takes the name of an R package with newer
+\title{updateOBSpkg takes the name of an R package with newer
 version CRAN and tries to update with minimal changes to
 the existing spec.}
 \usage{
@@ -30,7 +30,7 @@ you want to create your package in.}
 The path to the generated specfile.
 }
 \description{
-updateOBSpgk takes the name of an R package with newer
+updateOBSpkg takes the name of an R package with newer
 version CRAN and tries to update with minimal changes to
 the existing spec.
 }
