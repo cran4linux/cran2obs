@@ -242,7 +242,7 @@ testbuild <- function(pkg, pkgdir, specfile, logfile="buildlog", localOBSdir="~/
         cat( "The following missing dependencies must be built first to build R-", pkg, "\n", sep="", file=logfile, append=TRUE)
         for (line in buildlog[ grep( "nothing provides", buildlog, fixed=TRUE)] ) {
             cat( line,"\n")
-            cat( line,"\n", file=log, append=TRUE)
+            cat( line,"\n", file=logfile, append=TRUE)
             cat("Failed: Missing R-packages\n", file=logfile, append=TRUE)
         }
         return(list(status="failed", problem="missing R-packages", buildlog=buildlog))
@@ -502,7 +502,7 @@ createOBSpac <- function(packname, localOBSdir="~/OBS",remoteproj="home:dsteuer:
     specfile <- result
     speclines <- readLines(con=specfile)
 ### first build
-    buildresult <- testbuild( packname, pacdir, specfile, ap)
+    buildresult <- testbuild( packname, pacdir, specfile, ap=ap)
     
     if (buildresult$problem %in% c("bad exit status", "missing dependencies", "unknown problem", "missing R-packages")){
         cat( "Failed to build ", packname, " \n", sep="")
@@ -522,7 +522,7 @@ createOBSpac <- function(packname, localOBSdir="~/OBS",remoteproj="home:dsteuer:
 ### here the %file section is fully populated
 
 ### second build!
-    buildresult <- testbuild( packname, pacdir, specfile, ap)
+    buildresult <- testbuild( packname, pacdir, specfile, ap=ap)
 
     if (buildresult$status == "success") {
         return(ap[ap$Package == packname, "Version"])
