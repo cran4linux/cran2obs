@@ -42,19 +42,15 @@ finally be on the local machine, if built from scratch.
 ## Developter Notes
 ### Update Workflow
 
+Status file contains:
+> newinfo <- merge(new.ap, oldinfo[, c("Package", "OBSpkg", "File", "OBSVersion.a", "OBSVersion.r")], suffixes=c(".n", ".o"),all.x=TRUE, by="Package")
 
+> names(newinfo)
+ [1] "Package"          "Version"          "License"          "NeedsCompilation"
+ [5] "recDep"           "depLen"           "OBSpkg"           "File"            
+ [9] "OBSVersion.a"     "OBSVersion.r"    
 
-read.table(oldstatus, file="CRANinOBSStatus.csv", sep=";",row.names=FALSE, header=TRUE)
-> names (oldstatus)
-[1] "Package"          "Version"          "License"          "NeedsCompilation" "recDep"           "depLen"           "OBSpkg"          
-[8] "File"             "OBSVersion"      
-     cap <- as.data.frame(available.packages())
-> names(cap)
- [1] "Package"               "Version"               "Priority"              "Depends"               "Imports"              
- [6] "LinkingTo"             "Suggests"              "Enhances"              "License"               "License_is_FOSS"      
-[11] "License_restricts_use" "OS_type"               "Archs"                 "MD5sum"                "NeedsCompilation"     
-[16] "File"                  "Repository"
+ write.table(newinfo, file="CRANinOBSStatus.csv", sep=";", row.names=FALSE)
 
-     newall <- merge(cap[, !(names(cap) %in% c("Priority", "Enhances", "License_is_FOSS", "License_restricts_use", "OS_type", "Archs", "MD5sum", "File", "Repository")) ], oldstatus[, c("Package", "recDep", "depLen","OBSpkg","File", "OBSVersion"  )], by="Package", all.x=TRUE)
+Workflow: read status file, if exists, otherwise status must be constructed.
 
-     write.table(oldstatus, file="CRANinOBSStatus.csv", sep=";",row.names=FALSE)

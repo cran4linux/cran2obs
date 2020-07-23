@@ -85,11 +85,32 @@ getOBSVersion <- function ( pkg, obsproject="devel:languages:R:released", quiet=
     c(srcfile, srcversion)
 }
 
+
+
+#' CranOBSfromScratch combines available.pacakges() and info of two OBS repos, i.e.
+#' home:detlef:Automatic and d:l:R:released into a datafram combining all information
+#' about the build status of the different packages.
+#' @param repo1, repo2 Repos containing automatic builds and manually improved builds resp.
+#' @return A dataframe like cleanDeps with additional infos for OBS packages
+#' 
+#' @export
+CranOBSfromScratch <- function(repo1="home:dsteuer:AutomaticCRAN", repo2="devel:languages:R:released"){
+    cran <- cleanDeps()
+    automatic <- available.packages.OBS(obsproject=repo1)
+    released  <- available.packages.OBS(obsproject=repo2)
+    obs <- merge(automatic, released[,c("Package", "OBSVersion")], all=TRUE, suffixes=c(".a", ".r"), by="Package")
+    status <- merge( cran, obs, by="Package" , all=TRUE )
+    status <- cbind(status, triedVer=NA)
+    status$Row.names <- NULL
+    for (col in 1:dim(status)[2]) status[,col] <- as.character(status[,col])  
+    return(status)
+}
+
 #' CranOBSstatus enriches cleanDeps for all packages in CRAN with their version numbers
 #' in OBS
 #' @param quiet If set to FALSE some progress info is given, default = TRUE.
-#' @param cran If not NULL a matrix like returned from cleanDeps() must be given. If NULL cleanDeps()
-#' is called.
+#' @param cran If not NULL a matrix like returned from cleanDeps() must be given.
+#' If NULL cleanDeps() is called.
 #' @param obs If not NULL a matrix like returned from available.packages.OBS() must be given. If NULL
 #' that function is called.
 #' @param oldstatus If not NULL the name of a csv file containing the result of the latest run of this

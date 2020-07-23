@@ -198,7 +198,7 @@ buildforfiles <- function(pkg, pkgdir, specfile, logfile="buildlog", localOBSdir
     
     filelist <- extractFilesFromLog(buildresult$buildlog, pkg)
     version <- gsub("-",".",ap[ap$Package == pkg, "Version"])
-    gsub(version, "%{version}",filelist) # if there are files with version in name, this will be caught, see abcrlda
+    gsub(version, "%{version}", filelist) # if there are files with version in name, this will be caught, see abcrlda
     
     speclines <- c(speclines , filelist)
     writeLines(speclines, specfile)
@@ -373,7 +373,7 @@ updateOBSpkg <-  function(pkg, localOBSdir="~/OBS", remoteproj="home:dsteuer:Aut
     speclines <- readLines(specfile)
     cat(" first try, just replace the version\n")
     speclines[ grep( "Version:", speclines)] <- paste0("Version:        ", version)
-    speclines[ grep( "Source0:",  speclines)] <- paste0("Source0:         ", source0)
+    speclines[ grep( "Source:",  speclines)] <- paste0("Source:         ", source0)
     writeLines(speclines, specfile)
 
     ##cat("Specfile: ", specfile, "\n")

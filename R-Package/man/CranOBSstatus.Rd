@@ -10,8 +10,8 @@ CranOBSstatus(quiet = TRUE, cran = NULL, obs = NULL, oldstatus = NULL)
 \arguments{
 \item{quiet}{If set to FALSE some progress info is given, default = TRUE.}
 
-\item{cran}{If not NULL a matrix like returned from cleanDeps() must be given. If NULL cleanDeps()
-is called.}
+\item{cran}{If not NULL a matrix like returned from cleanDeps() must be given.
+If NULL cleanDeps() is called.}
 
 \item{obs}{If not NULL a matrix like returned from available.packages.OBS() must be given. If NULL
 that function is called.}
