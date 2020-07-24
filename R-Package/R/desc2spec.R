@@ -547,18 +547,20 @@ createOBSpac <- function(packname, localOBSdir="~/OBS",remoteproj="home:dsteuer:
 #'
 #' @param speclines character vector with lines holding a specfile
 #'
-#' @return character vector like the input minus file list
+#' @return list of two components status and speclines
+#' in status is "success" oder "fail", speclines either with empty file
+#' section resp. unaltered.
 #'
 #' @export
 
 dropFileSection <- function(speclines){
     filesLine <- grep("%files",speclines,fixed=TRUE)
     if (length(filesLine) != 1) {
-        stop("No or more than one %files section! Don't know what to do.")
+        return(list(status="fail", speclines, problem="No or more than one %files section! Don't know what to do."))
     } else {
         speclines[filesLine+1]="%dir %{rlibdir}/%{packname}"
     }
-    return(speclines[1:(filesLine+1)])
+    return(list(status="done", speclines=speclines[1:(filesLine+1)]))
 }
 
 #' extractFilesFromLog takes the lines of an osc build log and
