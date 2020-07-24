@@ -182,8 +182,9 @@ buildforfiles <- function(pkg, pkgdir, specfile, logfile="buildlog", localOBSdir
                           remoteproj="home:dsteuer:AutomaticCRAN", download.cache="~/rpmbuild/SOURCES",
                           ap = data.frame(available.packages(repos="https://cloud.r-project.org"))){
     speclines <- readLines(specfile)
-    speclines <- dropFileSection(speclines)
-    writeLines(speclines, specfile)
+    result <- dropFileSection(speclines)
+    if (result$status != "done") return (list(status="failed", problem=result$problem))
+    writeLines(result$speclines, specfile)
     
     buildresult <- testbuild( pkg, pkgdir, specfile, ap=ap)
     
