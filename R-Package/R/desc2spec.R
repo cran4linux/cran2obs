@@ -46,7 +46,7 @@ versionFromTgz <- function(pkg, tgzname){
 #' 
 #' @export
 
-createEmptySpec <- function(packname, pacdir=paste0("~/steuer/OBS/","home:dsteuer:AutomaticCRAN/R-",packname),
+createEmptySpec <- function(packname, pacdir=paste0("~/OBS/","home:dsteuer:AutomaticCRAN/R-",packname),
                             download.cache="~/rpmbuild/SOURCES",
                             ap = data.frame(available.packages(repos="https://cloud.r-project.org"))) {
     errorlog <- "desc2spec.err"
@@ -169,7 +169,8 @@ createEmptySpec <- function(packname, pacdir=paste0("~/steuer/OBS/","home:dsteue
     return(specfile)
 }
 
-#' buildforfiles performs a testbuild and analyses the result
+#' buildforfiles performs a build without %files section
+#' and tries to contstruct all files from the build errors.
 #' 
 #' @param pkg Name of a package in a R repo like CRAN
 #' @param specfile Location of created specfile
@@ -178,7 +179,7 @@ createEmptySpec <- function(packname, pacdir=paste0("~/steuer/OBS/","home:dsteue
 #' you want to create your package in. 
 #' @param remoteproj Name of the OBS project
 #' @export
-buildforfiles <- function(pkg, pkgdir, specfile, logfile="buildlog", localOBSdir="~/OBS",
+buildforfiles <- function(pkg, pkgdir, specfile, localOBSdir="~/OBS",
                           remoteproj="home:dsteuer:AutomaticCRAN", download.cache="~/rpmbuild/SOURCES",
                           ap = data.frame(available.packages(repos="https://cloud.r-project.org"))){
     speclines <- readLines(specfile)
@@ -191,7 +192,7 @@ buildforfiles <- function(pkg, pkgdir, specfile, logfile="buildlog", localOBSdir
     ## we dont need to check for success, because %files section empty and therefore fail by design
     
     if (buildresult$problem %in% c("bad exit status", "missing dependencies", "unknown problem", "missing R-packages")){
-        cat( "Failed to build files section", pkg, " \n", sep="")
+        cat( "buildforfiles: Failed to build files section for", pkg, " \n", sep="")
         return(list(status="failed", problem=buildresult$problem))
     }
 
@@ -217,25 +218,27 @@ buildforfiles <- function(pkg, pkgdir, specfile, logfile="buildlog", localOBSdir
 #' @export
 testbuild <- function(pkg, pkgdir, specfile, logfile="buildlog", localOBSdir="~/OBS",
                       remoteproj="home:dsteuer:AutomaticCRAN", download.cache="~/rpmbuild/SOURCES",
+                      binary.cache="/home/steuer/rpmbuild/RPMS/x86_64",
                       ap = data.frame(available.packages(repos="https://cloud.r-project.org"))){
     cmd <- paste("\""," cd", pkgdir,
-                 "; osc build --prefer-pkgs=/home/steuer/rpmbuild/RPMS/x86_64 --keep-pkgs=/home/steuer/rpmbuild/RPMS/x86_64 --local-package --ccache",
+                 "; osc build --prefer-pkgs=", binary.cache," --keep-pkgs=", binary.cache," --local-package --ccache",
                  specfile, "\"" )
     suppressWarnings(
         buildlog <- system2("bash", args=c("-c", cmd), stdout=TRUE, stderr=TRUE)
     )
-    writeLines(buildlog, con=file.path(pkgdir,logfile))
-    buildlog <- trimws(gsub("^\\[.*\\]","",buildlog), which="left")
 
+    buildlog <- trimws(gsub("^\\[.*\\]","",buildlog), which="left")
+    writeLines(buildlog, con=file.path(pkgdir,logfile))
+    
     if ( any ( grep( "ERROR: dependency", buildlog, fixed=TRUE)) ) { ### missing some dependency, no chance
         cat( "The following missing dependencies must be available to build R-", pkg, "\n", sep="")
         cat( "The following missing dependencies must be available to build R-", pkg, "\n", sep="", file=logfile, append=TRUE)
         for (line in buildlog[ grep( "ERROR: dependency", buildlog, fixed=TRUE)] ) {
             cat( line,"\n")
             cat( line,"\n", file=logfile, append=TRUE)
-            cat("Failed: Missing dependency\n", file=logfile, append=TRUE)
+            cat("testbuild failed: Missing dependency\n", file=logfile, append=TRUE)
         }
-        return(list(status="failed", problem="missing dep in R CMD INSTALL", buildlog=buildlog))
+        return(list(status="failed", problem="Missing dependencies in R CMD INSTALL", buildlog=buildlog))
     }
     
     if ( any ( grep( "nothing provides", buildlog, fixed=TRUE)) ) { ### missing R-rpms, no chance
@@ -244,7 +247,7 @@ testbuild <- function(pkg, pkgdir, specfile, logfile="buildlog", localOBSdir="~/
         for (line in buildlog[ grep( "nothing provides", buildlog, fixed=TRUE)] ) {
             cat( line,"\n")
             cat( line,"\n", file=logfile, append=TRUE)
-            cat("Failed: Missing R-packages\n", file=logfile, append=TRUE)
+            cat("testbuild Failed: Missing R-packages\n", file=logfile, append=TRUE)
         }
         return(list(status="failed", problem="missing R-packages", buildlog=buildlog))
     }
@@ -256,7 +259,7 @@ testbuild <- function(pkg, pkgdir, specfile, logfile="buildlog", localOBSdir="~/
             for (line in buildlog[ grep( "needed", buildlog, fixed=TRUE)] ) {
                 cat( line,"\n")
                 cat( line,"\n", file=log, append=TRUE)
-                cat("Failed: Missing dependencies\n", file=logfile, append=TRUE)
+                cat("testbuild Failed: Missing dependencies\n", file=logfile, append=TRUE)
             }
         }
         return(list(status="failed", problem="missing dependencies", buildlog=buildlog))
@@ -285,8 +288,8 @@ testbuild <- function(pkg, pkgdir, specfile, logfile="buildlog", localOBSdir="~/
         return(list(status="success", problem=NA, buildlog=buildlog))
     }
     ## if we end here some unknown condition has prevented a successful build
-    cat( "Failed to build ", pkg, " unknown problem\n", sep="")
-    cat( "Failed to build ", pkg, " unknown problem\n", sep="", file=logfile, append=TRUE)
+    cat( "Failed to build R-", pkg, " unknown problem\n", sep="")
+    cat( "Failed to build R-", pkg, " unknown problem\n", sep="", file=logfile, append=TRUE)
     return(list(status="failed", problem="unknown problem", buildlog=buildlog))    
 }
 
@@ -353,8 +356,8 @@ updateOBSpkg <-  function(pkg, localOBSdir="~/OBS", remoteproj="home:dsteuer:Aut
     specfile <- paste0( pkgdir, "/R-", pkg, ".spec")
     version <- gsub( "-", ".", version)
 
-    if (! file.exists( file.path(download.cache,source0))) {
-        if ( download.file(paste0("https://cloud.r-project.org/src/contrib/", source0),
+    if (! file.exists( file.path( download.cache, source0))) {
+        if ( download.file( paste0("https://cloud.r-project.org/src/contrib/", source0),
                             paste0( download.cache, "/", source0)) != 0){
             cat("Seems ", pkg, " no source on CRAN\n")
             cat("Seems ", pkg, " no source on CRAN\n", file=errorlog, append=TRUE)
@@ -362,13 +365,13 @@ updateOBSpkg <-  function(pkg, localOBSdir="~/OBS", remoteproj="home:dsteuer:Aut
         }
     }
 
-    if (! file.copy( file.path(download.cache,source0), file.path(pkgdir,source0), overwrite=TRUE )){
+    if ( !file.copy( file.path( download.cache, source0), file.path( pkgdir, source0), overwrite=TRUE )){
         cat("Seems ", pkg, " setup of pac failed\n")
         cat("Seems ", pkg, " setup of pac failed\n", file=errorlog, append=TRUE)
         return(paste("Failed: Package", pkg, " setup of pac failed"))
     }
 
-    file.remove(file.path(pkgdir, paste0(pkg,"_",obsversion,".tar.gz"))) 
+    file.remove( file.path( pkgdir, paste0( pkg, "_", obsversion, ".tar.gz"))) 
     ## new sources are in place in local OBS
 
     speclines <- readLines(specfile)
