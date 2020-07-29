@@ -11,7 +11,9 @@ dropFileSection(speclines)
 \item{speclines}{character vector with lines holding a specfile}
 }
 \value{
-character vector like the input minus file list
+list of two components status and speclines
+in status is "success" oder "fail", speclines either with empty file
+section resp. unaltered.
 }
 \description{
 dropFileSection removes the filelist from a character array

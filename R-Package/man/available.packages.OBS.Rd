@@ -5,7 +5,7 @@
 \title{This function generates an analogous matrix to available.packages()
 but for all the packages in OBS}
 \usage{
-available.packages.OBS(obsproject = "home:dsteuer:AutomaticCRAN", quiet = TRUE)
+available.packages.OBS(obsproject = getOption("c2o.auto"), quiet = TRUE)
 }
 \arguments{
 \item{obsproject}{Project in OBS where packages are taken from.}

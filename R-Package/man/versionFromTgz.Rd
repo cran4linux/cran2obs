@@ -8,9 +8,9 @@ a charater string containing that version}
 versionFromTgz(pkg, tgzname)
 }
 \arguments{
-\item{tgzname}{filename to extract version from}
+\item{pkg}{CRAN package name}
 
-\item{packname}{CRAN package name}
+\item{tgzname}{filename to extract version from}
 }
 \value{
 Version string

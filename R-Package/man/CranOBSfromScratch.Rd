@@ -2,23 +2,26 @@
 % Please edit documentation in R/deps.R
 \name{CranOBSfromScratch}
 \alias{CranOBSfromScratch}
-\title{CranOBSfromScratch combines available.pacakges() and info of two OBS repos, i.e.
-home:detlef:Automatic and d:l:R:released into a datafram combining all information
+\title{CranOBSfromScratch combines available.packages() and info of two OBS repos, i.e.
+home:detlef:AutomaticCRAN and d:l:R:released into a datafram combining all information
 about the build status of the different packages.}
 \usage{
 CranOBSfromScratch(
-  repo1 = "home:dsteuer:AutomaticCRAN",
-  repo2 = "devel:languages:R:released"
+  cran = getOption("c2o.cran"),
+  repo1 = getOption("c2o.auto"),
+  repo2 = getOption("c2o.manual")
 )
 }
 \arguments{
-\item{repo1, }{repo2 Repos containing automatic builds and manually improved builds resp.}
+\item{repo1}{and}
+
+\item{repo2}{Repos containing automatic builds and manually improved builds resp.}
 }
 \value{
 A dataframe like cleanDeps with additional infos for OBS packages
 }
 \description{
-CranOBSfromScratch combines available.pacakges() and info of two OBS repos, i.e.
-home:detlef:Automatic and d:l:R:released into a datafram combining all information
+CranOBSfromScratch combines available.packages() and info of two OBS repos, i.e.
+home:detlef:AutomaticCRAN and d:l:R:released into a datafram combining all information
 about the build status of the different packages.
 }

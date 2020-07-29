@@ -7,9 +7,11 @@ with empty file section from its DESCRIPTION file.}
 \usage{
 createEmptySpec(
   packname,
-  pacdir = paste0("~/steuer/OBS/", "home:dsteuer:AutomaticCRAN/R-", packname),
-  download.cache = "~/rpmbuild/SOURCES",
-  ap = data.frame(available.packages(repos = "https://cloud.r-project.org"))
+  pacdir = file.path(getOption("c2o.localOBSdir"), getOption("c2o.auto"), paste0("R-",
+    packname)),
+  download.cache = getOption("c2o.download.cache"),
+  cran = getOption("c2o.cran"),
+  ap = data.frame(available.packages(repos = getOption("c2o.cran")))
 )
 }
 \arguments{

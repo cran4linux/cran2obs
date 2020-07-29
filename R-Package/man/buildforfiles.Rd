@@ -2,17 +2,17 @@
 % Please edit documentation in R/desc2spec.R
 \name{buildforfiles}
 \alias{buildforfiles}
-\title{buildforfiles performs a testbuild and analyses the result}
+\title{buildforfiles performs a build without %files section
+and tries to contstruct all files from the build errors.}
 \usage{
 buildforfiles(
   pkg,
   pkgdir,
   specfile,
-  logfile = "buildlog",
-  localOBSdir = "~/OBS",
-  remoteproj = "home:dsteuer:AutomaticCRAN",
-  download.cache = "~/rpmbuild/SOURCES",
-  ap = data.frame(available.packages(repos = "https://cloud.r-project.org"))
+  localOBSdir = getOption("c2o.localOBSdir"),
+  remoteproj = getOption("c2o.auto"),
+  download.cache = getOption("c2o.download.cache"),
+  ap = data.frame(available.packages(repos = getOption("c2o.cran")))
 )
 }
 \arguments{
@@ -28,5 +28,6 @@ you want to create your package in.}
 \item{rpmbuildroot}{The directory where rpmbuild should do its work}
 }
 \description{
-buildforfiles performs a testbuild and analyses the result
+buildforfiles performs a build without %files section
+and tries to contstruct all files from the build errors.
 }

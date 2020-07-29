@@ -8,7 +8,10 @@ Because recommended packages may be assumed to be installed
 in a OpenSUSE installation with R, these are removed together with
 base packages from the dependencies.}
 \usage{
-cleanDeps()
+cleanDeps(repo = getOption("c2o.cran"))
+}
+\arguments{
+\item{repo}{to build the dependency matrix off}
 }
 \value{
 A dataframe containing available packages with new columns

@@ -9,10 +9,11 @@ testbuild(
   pkgdir,
   specfile,
   logfile = "buildlog",
-  localOBSdir = "~/OBS",
-  remoteproj = "home:dsteuer:AutomaticCRAN",
-  download.cache = "~/rpmbuild/SOURCES",
-  ap = data.frame(available.packages(repos = "https://cloud.r-project.org"))
+  localOBSdir = getOption("c2o.localOBSdir"),
+  remoteproj = getOption("c2o.auto"),
+  download.cache = getOption("c2o.download.cache"),
+  binary.cache = getOption("c2o.binary.cache"),
+  ap = data.frame(available.packages(repos = getOption("c2o.cran")))
 )
 }
 \arguments{
