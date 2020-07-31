@@ -11,13 +11,13 @@ statusOBS <- function(pkg, remoteproj=getOption("c2o.auto")){
         osclist <- system2("osc", args=c("ls", paste0(remoteproj,"/R-",pkg)), stdout=TRUE, stderr=TRUE)
     )
     if ( is.null( attributes( osclist))) {
-        return( versionFromTgz(pkg, osclist[grep("tar.gz",osclist)]) )
+        return( gsub( ".tar.gz", "", gsub( paste0( pkg, "_"), "", osclist[ grep( "tar.gz", osclist)]))) # returns the version 
     } else {
         return(NA)
     }
 }
 
-#' versionFromTgz extracts the version info, normalizes it and return
+#' versionFromTgz (deprecated) extracts the version info, normalizes it and return
 #' a charater string containing that version
 #'
 #' @param pkg CRAN package name
@@ -322,6 +322,7 @@ updateOBSpkg <-  function(pkg, localOBSdir=getOption("c2o.localOBSdir"), remotep
     }
     
     obsversion <- statusOBS(pkg, remoteproj)
+    ## TODO should be included in c2o.status
     
     if (is.na(obsversion) ) {
         cat("Failed: ", pkg, " does not exist in OBS. updateOBSpkg only does updates!", file=log, append=TRUE)
@@ -350,8 +351,8 @@ updateOBSpkg <-  function(pkg, localOBSdir=getOption("c2o.localOBSdir"), remotep
             return( paste("Failed: Package", pkg, " could not checkout from OBS"))
         }
     }
-    ## hier ist die aktuelle Version von OBS ausgecheckt
-    ## Download new sources
+    ## current pac is checked out
+    ## download new sources
     
     version <- ap[ ap$Package == pkg, "Version"]
     source0 <-  paste0( pkg, "_", version, ".tar.gz")
@@ -426,6 +427,115 @@ updateOBSpkg <-  function(pkg, localOBSdir=getOption("c2o.localOBSdir"), remotep
     return("Failed: Unknown updating error")
 }
 
+#' setupOBSdir creates the OBS project for pkg on the local machine
+#' or checks out the copy from remoteprj.
+#'
+#' @param pkg CRAN package name
+#' @param localOBS base directory for osc checkouts
+#' @param remoteprj the project for which packages are built
+#' @param cran CRAN mirror for download
+#' @param status dataframe holding the current sync status between
+#' CRAN and remoteprj
+#' @return list( status, problem) where 'status' is "done" or "fail"
+#' and 'problem' is NA or a string with an error message 
+#'
+#' @export
+setupOBSdir <- function(pkg,
+                        localOBS  = getOption("c2o.localOBSdir"),
+                        remoteprj = getOption("c2o.auto"),
+                        cran      = getOption("c2o.cran"),
+                        status    = getOption("c2o.status"),
+                        log       = getOption("c2o.logfile")){
+    cat("** Setting up OBSdir for package ", pkg, "\n", file=log, append=TRUE)
+
+    if (! pkg in status[, "Package"]) {
+        cat("Seems ", pkg, " not found on CRAN\n")
+        cat("Seems ", pkg, " not found on CRAN\n", file=log, append=TRUE)
+        return(list(status="fail", problem="not found"))
+    }
+    
+    pac <-  file.path( localOBS, remoteprj, paste0( "R-", packname))
+
+    inOBSVersion <-  status[ which( status$Package == pkg) , "OBSVersion"]
+    
+    if (! is.na( inOBSVErsion )) { # update
+        if ( dir.exists( pac )){ # just update
+            cmd <- paste( "\"", "cd", pac, " && osc up \"")
+            result <- system2( "bash", args = c("-c", cmd), stdout=TRUE, stderr=TRUE)
+            
+            if( ! is.null(attributes(result))) {
+                cat(result, "\n")
+                cat(pkg, " could not update local OBS pkg\n")
+                cat(pkg, " could not update local OBS pkg\n", file=log, append=TRUE)
+                return( list( status="fail", problem="could not update"))
+            } else { ## checkout
+                cmd <- paste( "\"", "cd", file.path( localOBSdir, remoteproj), " && osc co ", paste0( "R-", pkg), "\"")
+                result <- system2( "bash",  args = c("-c", cmd), stdout=TRUE, stderr=TRUE)
+                if( !is.null(attributes(result))) {
+                    cat(result)
+                    cat(pkg, " could not checkout from OBS\n")
+                    cat(pkg, " could not checkout from OBS\n", file=log, append=TRUE)
+                    return( list( status="fail", problem="could not checkout"))
+                }
+            }
+        }
+    } else { # create
+        if ( dir.exists( pac )){ # cleanup neccessary
+            cat( "cleanup of existing local ", pac, "\n")
+            cat( "cleanup of existing local ", pac, "\n", file=log, append=TRUE)
+            
+            cmd <- paste("\"", "cd", file.path(localOBS, remoteprj) , "&& osc delete --force ", paste0( "R-", packname)  , "\"")
+            result <- system2(  "bash",  args = c("-c", cmd), stdout=TRUE, stderr=TRUE)
+            
+            if( ! is.null(attributes(result))) {
+                cat(result, "\n")
+                cat(pkg, " could not setup packname\n")
+                cat(result, "\n", pkg, " could not setup packname\n", file=log, append=TRUE)
+                return(list(status="fail", problem="could not remove existing pac"))
+            }
+        }
+       
+        ## create dir to hold package for OBS
+        cmd <- paste("\"", "cd", file.path( localOBSdir, remoteproj), " ; osc mkpac ",paste0( "R-", packname)  , "\"")
+        result <- system2(  "bash",  args = c("-c", cmd), stdout=TRUE, stderr=TRUE)
+        if( ! is.null(attributes(result))) {
+            cat(result)
+            cat(packname, " could not create pac for ", pkg, "\n")
+            cat(packname, " could not create pac for ", pkg, "\n", file=log, append=TRUE)
+            return( list( status="fail", problem="could not setup pac"))
+        }
+    }
+
+    ## pac checked out or created, get the sources
+
+    version <- gsub( "-", ".", status[ which( status$Package == pkg), "Version"])
+    source0 <- paste0( pkg, "_", version, ".tar.gz")
+
+    if (! file.exists( file.path( download.cache, source0))) {
+        if ( download.file( file.path( cran ,"src/contrib", source0),
+                           file.path( download.cache, source0)) != 0){
+            cat(pkg, ": no sources found on CRAN\n")
+            cat(pkg, ": no sources found on CRAN\n", file=log, append=TRUE)
+            return( list( status="fail", problem="no sources found"))
+        }
+    }
+    
+    if ( !file.copy( file.path( download.cache, source0), file.path( pkgdir, source0), overwrite=TRUE )){
+        cat(pkg, ": copy of sources failed\n")
+        cat(pkg, ": copy of sources failed\n", file=log, append=TRUE)
+        return( list( status="fail", problem="copy of soources failed"))
+    }
+    
+    if (! is.na( inOBSVersion)){ # it is an update, there must be an old source file, just remove it
+        if ( !file.remove( file.path( pac, paste0( pkg, "_", obsversion, ".tar.gz")))){
+            cat(pkg, ": could not rm old sources\n")
+            cat(pkg, ": could not rm old sources\n", file=log, append=TRUE)
+            return( list( status="fail", problem="coud not rm old sources"))
+        }
+    }
+    return( list( status="done", problem=NA))
+}
+
 #' createOBSpac takes the name of an R package and creates a 
 #' package directory to be used in OBS.
 #' The external tool osc is used to build
@@ -445,7 +555,7 @@ updateOBSpkg <-  function(pkg, localOBSdir=getOption("c2o.localOBSdir"), remotep
 #' @export
 
 createOBSpac <- function(packname, localOBSdir=getOption("c2o.localOBSdir"),
-                         remoteproj=getOption("c2o.auto"), cran=getOption("c20.cran"),
+                         remoteproj=getOption("c2o.auto"), cran=getOption("c2o.cran"),
                          ap = data.frame(available.packages(repos=getOption("c2o.cran")))) {
     
     log <- "createOBSpac.log"

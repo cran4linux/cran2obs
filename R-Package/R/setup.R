@@ -31,11 +31,11 @@
         failed <- TRUE
     }
 
-    if (! is.null(getOption("c2o.localOBSdir") )) {
-        cat("Option 'c2o.localOBSdir' is set to ", getOption("c2o.localOBSdir") , "\n")
+    if (! is.null(getOption("c2o.localOBS") )) {
+        cat("Option 'c2o.localOBS' is set to ", getOption("c2o.localOBS") , "\n")
     } else {
-        cat("Set option 'c2o.localOBSdir' to the local directory, where packages will be created for or checked out from OBS\n")
-        cat("I.e. getOption(c2o.localOBSdir = \"~/OBS\").\n")
+        cat("Set option 'c2o.localOBS' to the local directory, where packages will be created for or checked out from OBS\n")
+        cat("I.e. getOption(c2o.localOBS = \"~/OBS\").\n")
         failed <- TRUE
     }
 
@@ -55,13 +55,34 @@
         failed <- TRUE
     }
 
-    if (! is.null(getOption("c2o.status") )) {
-        cat("Option 'c2o.status' is set to ", getOption("c2o.status") , "\n")
+    if (! is.null(getOption("c2o.statusfile") )) {
+        cat("Option 'c2o.statusfile' is set to ", getOption("c2o.statusfile") , "\n")
+        options(c2o.status = read.table(getOption("c2o.statusfile", header=TRUE, sep=";")))
+        ## TODO check if it works!
     } else {
-        cat("Set option 'c2o.status' to the filename, where the status of the current sync effort are stored.\n")
-        cat("I.e. getOption(c2o.status = \"CRANinOBSStatus.csv\").\n")
+        cat("Set option 'c2o.statusfile' to the filename, where the status of the current sync effort are stored.\n")
+        cat("I.e. getOption(c2o.statusfile = \"CRANinOBSStatus.csv\").\n")
         cat("Will be (re-)created if neccassary, what will take a few minutes\n")
         failed <- TRUE
     }
-    if (failed) warning("Not all getOption to build rpms from CRAN-packages are set!")
+
+    if (! is.null(getOption("c2o.logfile") )) {
+        cat("Option 'c2o.logfile' is set to ", getOption("c2o.logfile") , "\n")
+    } else {
+        cat("Set option 'c2o.logfile' to the filename, where the log of the current sync effort shall be stored.\n")
+        cat("I.e. getOption(c2o.logfile = \"buildlog.org\").\n")
+        failed <- TRUE
+    }
+    
+    if (failed) warning("Not all options to build rpms from CRAN are set! Use CRAN2OBS::check.settings().")
+}
+
+#' check.settings validates all options settings
+#'
+#' @return TRUE if build can start, FALSE otherwise, but tries to give hints.
+#'
+#' @export
+
+check.settings <- function(){
+    ## TODO must fill out
 }
