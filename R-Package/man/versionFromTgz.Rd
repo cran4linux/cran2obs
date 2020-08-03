@@ -2,7 +2,7 @@
 % Please edit documentation in R/desc2spec.R
 \name{versionFromTgz}
 \alias{versionFromTgz}
-\title{versionFromTgz extracts the version info, normalizes it and return
+\title{versionFromTgz (deprecated) extracts the version info, normalizes it and return
 a charater string containing that version}
 \usage{
 versionFromTgz(pkg, tgzname)
@@ -16,6 +16,6 @@ versionFromTgz(pkg, tgzname)
 Version string
 }
 \description{
-versionFromTgz extracts the version info, normalizes it and return
+versionFromTgz (deprecated) extracts the version info, normalizes it and return
 a charater string containing that version
 }

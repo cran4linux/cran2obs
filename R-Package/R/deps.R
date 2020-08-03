@@ -48,9 +48,10 @@ cleanList <- function(pkgname, kind, repo=getOption("c2o.cran")){
 #'
 #' @param repo to build the dependency matrix off
 #' 
-#' @return A dataframe containing available packages with new columns
-#' 'recDep' containing all recursive dependencies and 'depLen' containing
-#' the number of recursive dependencies
+#' @return A dataframe containing from available.packages() columns "Package",
+#' "Version", "License", "NeedsCompilation", a cleaned-up version of "Suggests",
+#' and new columns 'recDep', containing all recursive dependencies, and 'depLen'
+#' containing the number of recursive dependencies.
 #' 
 #' @export
 cleanDeps <- function(repo=getOption("c2o.cran")){
@@ -99,20 +100,26 @@ available.packages.OBS <- function(obsproject=getOption("c2o.auto"), quiet=TRUE)
     cmd <- paste("osc ls", obsproject, sep=" ", collapse="")
     obspkgs <- system(cmd, intern=TRUE)
 
-    ## contains some additional stuff only related to compiling some packages
-    obspkgs <- obspkgs[grep("R-", obspkgs)]
-
-    ## all packages start with "R-" by convention, see page in build service
-    if (obsproject == "devel:languages:R:released") {
-        ## other OBS Project shouldn't contain non-CRAN R packages
-        obspkgs <- obspkgs[-which(obspkgs=="R-base")]
-        ## R-base not an R package
-        obspkgs <- obspkgs[-which(obspkgs == "R-base-java")]
-        ## R-base-java is not a CRAN package.
+    ## may contain additional stuff related to compiling some packages
+    ## only R-* packages are relevant
+    if (length(obspkgs) > 0) { ## i.e. not a new empty repo
+        obspkgs <- obspkgs[grep("R-", obspkgs)]
+        
+        ## all packages start with "R-" by convention, see page in build service
+        if (obsproject == "devel:languages:R:released") {
+            ## other OBS Project shouldn't contain non-CRAN R packages
+            obspkgs <- obspkgs[-which(obspkgs=="R-base")]
+            ## R-base not an R package
+            obspkgs <- obspkgs[-which(obspkgs == "R-base-java")]
+            ## R-base-java is not a CRAN package.
+        }
+        cranpkgnames <- gsub("R-", "", obspkgs)
+        obsinfo <- sapply(cranpkgnames, getOBSVersion, obsproject=obsproject)
+        obspkgs <- data.frame(Package=obspkgs, File=obsinfo[1,], OBSVersion=obsinfo[2,])
+    } else {
+        obspkgs <- data.frame(Package=character(), File=character(), OBSVersion=character())
     }
-    cranpkgnames <- gsub("R-", "", obspkgs)
-    obsinfo <- sapply(cranpkgnames, getOBSVersion, obsproject=obsproject)
-    obspkgs <- cbind(OBSpkg=obspkgs, File=obsinfo[1,], OBSVersion=obsinfo[2,])
+    return (obspkgs)
 }
 
 #' getOBSVersion takes the name of an R package (from CRAN) and receives the corresponding
@@ -127,13 +134,13 @@ available.packages.OBS <- function(obsproject=getOption("c2o.auto"), quiet=TRUE)
 #'
 #' @export
 getOBSVersion <- function ( pkg, obsproject=getOption("c2o.auto"), quiet=TRUE ) {
-    if (! quiet) cat("Checking ", pkg, "\n")
-    cmd <- paste("osc ls ", obsproject," R-", pkg, sep="", collapse="")
+    if (! quiet) cat( "Checking ", pkg, "\n")
+    cmd <- paste( "osc ls ", obsproject, " R-", pkg, sep="", collapse="")
     lst <- system( cmd , intern=TRUE )
-    srcfile <- lst[grep(paste("^",pkg,sep="", collapse=""), lst)][1]
+    srcfile <- lst[ grep( paste( "^", pkg, sep="", collapse=""), lst)][1]
     ## the last [1] is needed if a package is linked to factory. In lst the files
     ## can appear multiple times then.
-    srcversion <- strsplit(gsub(".tar.gz", "", srcfile), "_")[[1]][2]
+    srcversion <- gsub(paste0( pkg, "_"), "", gsub(".tar.gz", "", srcfile))
     c(srcfile, srcversion)
 }
 
@@ -158,3 +165,25 @@ CranOBSfromScratch <- function(cran=getOption("c2o.cran") , repo1=getOption("c2o
     return(status)
 }
 
+#' repoStatusfromScratch creates a datafram from available.packages() and
+#' available.packages.OBS() to have all the neccessary information to sync
+#' the given CRAN mirror to the given OBS repo
+#' @param cran is a CRAN mirror
+#' @param repo is an OBS repo
+#' @param file is the name of the file which will store the information
+#' @param overwrite is a flag if an existing status file shall be overwritten
+#'
+#' @return a datafram containing the columns "Package", "Version", "License",
+#' "NeedsCompilation", "recDep", "depLen", "OBSpkg", "File", "OBSVersion",
+#' "triedVersion"
+repoStatusfromScratch <- function(cran=getOption("c2o.cran"), repo=getOption("c2o.auto"),
+                                  file=getOption("c2o.statusfile"), overwrite=FALSE ) {
+    if (file.exists(file) && !overwrite  ){
+        stop("Status file exists and overwrite='FALSE'!") 
+    }
+    cranstatus <- cleanDeps(cran)
+    repostatus <- available.packages.OBS(obsproject=repo)
+    status <- cbind( merge( cran, obs, by="Package" , all=TRUE ), triedVer=NA)
+    write.table(status, file=file, rownames=FALSE, sep=";")
+    return(status)
+}

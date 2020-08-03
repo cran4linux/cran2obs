@@ -31,7 +31,8 @@ versionFromTgz <- function(pkg, tgzname){
 }
 
 #' createEmptySpec takes the name of an R package and creates an specfile
-#' with empty file section from its DESCRIPTION file.
+#' with empty file section from its DESCRIPTION file. The OBS directory must
+#' be prepared by setupOBSdir
 #'
 #' @param packname A package name of a package in a R repo like CRAN
 #' @param targetdir The directory where rpmbuild should do its work.
@@ -40,56 +41,40 @@ versionFromTgz <- function(pkg, tgzname){
 #' @param ap A dataframe like the result of available.packages() or cleanDeps()
 #' createEmptySpec uses Package, Version, and NeedsCompilation of that dataframe.
 #' 
-#' @return The path to the generated specfile, if creation succeeded,
-#' a character string beginning with Failed: in case of an error.
+#' @return list of status, 'fail' and 'done' and value. 'value' is either the filename of the generated specfile
+#' or a problem description
 #' 
 #' @export
-createEmptySpec <- function(packname,
-                            pacdir=file.path(getOption("c2o.localOBSdir"), getOption("c2o.auto"), paste0("R-",packname)),
-                            download.cache=getOption("c2o.download.cache"), cran=getOption("c2o.cran"),
-                            ap = data.frame(available.packages(repos=getOption("c2o.cran")))) {
+createEmptySpec <- function(pkg,
+                            pac=file.path(getOption("c2o.localOBSdir"), getOption("c2o.auto"), paste0("R-",packname)),
+                            download.cache=getOption("c2o.download.cache"),
+                            cran=getOption("c2o.cran"),
+                            ap = getOption("c2o.status"),
+                            log = getOption("c2o.logfile")) {
     ## ap should be a status file
-    errorlog <- "desc2spec.err"
-    cat("Building ", packname, "\n", file=errorlog, append=TRUE)
+                
+    cat("Creating empty spec for pkg ", pkg, "\n")
+    cat("Creating empty spec for pkg ", pkg, "\n", file=log, append=TRUE)
     
     if (! file.exists(system.file("specfile.tpl", package="CRAN2OBS"))){
-        return("Failed: Specfile template not found. Exit.")
+        cat("specfile template not found ?!\n")
+        cat("specfile template not found ?!\n", file=log, append=TRUE)
+
+        return(list(status="fail", value="Specfile template not found."))
     }
     
     spectpl <- readLines(system.file("specfile.tpl", package="CRAN2OBS"))
+        
+    pkg.info <- ap[ ap$Package == pkg, ]
     
-    if (! packname %in% ap[,"Package"]) {
-        cat("Seems ", packname, " no longer exists on CRAN\n")
-        cat("Seems ", packname, " no longer exists on CRAN\n", file=errorlog, append=TRUE)
-        return(paste("Failed: Package", packname, " no longer on CRAN"))
-    }
-    
-    version <- ap[ap$Package == packname, "Version"]
-    
-    source0 <-  paste0(packname,"_",version,".tar.gz")
+    source0 <-  pkg.info$File
     specfile <- paste0(pacdir,"/R-",packname,".spec")
     
-    version <- gsub("-",".",ap[ap$Package == packname,"Version"])
+    version <- gsub("-",".", pkg.info$Version)
     ## version must be normalized for rpm
-    #rpmname <- paste(rpmbuildroot,"RPMS/x86_64/R-", packname,"-",version,"-0.rpm", sep="")
     
-    if (! file.exists( file.path(download.cache,source0))) {
-        if ( download.file(file.path( cran, "src/contrib", source0),
-                           file.path( download.cache, source0)) != 0){
-            cat("Seems ", packname, " has no source on CRAN\n")
-            cat("Seems ", packname, " has no source on CRAN\n", file=errorlog, append=TRUE)
-            return(paste("Failed: Package", packname, " download failed from CRAN"))
-        }
-    }
-
-    if (! file.copy( file.path(download.cache,source0), file.path(pacdir,source0), overwrite=TRUE )){
-        cat("Seems ", packname, " setup of pac failed\n")
-        cat("Seems ", packname, " setup of pac failed\n", file=errorlog, append=TRUE)
-        return(paste("Failed: Package", packname, " setup of pac failed"))
-    }
-    
-### extract DESCRIPTION file, read it, erase it
-    desc.file <- paste(packname,"/DESCRIPTION",sep="")
+    ## extract DESCRIPTION file, read it, erase it
+    desc.file <- paste( pkg, "/DESCRIPTION", sep="")
     untar( file.path( pacdir, source0), desc.file)
     
     description <- readLines( desc.file)
@@ -105,12 +90,12 @@ createEmptySpec <- function(packname,
         }
     }
 
-    unlink( packname, recursive=TRUE)
+    unlink( pkg, recursive=TRUE)
     
-### template and descrition have been read in now populate the specfile tempalte
+    ## template and descrition have been read in now populate the specfile tempalte
     
     spectpl <- gsub( "{{year}}", format( Sys.time(), "%Y" ), spectpl, fixed=TRUE)    
-    spectpl <- gsub( "{{packname}}", packname, spectpl, fixed=TRUE)
+    spectpl <- gsub( "{{packname}}", pkg, spectpl, fixed=TRUE)
     spectpl <- gsub( "{{version}}", version, spectpl, fixed=TRUE)	
     
     summary.str <- sub( "Title: ", "", description[ grep("Title:", description) ], fixed=TRUE)
@@ -120,8 +105,8 @@ createEmptySpec <- function(packname,
     spectpl <- gsub( "{{license}}", license, spectpl, fixed=TRUE)
     
     spectpl <- gsub( "{{source0}}", source0, spectpl, fixed=TRUE)
-    deps <-  cleanList( packname, "depends" )
-### TODO should be in the status file?
+#    deps <-  cleanList( packname, "depends" )
+    deps <- pkg.info$recDep
     
     if (length(deps) >0) {
         deps <- paste( "R-", deps, sep="")
@@ -129,7 +114,8 @@ createEmptySpec <- function(packname,
         deps <- c()
     }
 
-    suggests <- cleanList( packname, "suggests")
+#    suggests <- cleanList( packname, "suggests")
+    suggests <- pkg.info$Suggests
     if (length(suggests) > 0) {
         suggests <- paste( "R-", suggests, sep="")
     } else {
@@ -142,9 +128,9 @@ createEmptySpec <- function(packname,
     description.str[1] <- gsub("Description: ", "", description.str[1])
 ### TODO still needs formating! textwrap for R?
     
-    needs.compilation <- ap[ap$Package == packname, "NeedsCompilation"]
+    needs.compilation <- pkg.info$NeedsCompilation
     
-    cat( "# Automatically generated by CRAN2OBS::createOBSpac\n", file=specfile)
+    cat( "# Automatically generated by CRAN2OBS\n", file=specfile)
     
     for (line in spectpl) {
         if ( grepl( "{{depends}}", line, fixed=TRUE)) {
@@ -167,46 +153,53 @@ createEmptySpec <- function(packname,
             cat( line, "\n", file=specfile, append=TRUE)
         }
     }
-    return(specfile)
+    return(list(status="done", value=specfile))
 }
 
 #' buildforfiles performs a build without %files section
 #' and tries to contstruct all files from the build errors.
 #' 
 #' @param pkg Name of a package in a R repo like CRAN
+#' @param pac directory for OBS
 #' @param specfile Location of created specfile
 #' @param rpmbuildroot The directory where rpmbuild should do its work
 #' @param localOBSdir The top level directory of a checkout of the project
 #' you want to create your package in. 
 #' @param remoteproj Name of the OBS project
 #' @export
-buildforfiles <- function(pkg, pkgdir, specfile, localOBSdir=getOption("c2o.localOBSdir"),
+buildforfiles <- function(pkg, pac, specfile, localOBS=getOption("c2o.localOBSdir"),
                           remoteproj=getOption("c2o.auto"), download.cache=getOption("c2o.download.cache"),
-                          ap = data.frame(available.packages(repos=getOption("c2o.cran")))){
+                          binary.cache=getOption("c2o.binary.cache"),
+                          ap = if (! is.null (getOption("c2o.status"))) getOption("c2o.status"),
+                          log=getOption("c2o.logfile")){
+
     speclines <- readLines( specfile)
     result <- dropFileSection( speclines)
     
-    if ( result$status != "done") return (list(status="failed", problem=result$problem))
+    if ( result$status != "done") {
+        cat("dropping file section failed")
+        cat("dropping file section failed", file=log, append=TRUE)
+        return (list(status="failed", problem=result$problem))
+    }
     writeLines( result$speclines, specfile)
     
-    buildresult <- testbuild( pkg, pkgdir, specfile, ap=ap)
+    result <- testbuild( pkg, pac, specfile, ap=ap)
     
     ## we dont need to check for success, because %files section empty and therefore fail by design
     
-    if (buildresult$problem %in% c("bad exit status", "missing dependencies", "unknown problem", "missing R-packages")){
+    if (! result$value == "unpackaged files"){
         cat( "buildforfiles: Failed to build files section for", pkg, " \n", sep="")
-        return(list(status="failed", problem=buildresult$problem))
+        cat( "buildforfiles: Failed to build files section for", pkg, " \n", sep="", file=log, append=TRUE)
+        return(list(status="failed", problem=result$problem))
     }
 
-    ## but no fatal flaws, may be lucky with new filelist?
-    
-    filelist <- extractFilesFromLog( buildresult$buildlog, pkg)
+    filelist <- extractFilesFromLog( result$buildlog, pkg)
     version <- gsub( "-", ".", ap[ap$Package == pkg, "Version"])
     gsub(version, "%{version}", filelist) # if there are files with version in name, this will be caught, see abcrlda
     
     speclines <- c( speclines , filelist)
     writeLines( speclines, specfile)
-    return( list( status="success", problem=NA))
+    return( list( status="done", value=specfile))
 }
 
 #' testbuild performs a testbuild and analyses the result
@@ -217,41 +210,47 @@ buildforfiles <- function(pkg, pkgdir, specfile, localOBSdir=getOption("c2o.loca
 #' @param localOBSdir The top level directory of a checkout of the project
 #' you want to create your package in. 
 #' @param remoteproj Name of the OBS project
+#' @return list of status, value, buildlog
 #' @export
-testbuild <- function(pkg, pkgdir, specfile, logfile="buildlog", localOBSdir=getOption("c2o.localOBSdir"),
-                      remoteproj=getOption("c2o.auto"), download.cache=getOption("c2o.download.cache"),
+testbuild <- function(pkg, pac, specfile,
+                      log=getOption("c2o.logfile"),
+                      localOBS=getOption("c2o.localOBSdir"),
+                      remoteprj=getOption("c2o.auto"),
+                      download.cache=getOption("c2o.download.cache"),
                       binary.cache=getOption("c2o.binary.cache"),
-                      ap = data.frame(available.packages(repos=getOption("c2o.cran")))){
-    cmd <- paste("\""," cd", pkgdir,
-                 "; osc build --prefer-pkgs=", binary.cache," --keep-pkgs=", binary.cache,
+                      ap = if (! is.null (getOption("c2o.status"))) getOption("c2o.status")){
+
+    cmd <- paste("\""," cd", pac,
+                 "; osc build --prefer-pkgs=", binary.cache, " --keep-pkgs=", binary.cache,
                  " --local-package --ccache", specfile, "\"" )
     suppressWarnings(
         buildlog <- system2("bash", args=c("-c", cmd), stdout=TRUE, stderr=TRUE)
     )
 
     buildlog <- trimws( gsub( "^\\[.*\\]", "", buildlog), which="left")
-    writeLines( buildlog, con=file.path(pkgdir,logfile))
+#    writeLines( buildlog, con=file.path(pkgdir, log))
+                                        # TODO write to logfile
     
     if ( any ( grep( "ERROR: dependency", buildlog, fixed=TRUE)) ) { ### missing some dependency, no chance
         cat( "The following missing dependencies must be available to build R-", pkg, "\n", sep="")
         cat( "The following missing dependencies must be available to build R-", pkg, "\n", sep="", file=logfile, append=TRUE)
         for (line in buildlog[ grep( "ERROR: dependency", buildlog, fixed=TRUE)] ) {
             cat( line,"\n")
-            cat( line,"\n", file=logfile, append=TRUE)
-            cat("testbuild failed: Missing dependency\n", file=logfile, append=TRUE)
+            cat( line,"\n", file=log, append=TRUE)
+            cat("testbuild failed: Missing dependency\n", file=log, append=TRUE)
         }
-        return(list(status="failed", problem="Missing dependencies in R CMD INSTALL", buildlog=buildlog))
+        return(list(status="failed", value="Missing dependencies in R CMD INSTALL", buildlog=buildlog))
     }
     
     if ( any ( grep( "nothing provides", buildlog, fixed=TRUE)) ) { ### missing R-rpms, no chance
         cat( "The following missing dependencies must be built first to build R-", pkg, "\n", sep="")
-        cat( "The following missing dependencies must be built first to build R-", pkg, "\n", sep="", file=logfile, append=TRUE)
+        cat( "The following missing dependencies must be built first to build R-", pkg, "\n", sep="", file=log, append=TRUE)
         for (line in buildlog[ grep( "nothing provides", buildlog, fixed=TRUE)] ) {
             cat( line,"\n")
-            cat( line,"\n", file=logfile, append=TRUE)
-            cat("testbuild Failed: Missing R-packages\n", file=logfile, append=TRUE)
+            cat( line,"\n", file=log, append=TRUE)
+            cat("testbuild Failed: Missing R-packages\n", file=log, append=TRUE)
         }
-        return(list(status="failed", problem="missing R-packages", buildlog=buildlog))
+        return(list(status="failed", value="missing R-packages", buildlog=buildlog))
     }
     
     if ( length( grep( "Failed build dependencies", buildlog, fixed=TRUE)) >0 ) { ### missing dependencies, no chance
@@ -261,22 +260,22 @@ testbuild <- function(pkg, pkgdir, specfile, logfile="buildlog", localOBSdir=get
             for (line in buildlog[ grep( "needed", buildlog, fixed=TRUE)] ) {
                 cat( line,"\n")
                 cat( line,"\n", file=log, append=TRUE)
-                cat("testbuild Failed: Missing dependencies\n", file=logfile, append=TRUE)
+                cat("testbuild Failed: Missing dependencies\n", file=log, append=TRUE)
             }
         }
-        return(list(status="failed", problem="missing dependencies", buildlog=buildlog))
+        return(list(status="failed", value="missing dependencies", buildlog=buildlog))
     }
 
     if ( any( grep("Bad exit status", buildlog, fixed=TRUE))) {
         cat( "Bad exit status from build R-", pkg, "\n", sep="")
-        cat( "Bad exit status from build R-", pkg, "\n", sep="", file=logfile, append=TRUE)
-        return(list(status="failed", problem="bad exit status", buildlog=buildlog))
+        cat( "Bad exit status from build R-", pkg, "\n", sep="", file=log, append=TRUE)
+        return(list(status="failed", value="bad exit status", buildlog=buildlog))
     }
     ## no fatal flaws, may be lucky?
 
     if ( any( grep( "error: Installed (but unpackaged) file(s) found:", buildlog, fixed=TRUE))) {
         cat( "Unpackaged file(s) in build R-", pkg, "\n", sep="")
-        cat( "Unpackaged file(s) in build R-", pkg, "\n", sep="", file=logfile, append=TRUE)
+        cat( "Unpackaged file(s) in build R-", pkg, "\n", sep="", file=log, append=TRUE)
         return(list(status="failed", problem="unpackaged files", buildlog=buildlog)) 
     }
     
@@ -287,11 +286,11 @@ testbuild <- function(pkg, pkgdir, specfile, logfile="buildlog", localOBSdir=get
         for (line in  buildlog[grep("Wrote:", buildlog, fixed=TRUE)]){
             cat(line, "\n", file=logfile, append=TRUE)
         }
-        return(list(status="success", problem=NA, buildlog=buildlog))
+        return(list(status="done", value=NA, buildlog=buildlog))
     }
     ## if we end here some unknown condition has prevented a successful build
     cat( "Failed to build R-", pkg, " unknown problem\n", sep="")
-    cat( "Failed to build R-", pkg, " unknown problem\n", sep="", file=logfile, append=TRUE)
+    cat( "Failed to build R-", pkg, " unknown problem\n", sep="", file=log, append=TRUE)
     return(list(status="failed", problem="unknown problem", buildlog=buildlog))    
 }
 
@@ -436,8 +435,8 @@ updateOBSpkg <-  function(pkg, localOBSdir=getOption("c2o.localOBSdir"), remotep
 #' @param cran CRAN mirror for download
 #' @param status dataframe holding the current sync status between
 #' CRAN and remoteprj
-#' @return list( status, problem) where 'status' is "done" or "fail"
-#' and 'problem' is NA or a string with an error message 
+#' @return list( status, value) where 'status' is "done" or "fail"
+#' and 'value' is the created directory or a string with an error message 
 #'
 #' @export
 setupOBSdir <- function(pkg,
@@ -448,10 +447,10 @@ setupOBSdir <- function(pkg,
                         log       = getOption("c2o.logfile")){
     cat("** Setting up OBSdir for package ", pkg, "\n", file=log, append=TRUE)
 
-    if (! pkg in status[, "Package"]) {
+    if (! pkg %in% status[, "Package"]) {
         cat("Seems ", pkg, " not found on CRAN\n")
         cat("Seems ", pkg, " not found on CRAN\n", file=log, append=TRUE)
-        return(list(status="fail", problem="not found"))
+        return(list(status="fail", value="not found"))
     }
     
     pac <-  file.path( localOBS, remoteprj, paste0( "R-", packname))
@@ -467,7 +466,7 @@ setupOBSdir <- function(pkg,
                 cat(result, "\n")
                 cat(pkg, " could not update local OBS pkg\n")
                 cat(pkg, " could not update local OBS pkg\n", file=log, append=TRUE)
-                return( list( status="fail", problem="could not update"))
+                return( list( status="fail", value="could not update"))
             } else { ## checkout
                 cmd <- paste( "\"", "cd", file.path( localOBSdir, remoteproj), " && osc co ", paste0( "R-", pkg), "\"")
                 result <- system2( "bash",  args = c("-c", cmd), stdout=TRUE, stderr=TRUE)
@@ -475,7 +474,7 @@ setupOBSdir <- function(pkg,
                     cat(result)
                     cat(pkg, " could not checkout from OBS\n")
                     cat(pkg, " could not checkout from OBS\n", file=log, append=TRUE)
-                    return( list( status="fail", problem="could not checkout"))
+                    return( list( status="fail", value="could not checkout"))
                 }
             }
         }
@@ -491,7 +490,7 @@ setupOBSdir <- function(pkg,
                 cat(result, "\n")
                 cat(pkg, " could not setup packname\n")
                 cat(result, "\n", pkg, " could not setup packname\n", file=log, append=TRUE)
-                return(list(status="fail", problem="could not remove existing pac"))
+                return(list(status="fail", value="could not remove existing pac"))
             }
         }
        
@@ -502,7 +501,7 @@ setupOBSdir <- function(pkg,
             cat(result)
             cat(packname, " could not create pac for ", pkg, "\n")
             cat(packname, " could not create pac for ", pkg, "\n", file=log, append=TRUE)
-            return( list( status="fail", problem="could not setup pac"))
+            return( list( status="fail", value="could not setup pac"))
         }
     }
 
@@ -516,25 +515,139 @@ setupOBSdir <- function(pkg,
                            file.path( download.cache, source0)) != 0){
             cat(pkg, ": no sources found on CRAN\n")
             cat(pkg, ": no sources found on CRAN\n", file=log, append=TRUE)
-            return( list( status="fail", problem="no sources found"))
+            return( list( status="fail", value="no sources found"))
         }
     }
     
     if ( !file.copy( file.path( download.cache, source0), file.path( pkgdir, source0), overwrite=TRUE )){
         cat(pkg, ": copy of sources failed\n")
         cat(pkg, ": copy of sources failed\n", file=log, append=TRUE)
-        return( list( status="fail", problem="copy of soources failed"))
+        return( list( status="fail", value="copy of soources failed"))
     }
     
     if (! is.na( inOBSVersion)){ # it is an update, there must be an old source file, just remove it
         if ( !file.remove( file.path( pac, paste0( pkg, "_", obsversion, ".tar.gz")))){
             cat(pkg, ": could not rm old sources\n")
             cat(pkg, ": could not rm old sources\n", file=log, append=TRUE)
-            return( list( status="fail", problem="coud not rm old sources"))
+            return( list( status="fail", value="coud not rm old sources"))
         }
     }
-    return( list( status="done", problem=NA))
+    return( list( status="done", value=pac))
 }
+
+#' sync2pac takes the name of an R package and creates or updates 
+#' package directory to be used in OBS. 
+#' The external tool osc is used to build
+#' the OpenSUSE package. The resulting spec file will reside in a
+#' package dir under a local checkout of a remote proj.
+#'
+#' @param pkg Name of a package in a R repo like CRAN
+#' @param rpmbuildroot The directory where rpmbuild should do its work
+#' @param localOBS The top level directory of a checkout of the project
+#' you want to create your package in. 
+#' @param remoteprj Name of the OBS project
+#' @param cran CRAN mirror to use
+#' @param ap A dataframe containing the sync status of cran and remoteprj
+#' 
+#' @return list of 'status', "done" or "fail" and 'problem' set to NA or character string
+#' @export
+
+sync2pac <- function(pkg,
+                     localOBS  = getOption("c2o.localOBSdir"),
+                     remoteprj = getOption("c2o.auto"),
+                     cran      = getOption("c2o.cran"),
+                     ap        = if (! is.null (getOption("c2o.status"))) getOption("c2o.status"),
+                     download.cache = getOption("c2o.download.cache"),
+                     binary.cache = getOption("c2o.binary.cache"),
+                     log       = getOption("c2o.logfile")) {
+    
+    cat("Syncing ", pkg, " to OBS\n")
+    cat("Syncing ", pkg, " to OBS\n", file=log, append=TRUE)
+    
+
+    if (! pkg %in% ap[,"Package"] ) {
+        cat("Seems ", pkg, " not in status file\n")
+        cat("Seems ", pkg, " not in status file\n", file=log, append=TRUE)
+        return( list( status="fail", problem=paste("Package not in status file")))
+    }
+    
+    pkg.info <- ap[ ap$Package == pkg, ]
+
+    if ( is.na(pkg.info$Version) ) {
+        cat("Seems ", pkg, " not in CRAN\n")
+        cat("Seems ", pkg, " not in CRAN\n", file=log, append=TRUE)
+        return( list( status="fail", problem=paste("Package not in CRAN")))
+    }
+
+    if (! is.na(pkg.info$OBSVersion) ) {
+        cat("Failed: ", packname, " exists in OBS. createOBSpac does no updates!", file=log, append=TRUE)
+        return(list=(status="fail", value="createOBSpac does no OBS updates!"))
+    }
+
+    result <- setupOBSdir (pkg, localOBS=localOBS, remoteprj=remoteprj, cran=cran, status=db,log=log)
+
+    if (result$status == "fail") {
+        cat("Setting up OBS dir failed for pkg ", pkg, "\n")
+        cat("Setting up OBS dir failed for pkg ", pkg, "\n", file=log, append=TRUE)
+        return( list( status="fail", problem=paste("setting up OBS dir failed")))
+    }
+
+    pac <- result$value
+    result <- createEmptySpec(pkg, pac, download.cache=download.cache , ap)
+
+    if (result$status == "fail") {
+        cat("Creating empty spec failed for pkg ", pkg, "\n")
+        cat("Creating empty spec failed for pkg ", pkg, "\n", file=log, append=TRUE)
+        return( list( status="fail", problem=paste("creating empty spec failed")))
+    }
+
+    specfile <- result$value
+    speclines <- readLines(con=specfile)
+### first build
+    result <- buildforfiles( pkg, pac, specfile, localOBS=localOBS, remoteprj=remoteprj, download.cache=download.cache, binary.cache=binary.cache, ap=ap, log=log)
+
+    if (! result == "done") {
+        cat( "Failed to construct files section for ", pkg, " \n", sep="")
+        cat( "Failed to construct files section for ", pkg, " \n", sep="", file = log, append =TRUE)
+        return(list(status="fail", value="failed to construct files section"))
+    }
+
+### At this point something was build. But as the specfile.tpl has an empty file section.
+### that part must be constructed from error logs. Therfore we know the error structure
+### and where to find the unpackaged files list.
+
+    ## filelist <- extractFilesFromLog(buildresult$buildlog, packname)
+    ## version <- gsub("-",".",ap[ap$Package == packname, "Version"])
+    ## gsub(version, "%{version}",filelist) # if there are files with version in name, this will be caught, see abcrlda
+    
+    ## speclines <- c(speclines , filelist)
+    ## writeLines(speclines, specfile)
+### here the %file section is fully populated
+
+    specfile <- result$value
+    
+### second build!
+    result <- testbuild( pkg, pac, specfile, ap=ap, log=log)
+
+    if (result$status == "fail") {
+        cat( "Failed to automatically build ", pkg, " \n", sep="")
+        cat( "Failed to build autonatically ", pkg, " \n", sep="", file=log, append=TRUE)
+        return(list(status="fail", value="unresolvable (automatically) error"))
+    }
+
+### package successfully built!
+### upload
+### cleanup
+    
+    return(list(status="done", value=pkg.info$Version))
+}
+
+
+
+### TODO Check, if the rpm -q --provides package command only show expected provdides
+#### see R-gdata incident
+}
+
 
 #' createOBSpac takes the name of an R package and creates a 
 #' package directory to be used in OBS.
@@ -554,11 +667,13 @@ setupOBSdir <- function(pkg,
 #' @return The path to the generated specfile.
 #' @export
 
-createOBSpac <- function(packname, localOBSdir=getOption("c2o.localOBSdir"),
-                         remoteproj=getOption("c2o.auto"), cran=getOption("c2o.cran"),
-                         ap = data.frame(available.packages(repos=getOption("c2o.cran")))) {
+createOBSpac <- function(pkg,
+                         localOBS  = getOption("c2o.localOBSdir"),
+                         remoteprj = getOption("c2o.auto"),
+                         cran      = getOption("c2o.cran"),
+                         db        = getOption("c2o.status"),
+                         log       = getOption("c2o.logfile")) {
     
-    log <- "createOBSpac.log"
     cat("Building ", packname, "\n", file=log, append=TRUE)
 
     if (! packname %in% ap[,"Package"]) {

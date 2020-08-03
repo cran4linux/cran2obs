@@ -57,7 +57,7 @@
 
     if (! is.null(getOption("c2o.statusfile") )) {
         cat("Option 'c2o.statusfile' is set to ", getOption("c2o.statusfile") , "\n")
-        options(c2o.status = read.table(getOption("c2o.statusfile", header=TRUE, sep=";")))
+        options(c2o.status = read.table(getOption("c2o.statusfile"), header=TRUE, sep=";"))
         ## TODO check if it works!
     } else {
         cat("Set option 'c2o.statusfile' to the filename, where the status of the current sync effort are stored.\n")

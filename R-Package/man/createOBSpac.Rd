@@ -14,7 +14,7 @@ createOBSpac(
   packname,
   localOBSdir = getOption("c2o.localOBSdir"),
   remoteproj = getOption("c2o.auto"),
-  cran = getOption("c20.cran"),
+  cran = getOption("c2o.cran"),
   ap = data.frame(available.packages(repos = getOption("c2o.cran")))
 )
 }
