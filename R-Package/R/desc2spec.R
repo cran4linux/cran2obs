@@ -606,7 +606,7 @@ sync2pac <- function(pkg,
 ### first build
     result <- buildforfiles( pkg, pac, specfile, localOBS=localOBS, remoteprj=remoteprj, download.cache=download.cache, binary.cache=binary.cache, ap=ap, log=log)
 
-    if (! result == "done") {
+    if (! result$status == "done") {
         cat( "Failed to construct files section for ", pkg, " \n", sep="")
         cat( "Failed to construct files section for ", pkg, " \n", sep="", file = log, append =TRUE)
         return(list(status="fail", value="failed to construct files section"))
@@ -631,7 +631,7 @@ sync2pac <- function(pkg,
 
     if (result$status == "fail") {
         cat( "Failed to automatically build ", pkg, " \n", sep="")
-        cat( "Failed to build autonatically ", pkg, " \n", sep="", file=log, append=TRUE)
+        cat( "Failed to automatically ", pkg, " \n", sep="", file=log, append=TRUE)
         return(list(status="fail", value="unresolvable (automatically) error"))
     }
 
