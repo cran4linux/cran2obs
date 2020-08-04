@@ -6,7 +6,7 @@
     packageStartupMessage("This is CRAN2OBS version ", utils::packageDescription("CRAN2OBS", field="Version"), appendLF=TRUE)
     packageStartupMessage("CRAN2OBS needs a few options set to function properly", appendLF=TRUE)
     failed <- FALSE
-    
+
     if (! is.null(getOption("c2o.cran") )) {
         cat("Option c2o.cran is set to ", getOption("c2o.cran") , "\n")
     } else {
