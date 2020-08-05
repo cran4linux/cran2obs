@@ -104,13 +104,13 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"), repo=getOption("c2o.aut
     status <- merge( ap[, c("Package", "Version", "License", "NeedsCompilation")],
                        oldstatus[, c("Package", "recDep", "Suggests", "depLen", "File", "OBSVersion", "triedVersion" )], by="Package", all=TRUE)
 
-    if ( length(removedpkgs > 0) {
+    if ( length( removedpkgs > 0)) {
         for (pkg in which(removedpkgs %in% status$Package) ) { # not found in CRAN
             status[ pkg , "Version"] <- NA 
         }
     }
 
-    if (length(newpkgs > 0) {
+    if ( length( newpkgs > 0)) {
         for (pkg in which(newpks %in% status$Package) ) {
             status[ pkg , "recDep"]   <- cleanList( status$Package[pkg], "depends", repo=cran)
             status[ pkg , "Suggests"] <- cleanList( status$Package[pkg], "suggests", repo=cran)
