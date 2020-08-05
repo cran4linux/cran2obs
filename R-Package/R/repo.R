@@ -33,7 +33,7 @@ cran2repo <- function(cran=getOption("c2o.cran"),
             } else {
                 logger(paste0("Sync failed for ", pkg))
             }
-            status <- updateStatusOfpkg ( status, status$Package[pkg], result, file=file, log=log) 
+            status <- updateStatusOfpkg ( status, status$Package[pkg], result, file=statusfile, log=log) 
         }
     }
     return(status)
