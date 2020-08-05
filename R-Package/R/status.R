@@ -115,7 +115,7 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"), repo=getOption("c2o.aut
     }
 
     ## now check for new in repo
-    cmd <- paste("osc ls", obsproject, sep=" ", collapse="")
+    cmd <- paste("osc ls", repo, sep=" ", collapse="")
     obspkgs <- gsub("R-", "", system(cmd, intern=TRUE))
 
 
