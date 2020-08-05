@@ -176,7 +176,7 @@ dropFileSection <- function(speclines){
 #' with empty file section from its DESCRIPTION file. The OBS directory must
 #' be prepared by setupOBSdir
 #'
-#' @param packname A package name of a package in a R repo like CRAN
+#' @param pkg A package name of a package in a R repo like CRAN
 #' @param targetdir The directory where rpmbuild should do its work.
 #' Sources of packages reside in rpmbuildroot/SOURCES, SPECS in rpmbuildroot/SPECS
 #' @param download.cache Directory where sources are stored
@@ -188,7 +188,7 @@ dropFileSection <- function(speclines){
 #' 
 #' @export
 createEmptySpec <- function(pkg,
-                            pac=file.path(getOption("c2o.localOBSdir"), getOption("c2o.auto"), paste0("R-",packname)),
+                            pac=file.path(getOption("c2o.localOBSdir"), getOption("c2o.auto"), paste0("R-",pkg)),
                             download.cache=getOption("c2o.download.cache"),
                             cran=getOption("c2o.cran"),
                             ap = getOption("c2o.status"),
@@ -210,7 +210,7 @@ createEmptySpec <- function(pkg,
     pkg.info <- ap[ ap$Package == pkg, ]
     
     source0 <-  pkg.info$File
-    specfile <- paste0(pac,"/R-",packname,".spec")
+    specfile <- paste0(pac,"/R-",pkg,".spec")
     
     version <- gsub("-",".", pkg.info$Version)
     ## version must be normalized for rpm
