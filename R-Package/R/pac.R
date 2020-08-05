@@ -249,7 +249,7 @@ pkg2pac <- function( pkg,
         } 
     }
     
-    result <- setuppac( pkg, localOBS=localOBS, remoteprj=remoteprj, cran=cran, status=db, log=log)
+    result <- setuppac( pkg, localOBS=localOBS, remoteprj=remoteprj, cran=cran, status=status, log=log)
 
     if ( result$status == "fail") {
         cat( "Setting up OBS dir failed for pkg ", pkg, "\n")
@@ -295,14 +295,14 @@ pkg2pac <- function( pkg,
 ### package successfully built!
 ### upload
 ### cleanup
-    result <- uploadpac( pkg, pkg.info$Version, type=buildtype, localOBS=localOBS, remoteprj=remoteprj, cran=cran, status=db, log=log)
+    result <- uploadpac( pkg, pkg.info$Version, type=buildtype, localOBS=localOBS, remoteprj=remoteprj, cran=cran, status=status, log=log)
     if (! result$status == "done") {
         logger( paste0( "Failed to upload ", pkg , " to ", remoteprj), log)
         return( list( status="fail", value="failed to construct files section"))
     }
     logger( paste0( pkg, " uploaded"), log)
 
-    result <- cleanuppac( pkg, localOBS=localOBS, remoteprj=remoteprj, cran=cran, status=db, log=log)
+    result <- cleanuppac( pkg, localOBS=localOBS, remoteprj=remoteprj, cran=cran, status=status, log=log)
     if (! result$status == "done") {
         logger( paste0( "Failed final cleanup for ", pac), log)
         return( list( status="fail", value="failed to construct files section"))
