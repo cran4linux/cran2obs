@@ -111,7 +111,7 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"), repo=getOption("c2o.aut
     }
 
     if ( length( newpkgs > 0)) {
-        for (pkg in which(newpks %in% status$Package) ) {
+        for (pkg in which(newpkgs %in% status$Package) ) {
             status[ pkg , "recDep"]   <- cleanList( status$Package[pkg], "depends", repo=cran)
             status[ pkg , "Suggests"] <- cleanList( status$Package[pkg], "suggests", repo=cran)
             status[ pkg , "depLen"]   <- length( unlist( strsplit( status[ pkg, "recDep"], " ")))
