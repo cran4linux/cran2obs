@@ -83,7 +83,7 @@ repoStatusCreate <- function(cran=getOption("c2o.cran"), repo=getOption("c2o.aut
 #' @export
 repoStatusUpdate <- function(cran=getOption("c2o.cran"), repo=getOption("c2o.auto"),
                                   file=getOption("c2o.statusfile"), new.file=NA, overwrite=FALSE ) {
-    if ( file.exists(file) && is.na(new.file) && !overwrite  ){
+    if ( file.exists(file) & is.na(new.file) & !overwrite  ){
         stop("Status file exists, overwrite='FALSE' and no alternative filename given!") 
     }
 
@@ -106,14 +106,15 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"), repo=getOption("c2o.aut
                        oldstatus[, c("Package", "recDep", "Suggests", "depLen", "File", "OBSVersion", "triedVersion" )], by="Package", all=TRUE)
 
     if ( length( removedpkgs > 0)) { ## we keep them in repo as long, as they build
-        for (pkg in which(status$Package %in% removedpkgs) ) { # not found in CRAN
+        pkgnumbers <- which(status$Package %in% removedpkgs)
+        for (pkg in pkgnumbers ) { # not found in CRAN
             if (! is.na( status$OBSVersion)) {
                 status[ pkg , "Version"] <- NA
             } 
         }
+        emtpypkgs <- pkgnumbers[ which( is.na(status$Version[pkgnumbers]) &  is.na(status$OBSVersion[pkgnumbers]))]
+        if (length(emptypkgs) > 0) status <- status[ emptypkgs , ]
     }
-
-    status <- status[  -which( is.na(status$Version) && is.na(status$OBSVersion))    , ]
     
     if ( length( newpkgs > 0)) {
         for (pkg in which(status$Package %in% newpkgs) ) {
@@ -130,7 +131,7 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"), repo=getOption("c2o.aut
 
     for (pkg in which( is.na(status$OBSVersion))) { ## do not know about version in OBS, check if correct
         if (is.na(status$triedVersion[pkg])  ||
-            ( (! is.na(status$triedVersion[pkg])) && (status$Version[pkg] != status$triedVersion[pkg]))) {
+            ( (! is.na(status$triedVersion[pkg])) & (status$Version[pkg] != status$triedVersion[pkg]))) {
             if ( status$Package[pkg] %in% obspkgs  ) { ## seems someone somewhere else has built the package
                 obstatus <- getOBSVersion( status$Package[pkg], repo)
                 status$File[pkg] <- obsstatus[1]
