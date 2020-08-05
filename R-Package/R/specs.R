@@ -209,7 +209,7 @@ createEmptySpec <- function(pkg,
         
     pkg.info <- ap[ ap$Package == pkg, ]
     
-    source0 <-  paste0(pkg,"_",pkg.info$Version,"tar.gz")
+    source0 <-  paste0(pkg,"_",pkg.info$Version,".tar.gz")
     specfile <- paste0(pac,"/R-",pkg,".spec")
     
     version <- gsub("-",".", pkg.info$Version)
