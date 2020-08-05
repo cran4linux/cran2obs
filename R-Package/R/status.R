@@ -123,7 +123,7 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"), repo=getOption("c2o.aut
     obspkgs <- gsub("R-", "", system(cmd, intern=TRUE))
 
 
-    for (pkg in which( in.na(status$OBSVersion))) { ## do not know about version in OBS, check if correct
+    for (pkg in which( is.na(status$OBSVersion))) { ## do not know about version in OBS, check if correct
         if (is.na(status$triedVersion[pkg])  ||
             ( (! is.na(status$triedVersion[pkg])) && (status$Version[pkg] != status$triedVersion[pkg]))) {
             if ( status$Package[pkg] %in% obspkgs  ) { ## seems someone somewhere else has built the package
