@@ -202,7 +202,7 @@ pkg2pac <- function( pkg,
                       localOBS  = getOption( "c2o.localOBSdir"),
                       remoteprj = getOption( "c2o.auto"),
                       cran      = getOption( "c2o.cran"),
-                      ap        = if (! is.null (getOption( "c2o.status"))) getOption( "c2o.status"),
+                      ap        = getOption( "c2o.status"),
                       download.cache = getOption( "c2o.download.cache"),
                       binary.cache = getOption( "c2o.binary.cache"),
                       log       = getOption( "c2o.logfile")) {

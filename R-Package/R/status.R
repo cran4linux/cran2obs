@@ -28,17 +28,18 @@ statusOBS <- function(pkg, remoteproj=getOption("c2o.auto")){
 #' @return updated status dataframe
 #' 
 #' @export
-updateStatusOfpkg <- function( status, pkg, version, success=TRUE, log=getOption("c2o.logfile")){
+updateStatusOfpkg <- function( status, pkg, syncresult, always.safe=TRUE, file= getOption("c2o.statusfile"), log=getOption("c2o.logfile")){
     if (! pkg %in% status[, "Package"]) {
         msg <- paste0("Seems ", pkg, " has no status")
         logger(msg, log)
         return(list(status="fail", value=msg))
     }
     i <- which ( status$Package == pkg )
-    if (success) {
-        status[i , "OBSVersion"] <- version
+    if (syncresult$status == "done") {
+        status[i , "OBSVersion"] <- syncresult$value
     }
-    status[i , "triedVersion"] <- version
+    status[i , "triedVersion"] <- syncresult$value
+    if (always.safe) write.table(status, file=file, row.names=FALSE, sep=";")
     return(status)
 }
 

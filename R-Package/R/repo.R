@@ -11,9 +11,30 @@
 #' @param download.cache directory where source files from cran cached
 #' sync status
 #' @param log logfile to use
+#'
+#' @return dataframe containing new syncstatus
+#'
+#' @export
 cran2repo <- function(cran=getOption("c2o.cran"),
                       localOBS = getOption("c2o.localOBSdir"),
                       remoteprj=getOption("c2o.auto"),
+                      statusfile = getOption("c2o.statusfile"),
                       status= getOption( "c2o.status"),
                       log = getOption("c2o.logfile")){
+    all.deplength <- sort(unique(status$depLen))
+    for (level in all.deplength){
+        pkgs <- which(status$depLen == level)
+        for (pkg in pkgs) {
+            logger(paste0("* Working on ", pkg ))
+            result <- pkg2pac(pkg, localOBS=localOBS, remoteprj=remoteprj, ap=status,
+                              download.cache=download.cache, binary.cache=binary.cache, log=log)
+            if (result$status == "done") {
+                logger(paste0("Sync finished for ", pkg))
+            } else {
+                logger(paste0("Sync failed for ", pkg))
+            }
+            status <- updateStatusOfpkg ( status, status$Package[pkg], result, file=file, log=log) 
+        }
+    }
+    return(status)
 }
