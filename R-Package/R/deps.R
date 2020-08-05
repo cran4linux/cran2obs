@@ -37,7 +37,7 @@ cleanList <- function(pkgname, kind, repo=getOption("c2o.cran")){
     depn <- lapply( dep, function(x) x <- x[ ! x %in% rmpkgs  ]  )
     ## remove rmpkgs from dependency list
     
-    unlist(depn)
+    paste0( unlist(depn), collapse=" ")
 }
 
 #' cleanDeps returns a structure like available.package()
