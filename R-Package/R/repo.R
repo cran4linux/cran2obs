@@ -19,6 +19,8 @@ cran2repo <- function(cran=getOption("c2o.cran"),
                       localOBS = getOption("c2o.localOBSdir"),
                       remoteprj=getOption("c2o.auto"),
                       statusfile = getOption("c2o.statusfile"),
+                      download.cache = getOption("c2o.download.cache"),
+                      binary.cache = getOption("c2o.binary.cache"),
                       status= getOption( "c2o.status"),
                       log = getOption("c2o.logfile")){
     all.deplength <- sort(unique(status$depLen))
