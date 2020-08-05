@@ -114,8 +114,8 @@ available.packages.OBS <- function(obsproject=getOption("c2o.auto"), quiet=TRUE)
             ## R-base-java is not a CRAN package.
         }
         cranpkgnames <- gsub("R-", "", obspkgs)
-        obsinfo <- sapply(cranpkgnames, getOBSVersion, obsproject=obsproject)
-        obspkgs <- data.frame(Package=obspkgs, OBSVersion=obsinfo)
+        obsversion <- sapply(cranpkgnames, getOBSVersion, obsproject=obsproject)
+        obspkgs <- data.frame(Package=as.character(obspkgs), OBSVersion=as.character(obsversion))
     } else {
         obspkgs <- data.frame(Package=character(), OBSVersion=character())
     }
