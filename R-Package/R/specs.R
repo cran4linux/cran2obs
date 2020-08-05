@@ -210,14 +210,14 @@ createEmptySpec <- function(pkg,
     pkg.info <- ap[ ap$Package == pkg, ]
     
     source0 <-  pkg.info$File
-    specfile <- paste0(pacdir,"/R-",packname,".spec")
+    specfile <- paste0(pac,"/R-",packname,".spec")
     
     version <- gsub("-",".", pkg.info$Version)
     ## version must be normalized for rpm
     
     ## extract DESCRIPTION file, read it, erase it
     desc.file <- paste( pkg, "/DESCRIPTION", sep="")
-    untar( file.path( pacdir, source0), desc.file)
+    untar( file.path( pac, source0), desc.file)
     
     description <- readLines( desc.file)
     
