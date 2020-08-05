@@ -89,11 +89,12 @@ cleanuppac <- function(pkg,
 #'
 #' @export
 setuppac <- function(pkg,
-                        localOBS  = getOption("c2o.localOBSdir"),
-                        remoteprj = getOption("c2o.auto"),
-                        cran      = getOption("c2o.cran"),
-                        status    = getOption("c2o.status"),
-                        log       = getOption("c2o.logfile")){
+                     localOBS  = getOption("c2o.localOBSdir"),
+                     remoteprj = getOption("c2o.auto"),
+                     cran      = getOption("c2o.cran"),
+                     download.cache = getOption("c2o,download.cache"),
+                     status    = getOption("c2o.status"),
+                     log       = getOption("c2o.logfile")){
     cat("** Setting up OBSdir for package ", pkg, "\n", file=log, append=TRUE)
 
     if (! pkg %in% status[, "Package"]) {
@@ -249,7 +250,8 @@ pkg2pac <- function( pkg,
         } 
     }
     
-    result <- setuppac( pkg, localOBS=localOBS, remoteprj=remoteprj, cran=cran, status=status, log=log)
+    result <- setuppac( pkg, localOBS=localOBS, remoteprj=remoteprj, cran=cran, status=status,
+                       download.cache=download.cache, log=log)
 
     if ( result$status == "fail") {
         cat( "Setting up OBS dir failed for pkg ", pkg, "\n")
