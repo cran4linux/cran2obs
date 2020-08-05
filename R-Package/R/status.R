@@ -99,7 +99,7 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"), repo=getOption("c2o.aut
 
     statuschanged <- setdiff( ap$Package, oldstatus$Package[ which(! is.na(oldstatus$Version))  ])
     removedpkgs <- intersect( statuschanged, oldstatus$Package) ## no longer in available.packages
-    newpkgs <- intersect( statuschanged, ap$package)
+    newpkgs <- intersect( statuschanged, ap$Package)
     
     status <- merge( ap[, c("Package", "Version", "License", "NeedsCompilation")],
                        oldstatus[, c("Package", "recDep", "Suggests", "depLen", "OBSpkg", "File", "OBSVersion", "triedVersion" )], by="Package", all=TRUE)
