@@ -54,6 +54,8 @@ updateStatusOfpkg <- function( status, pkg, version, success=TRUE, log=getOption
 #' @return a datafram containing the columns "Package", "Version", "License",
 #' "NeedsCompilation", "recDep", "Suggests", "depLen", "OBSpkg", "File", "OBSVersion",
 #' "triedVersion"
+#'
+#' @export
 repoStatusCreate <- function(cran=getOption("c2o.cran"), repo=getOption("c2o.auto"),
                                   file=getOption("c2o.statusfile"), overwrite=FALSE ) {
     if (file.exists(file) && !overwrite  ){
@@ -77,6 +79,8 @@ repoStatusCreate <- function(cran=getOption("c2o.cran"), repo=getOption("c2o.aut
 #' @return a dataframe containing the columns "Package", "Version", "License",
 #' "NeedsCompilation", "recDep", "Suggests", "depLen", "OBSpkg", "File", "OBSVersion",
 #' "triedVersion"
+#'
+#' @export
 repoStatusUpdate <- function(cran=getOption("c2o.cran"), repo=getOption("c2o.auto"),
                                   file=getOption("c2o.statusfile"), new.file=NA, overwrite=FALSE ) {
     if ( file.exists(file) && is.na(new.file) && !overwrite  ){
