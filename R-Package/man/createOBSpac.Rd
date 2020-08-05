@@ -11,15 +11,18 @@ The %check section is deliberately empty. We rely
 on the checks on CRAN.}
 \usage{
 createOBSpac(
-  packname,
-  localOBSdir = getOption("c2o.localOBSdir"),
-  remoteproj = getOption("c2o.auto"),
+  pkg,
+  localOBS = getOption("c2o.localOBSdir"),
+  remoteprj = getOption("c2o.auto"),
   cran = getOption("c2o.cran"),
-  ap = data.frame(available.packages(repos = getOption("c2o.cran")))
+  db = getOption("c2o.status"),
+  log = getOption("c2o.logfile")
 )
 }
 \arguments{
 \item{packname}{Name of a package in a R repo like CRAN}
+
+\item{rpmbuildroot}{The directory where rpmbuild should do its work}
 
 \item{localOBSdir}{The top level directory of a checkout of the project
 you want to create your package in.}
@@ -27,8 +30,6 @@ you want to create your package in.}
 \item{remoteproj}{Name of the OBS project}
 
 \item{ap}{A dataframe containing info like from available.packages or cleanDeps.}
-
-\item{rpmbuildroot}{The directory where rpmbuild should do its work}
 }
 \value{
 The path to the generated specfile.

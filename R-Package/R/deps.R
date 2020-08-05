@@ -83,7 +83,7 @@ cleanDeps <- function(repo=getOption("c2o.cran")){
     ap <- data.frame(ap, Suggests=as.vector(unlist(lapply(suggestsn, paste0, collapse=" "))))
     ## new column with suggests
 
-    ap <- cbind(ap, depLen= sapply( ap[,"recDep"], function(x) length( strsplit( x, " ")[[1]] )))
+    ap <- cbind(ap, depLen= sapply( ap[,"recDep"], function(x) length( unlist( strsplit( x, " ")))))
     ## new column with number of dependencies
 }
 
@@ -159,31 +159,8 @@ CranOBSfromScratch <- function(cran=getOption("c2o.cran") , repo1=getOption("c2o
     released  <- available.packages.OBS(obsproject=repo2)
     obs <- merge(automatic, released[,c("Package", "OBSVersion")], all=TRUE, suffixes=c(".a", ".r"), by="Package")
     status <- merge( cran, obs, by="Package" , all=TRUE )
-    status <- cbind(status, triedVer=NA)
+    status <- cbind(status, triedVersion=NA)
     status$Row.names <- NULL
     for (col in 1:dim(status)[2]) status[,col] <- as.character(status[,col])  
-    return(status)
-}
-
-#' repoStatusfromScratch creates a datafram from available.packages() and
-#' available.packages.OBS() to have all the neccessary information to sync
-#' the given CRAN mirror to the given OBS repo
-#' @param cran is a CRAN mirror
-#' @param repo is an OBS repo
-#' @param file is the name of the file which will store the information
-#' @param overwrite is a flag if an existing status file shall be overwritten
-#'
-#' @return a datafram containing the columns "Package", "Version", "License",
-#' "NeedsCompilation", "recDep", "depLen", "OBSpkg", "File", "OBSVersion",
-#' "triedVersion"
-repoStatusfromScratch <- function(cran=getOption("c2o.cran"), repo=getOption("c2o.auto"),
-                                  file=getOption("c2o.statusfile"), overwrite=FALSE ) {
-    if (file.exists(file) && !overwrite  ){
-        stop("Status file exists and overwrite='FALSE'!") 
-    }
-    cranstatus <- cleanDeps(cran)
-    repostatus <- available.packages.OBS(obsproject=repo)
-    status <- cbind( merge( cran, obs, by="Package" , all=TRUE ), triedVer=NA)
-    write.table(status, file=file, rownames=FALSE, sep=";")
     return(status)
 }

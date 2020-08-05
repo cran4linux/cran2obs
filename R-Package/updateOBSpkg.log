@@ -1,0 +1,43 @@
+Building  abcrlda 
+Failed:  abcrlda  does not exist in OBS. updateOBSpkg only does updates!Building  abcrlda 
+Building  abcrlda 
+Building  abcrlda 
+Building  abcrlda 
+Building  abcrlda 
+Building  abcrlda 
+Building  abcrlda 
+Building  abcrlda 
+Building  abcrlda 
+Building  abcrlda 
+Building  abcrlda 
+Building  abcrlda 
+Building  abcrlda 
+Building  abcrlda 
+Building  abcrlda 
+Building  abcrlda 
+Building  abcrlda 
+Building  abcrlda 
+Building  abcrlda 
+Building  abcrlda 
+Building  abcrlda 
+Success:  abcrlda  rpm package created
+Wrote: /home/abuild/rpmbuild/SRPMS/R-abcrlda-1.0.3-0.src.rpm 
+Wrote: /home/abuild/rpmbuild/RPMS/x86_64/R-abcrlda-1.0.3-0.x86_64.rpm 
+Success:  abcrlda  rpm package created
+Building  tseries 
+Building  tseries 
+Building  tseries 
+Building  tseries 
+Building  tseries 
+Building  tseries 
+Building  tseries 
+Building  tseries 
+Building  tseries 
+Building  tseries 
+Building  tseries 
+Building  tseries 
+Building  xts 
+Building  seriation 
+Building  seriation 
+Building  seriation 
+Building  deSolve 

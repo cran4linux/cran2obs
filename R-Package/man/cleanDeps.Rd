@@ -14,9 +14,10 @@ cleanDeps(repo = getOption("c2o.cran"))
 \item{repo}{to build the dependency matrix off}
 }
 \value{
-A dataframe containing available packages with new columns
-'recDep' containing all recursive dependencies and 'depLen' containing
-the number of recursive dependencies
+A dataframe containing from available.packages() columns "Package",
+"Version", "License", "NeedsCompilation", a cleaned-up version of "Suggests",
+and new columns 'recDep', containing all recursive dependencies, and 'depLen'
+containing the number of recursive dependencies.
 }
 \description{
 cleanDeps returns a structure like available.package()
