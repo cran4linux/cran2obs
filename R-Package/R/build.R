@@ -12,20 +12,20 @@
 buildforfiles <- function(pkg, pac, specfile, localOBS=getOption("c2o.localOBSdir"),
                           remoteprj=getOption("c2o.auto"), download.cache=getOption("c2o.download.cache"),
                           binary.cache=getOption("c2o.binary.cache"),
-                          ap = if (! is.null (getOption("c2o.status"))) getOption("c2o.status"),
+                          ap = getOption("c2o.status"),
                           log=getOption("c2o.logfile")){
 
     speclines <- readLines( specfile)
     result <- dropFileSection( speclines)
     
     if ( result$status != "done") {
-        cat("dropping file section failed")
-        cat("dropping file section failed", file=log, append=TRUE)
-        return (list(status="failed", problem=result$problem))
+        logger(paste0("dropping file section failed"))
+        return (list(status="failed", value=result$problem))
     }
     writeLines( result$speclines, specfile)
     
-    result <- testbuild( pkg, pac, specfile, ap=ap)
+    result <- testbuild( pkg, pac, specfile, localOBS=localOBS, remoteprj=remoteprj, download.cache=download.cache,
+                        binary.cache=binary.cache, ap=ap, log=log)
     
     ## we dont need to check for success, because %files section is empty and therefore fail by design
     
@@ -55,12 +55,12 @@ buildforfiles <- function(pkg, pac, specfile, localOBS=getOption("c2o.localOBSdi
 #' @return list of status, value, buildlog
 #' @export
 testbuild <- function(pkg, pac, specfile,
-                      log=getOption("c2o.logfile"),
                       localOBS=getOption("c2o.localOBSdir"),
                       remoteprj=getOption("c2o.auto"),
                       download.cache=getOption("c2o.download.cache"),
                       binary.cache=getOption("c2o.binary.cache"),
-                      ap = if (! is.null (getOption("c2o.status"))) getOption("c2o.status")){
+                      ap = getOption("c2o.status"),
+                      log=getOption("c2o.logfile")){
 
     cmd <- paste("\""," cd", pac,
                  "; osc build --prefer-pkgs=", binary.cache, " --keep-pkgs=", binary.cache,

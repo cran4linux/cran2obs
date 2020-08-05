@@ -92,14 +92,13 @@ setuppac <- function(pkg,
                      localOBS  = getOption("c2o.localOBSdir"),
                      remoteprj = getOption("c2o.auto"),
                      cran      = getOption("c2o.cran"),
-                     download.cache = getOption("c2o,download.cache"),
+                     download.cache = getOption("c2o.download.cache"),
                      status    = getOption("c2o.status"),
                      log       = getOption("c2o.logfile")){
-    cat("** Setting up OBSdir for package ", pkg, "\n", file=log, append=TRUE)
+    logger(paste0("** Setting up OBSdir for package ", pkg))
 
     if (! pkg %in% status[, "Package"]) {
-        cat("Seems ", pkg, " not found on CRAN\n")
-        cat("Seems ", pkg, " not found on CRAN\n", file=log, append=TRUE)
+        logger(paste0("Seems ", pkg, " not found on CRAN"))
         return(list(status="fail", value="not found"))
     }
     
@@ -208,8 +207,7 @@ pkg2pac <- function( pkg,
                       binary.cache = getOption( "c2o.binary.cache"),
                       log       = getOption( "c2o.logfile")) {
     
-    cat("Syncing ", pkg, " to OBS\n")
-    cat("Syncing ", pkg, " to OBS\n", file=log, append=TRUE)
+    logger(paste0("** Syncing ", pkg, " to OBS"))
 
     if ( ! pkg %in% ap[ , "Package"] ) {
         cat( "Seems ", pkg, " not in status file\n")
@@ -254,8 +252,7 @@ pkg2pac <- function( pkg,
                        download.cache=download.cache, log=log)
 
     if ( result$status == "fail") {
-        cat( "Setting up OBS dir failed for pkg ", pkg, "\n")
-        cat( "Setting up OBS dir failed for pkg ", pkg, "\n", file=log, append=TRUE)
+        logger(paste0( "Setting up OBS dir failed for pkg ", pkg))
         return( list( status="fail", problem=result$value))
     }
 
@@ -263,8 +260,7 @@ pkg2pac <- function( pkg,
     result <- createEmptySpec(pkg, pac, download.cache=download.cache, ap)
 
     if (result$status == "fail") {
-        cat("Creating empty spec failed for pkg ", pkg, "\n")
-        cat("Creating empty spec failed for pkg ", pkg, "\n", file=log, append=TRUE)
+        logger(paste0("Creating empty spec failed for pkg ", pkg))
         return( list( status="fail", problem=paste( "creating empty spec failed")))
     }
 
