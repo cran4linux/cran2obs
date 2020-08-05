@@ -72,7 +72,7 @@ cleanDeps <- function(repo=getOption("c2o.cran")){
                              (rmpkgs[, "Priority"] == "recommended")), "Package"]
     ## base and recommended always already installed
 
-    ap <- ap[, c("Package", "Version", "File", "License", "NeedsCompilation")]
+    ap <- ap[, c("Package", "Version", "License", "NeedsCompilation")]
     
     depn <- lapply( dep, function(x) x <- x[ ! x %in% rmpkgs  ]  )
     suggestsn <- lapply( suggests, function(x) x <- x[ ! x %in% rmpkgs  ]  )
