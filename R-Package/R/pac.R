@@ -118,7 +118,7 @@ setuppac <- function(pkg,
                 return( list( status="fail", value="could not update"))
             }
         } else { ## checkout
-            cmd <- paste( "\"", "cd", file.path( localOBSdir, remoteproj), " && osc co ", paste0( "R-", pkg), "\"")
+            cmd <- paste( "\"", "cd", file.path( localOBS, remoteproj), " && osc co ", paste0( "R-", pkg), "\"")
             result <- system2( "bash",  args = c("-c", cmd), stdout=TRUE, stderr=TRUE)
             if( !is.null(attributes(result))) {
                 cat(result)
@@ -142,7 +142,7 @@ setuppac <- function(pkg,
         }
         
         ## create dir to hold package for OBS
-        cmd <- paste("\"", "cd", file.path( localOBSdir, remoteproj), " ; osc mkpac ",paste0( "R-", packname)  , "\"")
+        cmd <- paste("\"", "cd", file.path( localOBS, remoteproj), " ; osc mkpac ",paste0( "R-", packname)  , "\"")
         result <- system2(  "bash",  args = c("-c", cmd), stdout=TRUE, stderr=TRUE)
         if( ! is.null(attributes(result))) {
             cat(result)
@@ -165,7 +165,7 @@ setuppac <- function(pkg,
         }
     }
     
-    if ( !file.copy( file.path( download.cache, source0), file.path( pkgdir, source0), overwrite=TRUE )){
+    if ( !file.copy( file.path( download.cache, source0), file.path( pac, source0), overwrite=TRUE )){
         cat(pkg, ": copy of sources failed\n")
         cat(pkg, ": copy of sources failed\n", file=log, append=TRUE)
         return( list( status="fail", value="copy of soources failed"))
