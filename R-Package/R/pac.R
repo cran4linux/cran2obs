@@ -106,7 +106,7 @@ setuppac <- function(pkg,
 
     inOBSVersion <-  status[ which( status$Package == pkg) , "OBSVersion"]
     
-    if (! is.na( inOBSVErsion )) { # update
+    if (! is.na( inOBSVersion )) { # update
         if ( dir.exists( pac )){ # just update
             cmd <- paste( "\"", "cd", pac, " && osc up \"")
             result <- system2( "bash", args = c("-c", cmd), stdout=TRUE, stderr=TRUE)

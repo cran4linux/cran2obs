@@ -9,7 +9,7 @@ This function is not exactly cheap run-time wise. Around 0.5s per package.}
 getOBSVersion(pkg, obsproject = getOption("c2o.auto"), quiet = TRUE)
 }
 \arguments{
-\item{pkg}{A character string containing the name of a R package as found in CRAN}
+\item{pkg}{name of an R package as found in CRAN}
 
 \item{obsproject}{Project in OBS where packages are taken from.}
 

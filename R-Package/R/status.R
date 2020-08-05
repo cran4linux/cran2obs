@@ -88,6 +88,9 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"), repo=getOption("c2o.aut
     }
 
     oldstatus <- read.table( file, header=TRUE, sep=";")
+
+    ## first merge new info from available packages
+    
     ap <- available.packages(repos=repo)
 
     statuschanged <- setdiff( ap$Package, oldstatus$Package[ which(! is.na(oldstatus$Version))  ])
@@ -107,6 +110,24 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"), repo=getOption("c2o.aut
         status[ pkg , "depLen"]   <- length( unlist( strsplit( status[ pkg, "recDep"], " ")))
     }
 
+    ## now check for new in repo
+    cmd <- paste("osc ls", obsproject, sep=" ", collapse="")
+    obspkgs <- gsub("R-", "", system(cmd, intern=TRUE))
+
+
+    for (pkg in which( in.na(status$OBSVersion))) { ## do not know about version in OBS, check if correct
+        if (is.na(status$triedVersion[pkg])  ||
+            ( (! is.na(status$triedVersion[pkg])) && (status$Version[pkg] != status$triedVersion[pkg]))) {
+            if ( status$Package[pkg] %in% obspkgs  ) { ## seems someone somewhere else has built the package
+                obstatus <- getOBSVersion( status$Package[pkg], repo)
+                status$OBSpkg[pkg] <- paste("R-", status$Package[pkg], sep="")
+                status$File[pkg] <- obsstatus[1]
+                status$OBSVersion[pkg] <- obsstatus[2]
+                status$triedVersion <- obsstatus[2]
+            }
+        }
+    }
+    
     write.table(status, file=file, rownames=FALSE, sep=";")
     return(status)
 }

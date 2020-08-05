@@ -125,7 +125,7 @@ available.packages.OBS <- function(obsproject=getOption("c2o.auto"), quiet=TRUE)
 #' getOBSVersion takes the name of an R package (from CRAN) and receives the corresponding
 #' information off of OBS
 #' This function is not exactly cheap run-time wise. Around 0.5s per package.
-#' @param pkg A character string containing the name of a R package as found in CRAN
+#' @param pkg name of an R package as found in CRAN
 #' @param obsproject Project in OBS where packages are taken from.
 #' @param quiet If set to FALSE some progression info is given, default = TRUE.
 #' 
