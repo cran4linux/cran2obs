@@ -63,7 +63,7 @@ repoStatusCreate <- function(cran=getOption("c2o.cran"), repo=getOption("c2o.aut
     }
     cranstatus <- cleanDeps(cran)
     repostatus <- available.packages.OBS(obsproject=repo)
-    status <- cbind( merge( cran, obs, by="Package" , all=TRUE ), triedVersion=NA)
+    status <- cbind( merge( cranstatus, repostatus, by="Package" , all=TRUE ), triedVersion=NA)
     write.table(status, file=file, rownames=FALSE, sep=";")
     return(status)
 }
