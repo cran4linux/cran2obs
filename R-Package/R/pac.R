@@ -216,7 +216,9 @@ pkg2pac <- function( pkg,
     }
     
     pkg.info <- ap[ ap$Package == pkg, ]
-
+    logger("pkg info", log)
+    logger(paste(pkg.info),log)
+    
     if ( is.na( pkg.info$Version) ) {
         logger(paste0("Seems ", pkg, " not in CRAN"), log)
         return( list( status="fail", problem=paste( "Package not in CRAN")))
@@ -231,6 +233,7 @@ pkg2pac <- function( pkg,
             return( list( status="done", value=pkg.info$Version))
         }
     } else {
+        logger( paste0( "initial build of ", pkg), log)
         buildtype = "initial build"
     }
 
