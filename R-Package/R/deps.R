@@ -72,7 +72,7 @@ cleanDeps <- function(repo=getOption("c2o.cran")){
                              (rmpkgs[, "Priority"] == "recommended")), "Package"]
     ## base and recommended always already installed
 
-    ap <- ap[, c("Package", "Version", "License", "NeedsCompilation")]
+    ap <- ap[, c("Package", "Version", "File", "License", "NeedsCompilation")]
     
     depn <- lapply( dep, function(x) x <- x[ ! x %in% rmpkgs  ]  )
     suggestsn <- lapply( suggests, function(x) x <- x[ ! x %in% rmpkgs  ]  )
@@ -115,9 +115,9 @@ available.packages.OBS <- function(obsproject=getOption("c2o.auto"), quiet=TRUE)
         }
         cranpkgnames <- gsub("R-", "", obspkgs)
         obsinfo <- sapply(cranpkgnames, getOBSVersion, obsproject=obsproject)
-        obspkgs <- data.frame(Package=obspkgs, File=obsinfo[1,], OBSVersion=obsinfo[2,])
+        obspkgs <- data.frame(Package=obspkgs, OBSVersion=obsinfo)
     } else {
-        obspkgs <- data.frame(Package=character(), File=character(), OBSVersion=character())
+        obspkgs <- data.frame(Package=character(), OBSVersion=character())
     }
     return (obspkgs)
 }
@@ -141,7 +141,7 @@ getOBSVersion <- function ( pkg, obsproject=getOption("c2o.auto"), quiet=TRUE ) 
     ## the last [1] is needed if a package is linked to factory. In lst the files
     ## can appear multiple times then.
     srcversion <- gsub(paste0( pkg, "_"), "", gsub(".tar.gz", "", srcfile))
-    c(srcfile, srcversion)
+    return(srcversion)
 }
 
 #' CranOBSfromScratch combines available.packages() and info of two OBS repos, i.e.
