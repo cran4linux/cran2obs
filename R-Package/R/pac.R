@@ -131,23 +131,23 @@ setuppac <- function(pkg,
         if ( dir.exists( pac )){ # cleanup neccessary
             logger( paste0("cleanup of existing local ", pac))
             
-            cmd <- paste("\"", "cd", file.path(localOBS, remoteprj) , "&& osc delete --force ", paste0( "R-", packname)  , "\"")
+            cmd <- paste("\"", "cd", file.path(localOBS, remoteprj) , "&& osc delete --force ", paste0( "R-", pkg)  , "\"")
             result <- system2(  "bash",  args = c("-c", cmd), stdout=TRUE, stderr=TRUE)
             
             if( ! is.null(attributes(result))) {
                 cat(result, "\n")
-                logger(paste0(pkg, " could not setup packname"))
+                logger(paste0(pkg, " could not setup"))
                 return(list(status="fail", value="could not remove existing pac"))
             }
         }
         
         ## create dir to hold package for OBS
-        cmd <- paste("\"", "cd", file.path( localOBS, remoteprj), " ; osc mkpac ",paste0( "R-", packname)  , "\"")
+        cmd <- paste("\"", "cd", file.path( localOBS, remoteprj), " ; osc mkpac ",paste0( "R-", pkg)  , "\"")
         result <- system2(  "bash",  args = c("-c", cmd), stdout=TRUE, stderr=TRUE)
         if( ! is.null(attributes(result))) {
             cat(result)
-            cat(packname, " could not create pac for ", pkg, "\n")
-            cat(packname, " could not create pac for ", pkg, "\n", file=log, append=TRUE)
+            cat(pkg, " could not create pac for ", pkg, "\n")
+            cat(pkg, " could not create pac for ", pkg, "\n", file=log, append=TRUE)
             return( list( status="fail", value="could not setup pac"))
         }
     }
