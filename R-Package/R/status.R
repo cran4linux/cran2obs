@@ -91,20 +91,21 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"), repo=getOption("c2o.aut
         stop("Status file does not exist")
     }
 
+    
     oldstatus <- read.table( file, header=TRUE, sep=";")
-
+    if (! is.na(new.file) ) file=new.file
+    
     ## first merge new info from available packages
     
     ap <- as.data.frame(available.packages(repos=cran))
 
-    statuschanged <- setdiff( ap$Package, oldstatus$Package[ which(! is.na(oldstatus$Version))  ])
-    removedpkgs <- intersect( statuschanged, oldstatus$Package) ## no longer in available.packages
-    newpkgs <- intersect( statuschanged, ap$Package)
+    newpkgs <- setdiff( ap$Package, oldstatus$Package )
+    removedpkgs <- oldstatus$Package[ which(! oldstatus$Package %in% ap$Package)] ## no longer in available.packages
     
     status <- merge( ap[, c("Package", "Version", "License", "NeedsCompilation")],
                        oldstatus[, c("Package", "recDep", "Suggests", "depLen", "File", "OBSVersion", "triedVersion" )], by="Package", all=TRUE)
 
-    if ( length( removedpkgs > 0)) {
+    if ( length( removedpkgs > 0)) { ## we keep them in repo as long, as they build
         for (pkg in which(removedpkgs %in% status$Package) ) { # not found in CRAN
             status[ pkg , "Version"] <- NA 
         }
