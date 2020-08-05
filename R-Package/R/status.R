@@ -134,10 +134,9 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"), repo=getOption("c2o.aut
         if (is.na(status$triedVersion[pkg])  ||
             ( (! is.na(status$triedVersion[pkg])) & (status$Version[pkg] != status$triedVersion[pkg]))) {
             if ( status$Package[pkg] %in% obspkgs  ) { ## seems someone somewhere else has built the package
-                obstatus <- getOBSVersion( status$Package[pkg], repo)
-#                status$File[pkg] <- obsstatus[1]
-                status$OBSVersion[pkg] <- obsstatus[2]
-                status$triedVersion <- obsstatus[2]
+                obsversion <- getOBSVersion( status$Package[pkg], repo)
+                status$OBSVersion[pkg] <- obsversion
+                status$triedVersion[pkg] <- obsversion
             }
         }
     }
