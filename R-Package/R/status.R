@@ -135,7 +135,7 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"), repo=getOption("c2o.aut
         }
     }
     
-    write.table(status, file=file, rownames=FALSE, sep=";")
+    write.table(status, file=file, row.names=FALSE, sep=";")
     return(status)
 }
 
