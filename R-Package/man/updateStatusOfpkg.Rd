@@ -8,8 +8,9 @@ the status dataframe.}
 updateStatusOfpkg(
   status,
   pkg,
-  version,
-  success = TRUE,
+  syncresult,
+  always.safe = TRUE,
+  file = getOption("c2o.statusfile"),
   log = getOption("c2o.logfile")
 )
 }

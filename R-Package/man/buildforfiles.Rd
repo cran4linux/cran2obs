@@ -10,10 +10,10 @@ buildforfiles(
   pac,
   specfile,
   localOBS = getOption("c2o.localOBSdir"),
-  remoteproj = getOption("c2o.auto"),
+  remoteprj = getOption("c2o.auto"),
   download.cache = getOption("c2o.download.cache"),
   binary.cache = getOption("c2o.binary.cache"),
-  ap = if (!is.null(getOption("c2o.status"))) getOption("c2o.status"),
+  ap = getOption("c2o.status"),
   log = getOption("c2o.logfile")
 )
 }
@@ -24,7 +24,7 @@ buildforfiles(
 
 \item{specfile}{Location of created specfile}
 
-\item{remoteproj}{Name of the OBS project}
+\item{remoteprj}{Name of the OBS project}
 
 \item{rpmbuildroot}{The directory where rpmbuild should do its work}
 

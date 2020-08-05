@@ -8,12 +8,12 @@ testbuild(
   pkg,
   pac,
   specfile,
-  log = getOption("c2o.logfile"),
   localOBS = getOption("c2o.localOBSdir"),
   remoteprj = getOption("c2o.auto"),
   download.cache = getOption("c2o.download.cache"),
   binary.cache = getOption("c2o.binary.cache"),
-  ap = if (!is.null(getOption("c2o.status"))) getOption("c2o.status")
+  ap = getOption("c2o.status"),
+  log = getOption("c2o.logfile")
 )
 }
 \arguments{
@@ -21,12 +21,12 @@ testbuild(
 
 \item{specfile}{Location of created specfile}
 
+\item{remoteprj}{Name of the OBS project}
+
 \item{rpmbuildroot}{The directory where rpmbuild should do its work}
 
 \item{localOBSdir}{The top level directory of a checkout of the project
 you want to create your package in.}
-
-\item{remoteproj}{Name of the OBS project}
 }
 \value{
 list of status, value, buildlog

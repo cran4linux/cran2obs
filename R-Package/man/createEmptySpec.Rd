@@ -9,7 +9,7 @@ be prepared by setupOBSdir}
 createEmptySpec(
   pkg,
   pac = file.path(getOption("c2o.localOBSdir"), getOption("c2o.auto"), paste0("R-",
-    packname)),
+    pkg)),
   download.cache = getOption("c2o.download.cache"),
   cran = getOption("c2o.cran"),
   ap = getOption("c2o.status"),
@@ -17,12 +17,12 @@ createEmptySpec(
 )
 }
 \arguments{
+\item{pkg}{A package name of a package in a R repo like CRAN}
+
 \item{download.cache}{Directory where sources are stored}
 
 \item{ap}{A dataframe like the result of available.packages() or cleanDeps()
 createEmptySpec uses Package, Version, and NeedsCompilation of that dataframe.}
-
-\item{packname}{A package name of a package in a R repo like CRAN}
 
 \item{targetdir}{The directory where rpmbuild should do its work.
 Sources of packages reside in rpmbuildroot/SOURCES, SPECS in rpmbuildroot/SPECS}

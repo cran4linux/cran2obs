@@ -248,7 +248,7 @@ createEmptySpec <- function(pkg,
     
     spectpl <- gsub( "{{source0}}", source0, spectpl, fixed=TRUE)
 #    deps <-  cleanList( packname, "depends" )
-    deps <- pkg.info$recDep
+    deps <- unlist(strsplit(pkg.info$recDep, " "))
     
     if (length(deps) >0) {
         deps <- paste( "R-", deps, sep="")
@@ -257,7 +257,7 @@ createEmptySpec <- function(pkg,
     }
 
 #    suggests <- cleanList( packname, "suggests")
-    suggests <- pkg.info$Suggests
+    suggests <- unlist(strsplit(pkg.info$Suggests, " "))
     if (length(suggests) > 0) {
         suggests <- paste( "R-", suggests, sep="")
     } else {

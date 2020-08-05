@@ -10,6 +10,7 @@ setuppac(
   localOBS = getOption("c2o.localOBSdir"),
   remoteprj = getOption("c2o.auto"),
   cran = getOption("c2o.cran"),
+  download.cache = getOption("c2o.download.cache"),
   status = getOption("c2o.status"),
   log = getOption("c2o.logfile")
 )

@@ -12,6 +12,9 @@ cran2repo(
   cran = getOption("c2o.cran"),
   localOBS = getOption("c2o.localOBSdir"),
   remoteprj = getOption("c2o.auto"),
+  statusfile = getOption("c2o.statusfile"),
+  download.cache = getOption("c2o.download.cache"),
+  binary.cache = getOption("c2o.binary.cache"),
   status = getOption("c2o.status"),
   log = getOption("c2o.logfile")
 )
@@ -21,16 +24,19 @@ cran2repo(
 
 \item{localOBS}{root directory to build remoteprj in locally}
 
+\item{download.cache}{directory where source files from cran cached
+sync status}
+
+\item{binary.cache}{directory where newly built pacs are found}
+
 \item{status}{dataframe containing status information about}
 
 \item{log}{logfile to use}
 
 \item{repo}{OBS repo to use}
-
-\item{binary.cache}{directory where newly built pacs are found}
-
-\item{download.cache}{directory where source files from cran cached
-sync status}
+}
+\value{
+dataframe containing new syncstatus
 }
 \description{
 cran2repo tries to sync as much of a CRAN mirror

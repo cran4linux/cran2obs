@@ -62,9 +62,11 @@ testbuild <- function(pkg, pac, specfile,
                       ap = getOption("c2o.status"),
                       log=getOption("c2o.logfile")){
 
-    cmd <- paste("\""," cd", pac,
+    cmd <- paste0("\""," cd ", pac,
                  "; osc build --prefer-pkgs=", binary.cache, " --keep-pkgs=", binary.cache,
-                 " --local-package --ccache", specfile, "\"" )
+                 " --local-package --ccache ", specfile, "\"" )
+
+    cat("testbuild ", cmd, "\n")
     suppressWarnings(
         buildlog <- system2("bash", args=c("-c", cmd), stdout=TRUE, stderr=TRUE)
     )
@@ -75,7 +77,7 @@ testbuild <- function(pkg, pac, specfile,
     
     if ( any ( grep( "ERROR: dependency", buildlog, fixed=TRUE)) ) { ### missing some dependency, no chance
         cat( "The following missing dependencies must be available to build R-", pkg, "\n", sep="")
-        cat( "The following missing dependencies must be available to build R-", pkg, "\n", sep="", file=logfile, append=TRUE)
+        cat( "The following missing dependencies must be available to build R-", pkg, "\n", sep="", file=log, append=TRUE)
         for (line in buildlog[ grep( "ERROR: dependency", buildlog, fixed=TRUE)] ) {
             cat( line,"\n")
             cat( line,"\n", file=log, append=TRUE)
@@ -97,7 +99,7 @@ testbuild <- function(pkg, pac, specfile,
     
     if ( length( grep( "Failed build dependencies", buildlog, fixed=TRUE)) >0 ) { ### missing dependencies, no chance
         cat( "The following missing dependencies must be installed to build R-", pkg, "\n", sep="")
-        cat( "The following missing dependencies must be installed to build R-", pkg, "\n", sep="", file=logfile, append=TRUE)
+        cat( "The following missing dependencies must be installed to build R-", pkg, "\n", sep="", file=log, append=TRUE)
         if (any ( grep( "needed", buildlog, fixed=TRUE))) {
             for (line in buildlog[ grep( "needed", buildlog, fixed=TRUE)] ) {
                 cat( line,"\n")
@@ -123,10 +125,10 @@ testbuild <- function(pkg, pac, specfile,
     
     if (length( grep( "Wrote:", buildlog, fixed=TRUE)) == 2) {
         cat("Success: ", pkg, " rpm package created\n")
-        cat("Success: ", pkg, " rpm package created\n", file=logfile, append=TRUE)
+        cat("Success: ", pkg, " rpm package created\n", file=log, append=TRUE)
         print(buildlog[grep("Wrote:", buildlog, fixed=TRUE)])
         for (line in  buildlog[grep("Wrote:", buildlog, fixed=TRUE)]){
-            cat(line, "\n", file=logfile, append=TRUE)
+            cat(line, "\n", file=log, append=TRUE)
         }
         return(list(status="done", value=NA, buildlog=buildlog))
     }
