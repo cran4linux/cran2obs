@@ -107,12 +107,16 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"), repo=getOption("c2o.aut
 
     if ( length( removedpkgs > 0)) { ## we keep them in repo as long, as they build
         for (pkg in which(removedpkgs %in% status$Package) ) { # not found in CRAN
-            status[ pkg , "Version"] <- NA 
+            if (! is.na( status$OBSVersion)) {
+                status[ pkg , "Version"] <- NA
+            } 
         }
     }
 
+    status <- status[  -which( is.na(status$Version) && is.na(status$OBSVersion))    , ]
+    
     if ( length( newpkgs > 0)) {
-        for (pkg in which(newpkgs %in% status$Package) ) {
+        for (pkg in which(status$Package %in% newpkgs) ) {
             status[ pkg , "recDep"]   <- cleanList( status$Package[pkg], "depends", repo=cran)
             status[ pkg , "Suggests"] <- cleanList( status$Package[pkg], "suggests", repo=cran)
             status[ pkg , "depLen"]   <- length( unlist( strsplit( status[ pkg, "recDep"], " ")))
