@@ -300,10 +300,10 @@ pkg2pac <- function( pkg,
     }
     logger( paste0( pkg, " uploaded"), log)
 
-    result <- cleanuppac( pkg, localOBS=localOBS, remoteprj=remoteprj, cran=cran, status=status, log=log)
+    result <- cleanuppac( pkg, localOBS=localOBS, remoteprj=remoteprj, log=log)
     if (! result$status == "done") {
         logger( paste0( "Failed final cleanup for ", pac), log)
-        return( list( status="fail", value="failed to construct files section"))
+        return( list( status="fail", value="failed to cleanup after upload"))
     }
     logger( paste0( pac, "cleaned up"), log)
 
