@@ -24,7 +24,7 @@ cran2repo <- function(cran=getOption("c2o.cran"),
     all.deplength <- sort(unique(status$depLen))
     for (level in all.deplength){
         pkgs <- which(status$depLen == level)
-        for (pkg in pkgs) {
+        for (pkg in status$Package[pkgs]) {
             logger(paste0("* Working on ", pkg ))
             result <- pkg2pac(pkg, localOBS=localOBS, remoteprj=remoteprj, ap=status,
                               download.cache=download.cache, binary.cache=binary.cache, log=log)
@@ -33,7 +33,7 @@ cran2repo <- function(cran=getOption("c2o.cran"),
             } else {
                 logger(paste0("Sync failed for ", pkg))
             }
-            status <- updateStatusOfpkg ( status, status$Package[pkg], result, file=statusfile, log=log) 
+            status <- updateStatusOfpkg ( status, pkg, result, file=statusfile, log=log) 
         }
     }
     return(status)
