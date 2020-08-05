@@ -172,7 +172,7 @@ setuppac <- function(pkg,
     }
     
     if (! is.na( inOBSVersion)){ # it is an update, there must be an old source file, just remove it
-        if ( !file.remove( file.path( pac, paste0( pkg, "_", obsversion, ".tar.gz")))){
+        if ( !file.remove( file.path( pac, paste0( pkg, "_", inOBSVersion, ".tar.gz")))){
             logger(paste0(pkg, ": could not rm old sources"))
             return( list( status="fail", value="coud not rm old sources"))
         }
