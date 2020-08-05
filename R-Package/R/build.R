@@ -118,7 +118,7 @@ testbuild <- function(pkg, pac, specfile,
     if ( any( grep( "error: Installed (but unpackaged) file(s) found:", buildlog, fixed=TRUE))) {
         cat( "Unpackaged file(s) in build R-", pkg, "\n", sep="")
         cat( "Unpackaged file(s) in build R-", pkg, "\n", sep="", file=log, append=TRUE)
-        return(list(status="failed", problem="unpackaged files", buildlog=buildlog)) 
+        return(list(status="failed", value="unpackaged files", buildlog=buildlog)) 
     }
     
     if (length( grep( "Wrote:", buildlog, fixed=TRUE)) == 2) {
@@ -133,5 +133,5 @@ testbuild <- function(pkg, pac, specfile,
     ## if we end here some unknown condition has prevented a successful build
     cat( "Failed to build R-", pkg, " unknown problem\n", sep="")
     cat( "Failed to build R-", pkg, " unknown problem\n", sep="", file=log, append=TRUE)
-    return(list(status="failed", problem="unknown problem", buildlog=buildlog))    
+    return(list(status="failed", value="unknown problem", buildlog=buildlog))    
 }
