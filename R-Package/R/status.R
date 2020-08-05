@@ -109,11 +109,11 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"), repo=getOption("c2o.aut
     if ( length( removedpkgs > 0)) { ## we keep them in repo as long, as they build
         pkgnumbers <- which(status$Package %in% removedpkgs)
         for (pkg in pkgnumbers ) { # not found in CRAN
-            if (! is.na( status$OBSVersion)) {
+            if (! is.na( status$OBSVersion[pkg])) {
                 status[ pkg , "Version"] <- NA
             } 
         }
-        emtpypkgs <- pkgnumbers[ which( is.na(status$Version[pkgnumbers]) &  is.na(status$OBSVersion[pkgnumbers]))]
+        emptypkgs <- pkgnumbers[ which( is.na(status$Version[pkgnumbers]) &  is.na(status$OBSVersion[pkgnumbers]))]
         if (length(emptypkgs) > 0) status <- status[ emptypkgs , ]
     }
     
