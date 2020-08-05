@@ -102,7 +102,7 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"), repo=getOption("c2o.aut
     newpkgs <- intersect( statuschanged, ap$Package)
     
     status <- merge( ap[, c("Package", "Version", "License", "NeedsCompilation")],
-                       oldstatus[, c("Package", "recDep", "Suggests", "depLen", "OBSpkg", "File", "OBSVersion", "triedVersion" )], by="Package", all=TRUE)
+                       oldstatus[, c("Package", "recDep", "Suggests", "depLen", "File", "OBSVersion", "triedVersion" )], by="Package", all=TRUE)
 
     for (pkg in which(removedpks %in% status$Package) ) { # not found in CRAN
         status[ pkg , "Version"] <- NA 
@@ -124,7 +124,6 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"), repo=getOption("c2o.aut
             ( (! is.na(status$triedVersion[pkg])) && (status$Version[pkg] != status$triedVersion[pkg]))) {
             if ( status$Package[pkg] %in% obspkgs  ) { ## seems someone somewhere else has built the package
                 obstatus <- getOBSVersion( status$Package[pkg], repo)
-                status$OBSpkg[pkg] <- paste("R-", status$Package[pkg], sep="")
                 status$File[pkg] <- obsstatus[1]
                 status$OBSVersion[pkg] <- obsstatus[2]
                 status$triedVersion <- obsstatus[2]
