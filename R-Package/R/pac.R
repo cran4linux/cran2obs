@@ -293,7 +293,7 @@ pkg2pac <- function( pkg,
 ### package successfully built!
 ### upload
 ### cleanup
-    result <- uploadpac( pkg, pkg.info$Version, type=buildtype, localOBS=localOBS, remoteprj=remoteprj, cran=cran, status=status, log=log)
+    result <- uploadpac( pkg, pkg.info$Version, buildtype=buildtype, localOBS=localOBS, remoteprj=remoteprj, log=log)
     if (! result$status == "done") {
         logger( paste0( "Failed to upload ", pkg , " to ", remoteprj), log)
         return( list( status="fail", value="failed to construct files section"))
