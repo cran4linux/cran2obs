@@ -44,7 +44,7 @@ updateStatusOfpkg <- function( status, pkg, syncresult, always.safe=TRUE, file= 
 }
 
 
-#' repoStatusCreate creates a datafram from available.packages() and
+#' repoStatusCreate creates a dataframe from available.packages() and
 #' available.packages.OBS() to have all the neccessary information to sync
 #' the given CRAN mirror to the given OBS repo
 #' @param cran is a CRAN mirror
