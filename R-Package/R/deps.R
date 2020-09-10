@@ -115,7 +115,7 @@ available.packages.OBS <- function(obsproject=getOption("c2o.auto"), quiet=TRUE)
         }
         cranpkgnames <- gsub("R-", "", obspkgs)
         obsversion <- sapply(cranpkgnames, getOBSVersion, obsproject=obsproject)
-        obspkgs <- data.frame(Package=as.character(obspkgs), OBSVersion=as.character(obsversion))
+        obspkgs <- data.frame(Package=as.character(cranpkgnames), OBSVersion=as.character(obsversion))
     } else {
         obspkgs <- data.frame(Package=character(), OBSVersion=character())
     }
