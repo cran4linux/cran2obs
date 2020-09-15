@@ -2,7 +2,7 @@
 % Please edit documentation in R/status.R
 \name{repoStatusCreate}
 \alias{repoStatusCreate}
-\title{repoStatusCreate creates a datafram from available.packages() and
+\title{repoStatusCreate creates a dataframe from available.packages() and
 available.packages.OBS() to have all the neccessary information to sync
 the given CRAN mirror to the given OBS repo}
 \usage{
@@ -28,7 +28,7 @@ a datafram containing the columns "Package", "Version", "License",
 "triedVersion"
 }
 \description{
-repoStatusCreate creates a datafram from available.packages() and
+repoStatusCreate creates a dataframe from available.packages() and
 available.packages.OBS() to have all the neccessary information to sync
 the given CRAN mirror to the given OBS repo
 }

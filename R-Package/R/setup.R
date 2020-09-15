@@ -86,3 +86,58 @@
 check.settings <- function(){
     ## TODO must fill out
 }
+
+#' show.settings shows all options set for CRAN2OBS
+#'
+#' @export
+show.settings <- function(){
+    cat("Current settings of CRAN2OBS options\n")
+
+    if (! is.null(getOption("c2o.cran") )) {
+        cat("Option c2o.cran is set to ", getOption("c2o.cran") , "\n")
+    } else {
+        cat("Option c2o.cran is not set\n")
+    }
+
+    if (! is.null(getOption("c2o.auto") )) {
+        cat("Option 'c2o.auto' is set to ", getOption("c2o.auto") , "\n")
+    } else {
+        cat("Option 'c2o.auto' is not set \n")
+    }
+    
+    if (! is.null(getOption("c2o.manual") )) {
+        cat("Option 'c2o.manual' is set to ", getOption("c2o.manual") , "\n")
+    } else {
+        cat("Option 'c2o.manual' is not set \n")
+    }
+
+    if (! is.null(getOption("c2o.localOBSdir") )) {
+        cat("Option 'c2o.localOBSdir' is set to ", getOption("c2o.localOBSdir") , "\n")
+    } else {
+        cat("Option 'c2o.localOBSdir' is not set \n")
+    }
+
+    if (! is.null(getOption("c2o.download.cache") )) {
+        cat("Option 'c2o.download.cache' is set to ", getOption("c2o.download.cache") , "\n")
+    } else {
+        cat("Option 'c2o.download.cache' is not set \n")
+    }
+
+    if (! is.null(getOption("c2o.binary.cache") )) {
+        cat("Option 'c2o.binary.cache' is set to ", getOption("c2o.binary.cache") , "\n")
+    } else {
+        cat("Option 'c2o.binary.cache' is not set \n")
+    }
+
+    if (! is.null(getOption("c2o.statusfile") )) {
+        cat("Option 'c2o.statusfile' is set to ", getOption("c2o.statusfile") , "\n")
+    } else {
+        cat("Option 'c2o.statusfile' is not set \n")
+    }
+
+    if (! is.null(getOption("c2o.logfile") )) {
+        cat("Option 'c2o.logfile' is set to ", getOption("c2o.logfile") , "\n")
+    } else {
+        cat("Option 'c2o.logfile' is not set \n")
+    }
+}
