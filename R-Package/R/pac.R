@@ -9,6 +9,7 @@
 #' @param status dataframe holding the current sync status between
 #' CRAN and remoteprj
 #' @return list "status" and "value"
+#' @export
 uploadpac <- function(pkg, version, buildtype,
                        localOBS  = getOption("c2o.localOBSdir"),
                        remoteprj = getOption("c2o.auto"),
@@ -166,15 +167,15 @@ setuppac <- function(pkg,
     }
     
     if ( !file.copy( file.path( download.cache, source0), file.path( pac, source0), overwrite=TRUE )){
-        cat(pkg, ": copy of sources failed\n")
-        cat(pkg, ": copy of sources failed\n", file=log, append=TRUE)
-        return( list( status="fail", value="copy of soources failed"))
+        logger(paste0(pkg, ": copy of sources failed")
+
+        return( list( status="fail", value="copy of sources failed"))
     }
     
     if (! is.na( inOBSVersion)){ # it is an update, there must be an old source file, just remove it
         if ( !file.remove( file.path( pac, paste0( pkg, "_", inOBSVersion, ".tar.gz")))){
             logger(paste0(pkg, ": could not rm old sources"))
-            return( list( status="fail", value="coud not rm old sources"))
+            return( list( status="fail", value="could not rm old sources"))
         }
     }
     return( list( status="done", value=pac))
@@ -260,7 +261,7 @@ pkg2pac <- function( pkg,
     }
 
     pac <- result$value
-    result <- createEmptySpec(pkg, pac, download.cache=download.cache, ap)
+    result <- createEmptySpec(pkg, pac=pac, download.cache=download.cache, status=ap)
 
     if (result$status == "fail") {
         logger(paste0("Creating empty spec failed for pkg ", pkg))

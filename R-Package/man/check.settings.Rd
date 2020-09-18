@@ -2,13 +2,18 @@
 % Please edit documentation in R/setup.R
 \name{check.settings}
 \alias{check.settings}
-\title{check.settings validates all options settings}
+\title{.onLoad prints the version number and checks settings of the package configuration
+A warning is given, if settings are not complete!}
 \usage{
 check.settings()
 }
 \value{
+No return value
+check.settings validates all options settings
+
 TRUE if build can start, FALSE otherwise, but tries to give hints.
 }
 \description{
-check.settings validates all options settings
+.onLoad prints the version number and checks settings of the package configuration
+A warning is given, if settings are not complete!
 }

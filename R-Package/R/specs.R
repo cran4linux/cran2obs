@@ -191,12 +191,11 @@ createEmptySpec <- function(pkg,
                             pac=file.path(getOption("c2o.localOBSdir"), getOption("c2o.auto"), paste0("R-",pkg)),
                             download.cache=getOption("c2o.download.cache"),
                             cran=getOption("c2o.cran"),
-                            ap = getOption("c2o.status"),
+                            status = getOption("c2o.status"),
                             log = getOption("c2o.logfile")) {
     ## ap should be a status file
                 
-    cat("Creating empty spec for pkg ", pkg, "\n")
-    cat("Creating empty spec for pkg ", pkg, "\n", file=log, append=TRUE)
+    logger(paste0("** Creating empty spec for pkg ", pkg))
     
     if (! file.exists(system.file("specfile.tpl", package="CRAN2OBS"))){
         cat("specfile template not found ?!\n")
@@ -207,7 +206,7 @@ createEmptySpec <- function(pkg,
     
     spectpl <- readLines(system.file("specfile.tpl", package="CRAN2OBS"))
         
-    pkg.info <- ap[ ap$Package == pkg, ]
+    pkg.info <- status[ status$Package == pkg, ]
     
     source0 <-  paste0(pkg,"_",pkg.info$Version,".tar.gz")
     specfile <- paste0(pac,"/R-",pkg,".spec")
