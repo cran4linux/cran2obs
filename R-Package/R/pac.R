@@ -167,7 +167,7 @@ setuppac <- function(pkg,
     }
     
     if ( !file.copy( file.path( download.cache, source0), file.path( pac, source0), overwrite=TRUE )){
-        logger(paste0(pkg, ": copy of sources failed")
+        logger(paste0(pkg, ": copy of sources failed"))
 
         return( list( status="fail", value="copy of sources failed"))
     }
