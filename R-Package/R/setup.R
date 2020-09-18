@@ -94,7 +94,7 @@ show.settings <- function(){
     cat("Current settings of CRAN2OBS options\n")
 
     if (! is.null(getOption("c2o.cran") )) {
-        cat("Option c2o.cran is set to ", getOption("c2o.cran") , "\n")
+        cat("Option 'c2o.cran' is set to ", getOption("c2o.cran") , "\n")
     } else {
         cat("Option c2o.cran is not set\n")
     }

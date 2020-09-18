@@ -29,7 +29,7 @@ A version 1.0 should present users of flavours of SUSE Linux, either OpenSUSE
 or SLES, a seamless integration of packages present in OBS and packages
 in CRAN, Bioconductor, or even in github.
 
-Already implemented
+Already implemented (TODO update)
 -------------------
 
 For a start we implemented a function showOBSstatus, giving
