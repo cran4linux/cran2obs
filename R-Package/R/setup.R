@@ -96,7 +96,7 @@ show.settings <- function(){
     if (! is.null(getOption("c2o.cran") )) {
         cat("Option 'c2o.cran' is set to ", getOption("c2o.cran") , "\n")
     } else {
-        cat("Option c2o.cran is not set\n")
+        cat("Option 'c2o.cran' is not set\n")
     }
 
     if (! is.null(getOption("c2o.auto") )) {
