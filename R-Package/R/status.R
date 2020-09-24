@@ -28,7 +28,8 @@ statusOBS <- function(pkg, remoteproj=getOption("c2o.auto")){
 #' @return updated status dataframe
 #' 
 #' @export
-updateStatusOfpkg <- function( status, pkg, syncresult, always.safe=TRUE, file= getOption("c2o.statusfile"), log=getOption("c2o.logfile")){
+updateStatusOfpkg <- function( status, pkg, syncresult, always.save=TRUE, file= getOption("c2o.statusfile"), log=getOption("c2o.logfile")){
+    logger("Update of pkg status")
     if (! pkg %in% status[, "Package"]) {
         msg <- paste0("Seems ", pkg, " has no status")
         logger(msg, log)
@@ -39,7 +40,7 @@ updateStatusOfpkg <- function( status, pkg, syncresult, always.safe=TRUE, file= 
         status[i , "OBSVersion"] <- syncresult$value
     }
     status[i , "triedVersion"] <- syncresult$value
-    if (always.safe) write.table(status, file=file, row.names=FALSE, sep=";")
+    if (always.save) write.table(status, file=file, row.names=FALSE, sep=";")
     return(status)
 }
 
@@ -102,19 +103,23 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"), repo=getOption("c2o.aut
 
     newpkgs <- setdiff( ap$Package, oldstatus$Package )
     removedpkgs <- oldstatus$Package[ which(! oldstatus$Package %in% ap$Package)] ## no longer in available.packages
-    
-    status <- merge( ap[, c("Package", "Version", "License", "NeedsCompilation")],
-                       oldstatus[, c("Package", "recDep", "Suggests", "depLen", "OBSVersion", "triedVersion" )], by="Package", all=TRUE)
 
     if ( length( removedpkgs > 0)) { ## we keep them in repo as long, as they build
-        pkgnumbers <- which(status$Package %in% removedpkgs)
+        ## but if not in OBS, remove every mention of package.
+        pkgnumbers <- which( (oldstatus$Package %in% removedpkgs) & is.na(oldstatus$OBSVersion) )
+        oldstatus <- oldstatus[-pkgnumbers,]
+    }
+    
+    status <- merge( ap[, c("Package", "Version", "License", "NeedsCompilation")],
+                    oldstatus[, c("Package", "recDep", "Suggests", "depLen", "OBSVersion", "triedVersion" )], by="Package", all=TRUE)
+    
+    removedpkgs <- oldstatus$Package[ which(! oldstatus$Package %in% ap$Package)] ## no longer in available.packages, but in OBS
+
+    if ( length( removedpkgs > 0)) { ## we keep them in repo as long, as they build
+        pkgnumbers <- which( status$Package %in% removedpkgs)
         for (pkg in pkgnumbers ) { # not found in CRAN
-            if (! is.na( status$OBSVersion[pkg])) {
-                status[ pkg , "Version"] <- NA
-            } 
+            status[ pkg , "Version"] <- NA
         }
-        emptypkgs <- pkgnumbers[ which( is.na(status$Version[pkgnumbers]) &  is.na(status$OBSVersion[pkgnumbers]))]
-        if (length(emptypkgs) > 0) status <- status[ emptypkgs , ]
     }
     
     if ( length( newpkgs > 0)) {

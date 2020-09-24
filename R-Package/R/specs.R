@@ -198,9 +198,7 @@ createEmptySpec <- function(pkg,
     logger(paste0("** Creating empty spec for pkg ", pkg))
     
     if (! file.exists(system.file("specfile.tpl", package="CRAN2OBS"))){
-        cat("specfile template not found ?!\n")
-        cat("specfile template not found ?!\n", file=log, append=TRUE)
-
+        logger("*** specfile template not found ?!")
         return(list(status="fail", value="Specfile template not found."))
     }
     

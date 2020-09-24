@@ -31,10 +31,10 @@ cran2repo <- function(cran=getOption("c2o.cran"),
             result <- pkg2pac(pkg, localOBS=localOBS, remoteprj=remoteprj, ap=status,
                               download.cache=download.cache, binary.cache=binary.cache, log=log)
             if (result$status == "done") {
-                logger(paste0("Sync finished for ", pkg))
+                logger(paste0("** Sync finished for ", pkg))
                 uploadpac(pkg, status$Version[pkg], "initial build")
             } else {
-                logger(paste0("Sync failed for ", pkg))
+                logger(paste0("** Sync failed for ", pkg))
             }
             status <- updateStatusOfpkg ( status, pkg, result, file=statusfile, log=log) 
         }

@@ -14,12 +14,12 @@ buildforfiles <- function(pkg, pac, specfile, localOBS=getOption("c2o.localOBSdi
                           binary.cache=getOption("c2o.binary.cache"),
                           ap = getOption("c2o.status"),
                           log=getOption("c2o.logfile")){
-
+    logger("** Build to construct files section")
     speclines <- readLines( specfile)
     result <- dropFileSection( speclines)
     
     if ( result$status != "done") {
-        logger(paste0("dropping file section failed"))
+        logger("dropping file section failed")
         return (list(status="failed", value=result$problem))
     }
     writeLines( result$speclines, specfile)
@@ -30,8 +30,7 @@ buildforfiles <- function(pkg, pac, specfile, localOBS=getOption("c2o.localOBSdi
     ## we dont need to check for success, because %files section is empty and therefore fail by design
     
     if (! result$value == "unpackaged files"){
-        cat( "buildforfiles: Failed to build files section for", pkg, " \n", sep="")
-        cat( "buildforfiles: Failed to build files section for", pkg, " \n", sep="", file=log, append=TRUE)
+        logger(paste0( "buildforfiles: Failed to build files section for ", pkg))
         return(list(status="failed", problem=result$problem))
     }
 
@@ -61,7 +60,7 @@ testbuild <- function(pkg, pac, specfile,
                       binary.cache=getOption("c2o.binary.cache"),
                       ap = getOption("c2o.status"),
                       log=getOption("c2o.logfile")){
-
+    logger(paste0("** testbuild for pkg ", pkg))
     cmd <- paste0("\""," cd ", pac,
                  "; osc build --prefer-pkgs=", binary.cache, " --keep-pkgs=", binary.cache,
                  " --local-package --ccache ", specfile, "\"" )
@@ -75,23 +74,21 @@ testbuild <- function(pkg, pac, specfile,
                          
     
     if ( any ( grep( "ERROR: dependency", buildlog, fixed=TRUE)) ) { ### missing some dependency, no chance
-        cat( "The following missing dependencies must be available to build R-", pkg, "\n", sep="")
-        cat( "The following missing dependencies must be available to build R-", pkg, "\n", sep="", file=log, append=TRUE)
+        logger(paste0( "The following missing dependencies must be available to build R-", pkg, "\n", sep=""))
+
         for (line in buildlog[ grep( "ERROR: dependency", buildlog, fixed=TRUE)] ) {
-            cat( line,"\n")
-            cat( line,"\n", file=log, append=TRUE)
-            cat("testbuild failed: Missing dependency\n", file=log, append=TRUE)
+            logger(line)
+            logger("testbuild failed: Missing dependency")
         }
         return(list(status="failed", value="Missing dependencies in R CMD INSTALL", buildlog=buildlog))
     }
     
     if ( any ( grep( "nothing provides", buildlog, fixed=TRUE)) ) { ### missing R-rpms, no chance
-        cat( "The following missing dependencies must be built first to build R-", pkg, "\n", sep="")
-        cat( "The following missing dependencies must be built first to build R-", pkg, "\n", sep="", file=log, append=TRUE)
+        logger(paste0( "The following missing dependencies must be built first to build R-", pkg))
+
         for (line in buildlog[ grep( "nothing provides", buildlog, fixed=TRUE)] ) {
-            cat( line,"\n")
-            cat( line,"\n", file=log, append=TRUE)
-            cat("testbuild Failed: Missing R-packages\n", file=log, append=TRUE)
+            logger( line)
+            logger("testbuild Failed: Missing R-packages")
         }
         return(list(status="failed", value="missing R-packages", buildlog=buildlog))
     }

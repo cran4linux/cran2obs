@@ -208,11 +208,10 @@ pkg2pac <- function( pkg,
                       binary.cache = getOption( "c2o.binary.cache"),
                       log       = getOption( "c2o.logfile")) {
     
-    logger(paste0("** Syncing ", pkg, " to OBS"))
+    logger(paste0("* Syncing ", pkg, " to OBS"))
 
     if ( ! pkg %in% ap[ , "Package"] ) {
-        cat( "Seems ", pkg, " not in status file\n")
-        cat( "Seems ", pkg, " not in status file\n", file=log, append=TRUE)
+        logger(paste0( "Seems ", pkg, " not in status file"))
         return( list( status="fail", problem=paste( "Package not in status file")))
     }
     
@@ -245,7 +244,7 @@ pkg2pac <- function( pkg,
         depsinOBS <- intersect( deps, status$Package)
         if ( pkg.info$depLen != length(depsinOBS)) { ## missing dependencies, no chance
             missing <- setdiff( deps, depsinOBS )
-            msg <- "missing R package dependencies"
+            msg <- "** missing R package dependencies"
             logger( paste0(msg, " to build " , pkg), log)
             logger( paste0( paste( "R-", missing, sep=""), collapse=" "), log)
             return( list( status = "fail", value=msg))
@@ -298,18 +297,21 @@ pkg2pac <- function( pkg,
 ### upload
 ### cleanup
     result <- uploadpac( pkg, pkg.info$Version, buildtype=buildtype, localOBS=localOBS, remoteprj=remoteprj, log=log)
+
     if (! result$status == "done") {
         logger( paste0( "Failed to upload ", pkg , " to ", remoteprj), log)
         return( list( status="fail", value="failed to construct files section"))
     }
+
     logger( paste0( pkg, " uploaded"), log)
 
-    result <- cleanuppac( pkg, localOBS=localOBS, remoteprj=remoteprj, log=log)
-    if (! result$status == "done") {
-        logger( paste0( "Failed final cleanup for ", pac), log)
-        return( list( status="fail", value="failed to cleanup after upload"))
-    }
-    logger( paste0( pac, "cleaned up"), log)
+    ## result <- cleanuppac( pkg, localOBS=localOBS, remoteprj=remoteprj, log=log)
+    ## if (! result$status == "done") {
+    ##     logger( paste0( "Failed final cleanup for ", pac), log)
+    ##     return( list( status="fail", value="failed to cleanup after upload"))
+    ## }
+    
+    ## logger( paste0( pac, " cleaned up"), log)
 
     return( syncresult)
 }

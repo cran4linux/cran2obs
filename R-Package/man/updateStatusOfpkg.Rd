@@ -9,7 +9,7 @@ updateStatusOfpkg(
   status,
   pkg,
   syncresult,
-  always.safe = TRUE,
+  always.save = TRUE,
   file = getOption("c2o.statusfile"),
   log = getOption("c2o.logfile")
 )
