@@ -28,7 +28,7 @@ cran2repo <- function(cran=getOption("c2o.cran"),
         pkgs <- which(status$depLen == level)
         for (pkg in status$Package[pkgs]) {
             logger(paste0("* Working on ", pkg ))
-            result <- pkg2pac(pkg, localOBS=localOBS, remoteprj=remoteprj, ap=status,
+            result <- pkg2pac(pkg, localOBS=localOBS, remoteprj=remoteprj, status=status,
                               download.cache=download.cache, binary.cache=binary.cache, log=log)
             if (result$status == "done") {
                 logger(paste0("** Sync finished for ", pkg))
