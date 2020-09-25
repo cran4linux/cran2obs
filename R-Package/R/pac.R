@@ -203,7 +203,7 @@ pkg2pac <- function( pkg,
                       localOBS  = getOption( "c2o.localOBSdir"),
                       remoteprj = getOption( "c2o.auto"),
                       cran      = getOption( "c2o.cran"),
-                      ap        = getOption( "c2o.status"),
+                      status    = getOption( "c2o.status"),
                       download.cache = getOption( "c2o.download.cache"),
                       binary.cache = getOption( "c2o.binary.cache"),
                       log       = getOption( "c2o.logfile")) {
@@ -215,7 +215,7 @@ pkg2pac <- function( pkg,
         return( list( status="fail", problem=paste( "Package not in status file")))
     }
     
-    pkg.info <- ap[ ap$Package == pkg, ]
+    pkg.info <- status[ status$Package == pkg, ]
     logger("pkg info", log)
     logger(paste(pkg.info),log)
     
@@ -270,7 +270,7 @@ pkg2pac <- function( pkg,
     specfile <- result$value
 ### speclines <- readLines(con=specfile)
 ### first build
-    result <- buildforfiles( pkg, pac, specfile, localOBS=localOBS, remoteprj=remoteprj, download.cache=download.cache, binary.cache=binary.cache, ap=ap, log=log)
+    result <- buildforfiles( pkg, pac, specfile, localOBS=localOBS, remoteprj=remoteprj, download.cache=download.cache, binary.cache=binary.cache, ap=status, log=log)
 
     if (! result$status == "done") {
         cat( "Failed to construct files section for ", pkg, " \n", sep="")
@@ -283,7 +283,7 @@ pkg2pac <- function( pkg,
     specfile <- result$value
     
     ## second build!
-    result <- testbuild( pkg, pac, specfile, ap=ap, log=log)
+    result <- testbuild( pkg, pac, specfile, ap=status, log=log)
 
     if ( result$status == "fail") {
         logger( paste0( "Failed to automatically build ", pkg), log)
