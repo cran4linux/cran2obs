@@ -210,7 +210,7 @@ pkg2pac <- function( pkg,
     
     logger(paste0("* Syncing ", pkg, " to OBS"))
 
-    if ( ! pkg %in% ap[ , "Package"] ) {
+    if ( ! pkg %in% status[ , "Package"] ) {
         logger(paste0( "Seems ", pkg, " not in status file"))
         return( list( status="fail", problem=paste( "Package not in status file")))
     }
