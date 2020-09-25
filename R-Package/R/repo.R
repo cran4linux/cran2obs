@@ -6,7 +6,6 @@
 #' @param cran CRAN mirror to use
 #' @param localOBS root directory to build remoteprj in locally
 #' @param repo OBS repo to use
-#' @param status dataframe containing status information about
 #' @param binary.cache directory where newly built pacs are found
 #' @param download.cache directory where source files from cran cached
 #' sync status
@@ -21,8 +20,8 @@ cran2repo <- function(cran=getOption("c2o.cran"),
                       statusfile = getOption("c2o.statusfile"),
                       download.cache = getOption("c2o.download.cache"),
                       binary.cache = getOption("c2o.binary.cache"),
-                      status= getOption( "c2o.status"),
                       log = getOption("c2o.logfile")){
+    status <- read.table(statusfile, header=TRUE, sep=";", colClasses="character")
     all.deplength <- sort(unique(status$depLen))
     for (level in all.deplength){
         pkgs <- which(status$depLen == level)
