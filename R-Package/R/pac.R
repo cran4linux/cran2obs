@@ -155,8 +155,9 @@ setuppac <- function(pkg,
 
     ## pac checked out or created, get the sources
 
-    version <- gsub( "-", ".", status[ which( status$Package == pkg), "Version"])
-    source0 <- paste0( pkg, "_", version, ".tar.gz")
+    ## version <- gsub( "-", ".", status[ which( status$Package == pkg), "Version"])
+    ##    version <- status[ which( status$Package == pkg), "Version"]
+    source0 <- paste0( pkg, "_", status[ which( status$Package == pkg), "Version"]   , ".tar.gz")
 
     if (! file.exists( file.path( download.cache, source0))) {
         if ( download.file( file.path( cran ,"src/contrib", source0),
