@@ -102,7 +102,7 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"),
         stop("Status file does not exist")
     }
     
-    oldstatus <- read.table( file, header=TRUE, sep=";")
+    oldstatus <- read.table( file, header=TRUE, sep=";", colClasses="character")
     if (! is.na(new.file) ) file=new.file
     
     ## first merge new info from available packages
