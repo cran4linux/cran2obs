@@ -11,7 +11,8 @@ repoStatusUpdate(
   repo = getOption("c2o.auto"),
   file = getOption("c2o.statusfile"),
   new.file = NA,
-  overwrite = FALSE
+  overwrite = FALSE,
+  log = getOption("c2o.logfile")
 )
 }
 \arguments{
@@ -19,9 +20,13 @@ repoStatusUpdate(
 
 \item{repo}{is an OBS repo}
 
-\item{file}{is the name of the file which will store the information}
+\item{file}{is the name of the file where the information is stored}
+
+\item{new.file}{is the name of the file which will store the information}
 
 \item{overwrite}{is a flag if an existing status file shall be overwritten}
+
+\item{log}{logfile}
 }
 \value{
 a dataframe containing the columns "Package", "Version", "License",
