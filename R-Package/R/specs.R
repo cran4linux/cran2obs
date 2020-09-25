@@ -180,7 +180,7 @@ dropFileSection <- function(speclines){
 #' @param targetdir The directory where rpmbuild should do its work.
 #' Sources of packages reside in rpmbuildroot/SOURCES, SPECS in rpmbuildroot/SPECS
 #' @param download.cache Directory where sources are stored
-#' @param ap A dataframe like the result of available.packages() or cleanDeps()
+#' @param status A dataframe like the result of available.packages() or cleanDeps()
 #' createEmptySpec uses Package, Version, and NeedsCompilation of that dataframe.
 #' 
 #' @return list of status, 'fail' and 'done' and value. 'value' is either the filename of the generated specfile
