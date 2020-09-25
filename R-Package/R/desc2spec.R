@@ -110,7 +110,7 @@ updateOBSpkg <-  function(pkg, localOBSdir=getOption("c2o.localOBSdir"), remotep
     }
 
     ## Last try: rebuild spec file from scratch
-    result <- createEmptySpec( pkg, pkgdir, download.cache=download.cache, ap=ap)
+    result <- createEmptySpec( pkg, pkgdir, download.cache=download.cache, status=ap)
     if (! grepl( ".spec", result)){ ##failure
         cat( "Failed: ", pkg, " no specfile created. Error was ", specfile, "\n")
         return( "Failed: could not create specfile")

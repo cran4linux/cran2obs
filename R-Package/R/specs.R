@@ -193,7 +193,6 @@ createEmptySpec <- function(pkg,
                             cran=getOption("c2o.cran"),
                             status = getOption("c2o.status"),
                             log = getOption("c2o.logfile")) {
-    ## ap should be a status file
                 
     logger(paste0("** Creating empty spec for pkg ", pkg))
     
