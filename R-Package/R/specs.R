@@ -222,7 +222,7 @@ createEmptySpec <- function(pkg,
         encoding <- trimws( gsub( "Encoding: ", "",
                                  description[ grep( "Encoding: ", description, fixed=TRUE)]), which="both")
         if (encoding %in% c("latin1", "latin2")) {
-            system2( "recode", args=c( "..UTF-8", descfile))
+            system2( "recode", args=c( "..UTF-8", desc.file))
             ## re-read re-encoded DESCRITION
             description <- readLines(desc.file) 
         }
