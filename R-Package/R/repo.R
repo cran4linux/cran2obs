@@ -21,21 +21,27 @@ cran2repo <- function(cran=getOption("c2o.cran"),
                       download.cache = getOption("c2o.download.cache"),
                       binary.cache = getOption("c2o.binary.cache"),
                       log = getOption("c2o.logfile")){
+
     status <- read.table(statusfile, header=TRUE, sep=";", colClasses="character")
     all.deplength <- sort(unique(status$depLen))
     for (level in all.deplength){
         pkgs <- which(status$depLen == level)
         for (pkg in status$Package[pkgs]) {
             logger(paste0("* Working on ", pkg ))
-            result <- pkg2pac(pkg, localOBS=localOBS, remoteprj=remoteprj, status=status,
-                              download.cache=download.cache, binary.cache=binary.cache, log=log)
-            if (result$status == "done") {
-                logger(paste0("** Sync finished for ", pkg))
-                uploadpac(pkg, status$Version[pkg], "initial build")
+            if ( (! is.na(status$OBSVersion)   & (status$Version[pkg] != status$OBSVersion[pkg])) |
+                 (! is.na(status$triedVersion) & (status$Version[pkg] != status$triedVersion[pgk]))) {
+                result <- pkg2pac(pkg, localOBS=localOBS, remoteprj=remoteprj, status=status,
+                                  download.cache=download.cache, binary.cache=binary.cache, log=log)
+                if (result$status == "done") {
+                    logger(paste0("** Sync finished for ", pkg))
+                    uploadpac(pkg, status$Version[pkg], "initial build")
+                } else {
+                    logger(paste0("** Sync failed for ", pkg))
+                }
+                status <- updateStatusOfpkg ( status, pkg, result, file=statusfile, log=log) 
             } else {
-                logger(paste0("** Sync failed for ", pkg))
+                logger( "latest version already tried for OBS")
             }
-            status <- updateStatusOfpkg ( status, pkg, result, file=statusfile, log=log) 
         }
     }
     return(status)
