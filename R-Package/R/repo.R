@@ -29,8 +29,8 @@ cran2repo <- function(cran=getOption("c2o.cran"),
         for (pkg in status$Package[pkgs]) {
             logger(paste0("* Working on ", pkg ))
             num <- which(status$Package == pkg)
-            if ( ( (! is.na(status$OBSVersion[num]  )) & (status$Version[num] != status$OBSVersion[num]  )) |
-                 ( (! is.na(status$triedVersion[num])) & (status$Version[num] != status$triedVersion[num]))) {
+            if ( (is.na(status$OBSVersion[num]) & is.na(status$triedVersion[num])) |
+                 ( !is.na(status$triedVersion[num]) &  status$Version[num] != status$triedVersion[num])  ){ 
                 result <- pkg2pac(pkg, localOBS=localOBS, remoteprj=remoteprj, status=status,
                                   download.cache=download.cache, binary.cache=binary.cache, log=log)
                 if (result$status == "done") {
