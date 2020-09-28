@@ -13,7 +13,7 @@ pkg2pac(
   localOBS = getOption("c2o.localOBSdir"),
   remoteprj = getOption("c2o.auto"),
   cran = getOption("c2o.cran"),
-  ap = getOption("c2o.status"),
+  status = getOption("c2o.status"),
   download.cache = getOption("c2o.download.cache"),
   binary.cache = getOption("c2o.binary.cache"),
   log = getOption("c2o.logfile")
@@ -29,9 +29,9 @@ you want to create your package in.}
 
 \item{cran}{CRAN mirror to use}
 
-\item{ap}{A dataframe containing the sync status of cran and remoteprj}
-
 \item{rpmbuildroot}{The directory where rpmbuild should do its work}
+
+\item{ap}{A dataframe containing the sync status of cran and remoteprj}
 }
 \value{
 list of 'status', "done" or "fail" and 'problem' set to NA

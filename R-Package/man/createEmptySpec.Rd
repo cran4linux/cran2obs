@@ -21,11 +21,11 @@ createEmptySpec(
 
 \item{download.cache}{Directory where sources are stored}
 
+\item{status}{A dataframe like the result of available.packages() or cleanDeps()
+createEmptySpec uses Package, Version, and NeedsCompilation of that dataframe.}
+
 \item{targetdir}{The directory where rpmbuild should do its work.
 Sources of packages reside in rpmbuildroot/SOURCES, SPECS in rpmbuildroot/SPECS}
-
-\item{ap}{A dataframe like the result of available.packages() or cleanDeps()
-createEmptySpec uses Package, Version, and NeedsCompilation of that dataframe.}
 }
 \value{
 list of status, 'fail' and 'done' and value. 'value' is either the filename of the generated specfile

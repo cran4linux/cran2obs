@@ -15,7 +15,6 @@ cran2repo(
   statusfile = getOption("c2o.statusfile"),
   download.cache = getOption("c2o.download.cache"),
   binary.cache = getOption("c2o.binary.cache"),
-  status = getOption("c2o.status"),
   log = getOption("c2o.logfile")
 )
 }
@@ -28,8 +27,6 @@ cran2repo(
 sync status}
 
 \item{binary.cache}{directory where newly built pacs are found}
-
-\item{status}{dataframe containing status information about}
 
 \item{log}{logfile to use}
 

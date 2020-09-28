@@ -69,11 +69,8 @@ testbuild <- function(pkg, pac, specfile,
         buildlog <- system2("bash", args=c("-c", cmd), stdout=TRUE, stderr=TRUE)
     )
 
-    logger("after testbuild")
-    
-##    write(buildlog, file="oscbuildutf8")
-    
-    buildlog <- trimws( gsub( "^\\[.*\\]", "", buildlog), which="left")
+    buildlog <- trimws( gsub( "^\\[.*\\]", "", iconv(buildlog, "UTF-8", "UTF-8", sub="")), which="left")
+
     logger( buildlog, log)
                          
     
