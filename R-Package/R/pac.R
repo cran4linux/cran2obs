@@ -160,7 +160,7 @@ setuppac <- function(pkg,
     source0 <- paste0( pkg, "_", status[ which( status$Package == pkg), "Version"]   , ".tar.gz")
 
     if (! file.exists( file.path( download.cache, source0))) {
-        if ( if class( try( download.file( file.path( cran ,"src/contrib", source0),
+        if ( class( try( download.file( file.path( cran ,"src/contrib", source0),
                            file.path( download.cache, source0)))) == "try-error"){
             logger( paste0(pkg, ": sources not found on CRAN"))
             return( list( status="fail", value="no sources found"))
