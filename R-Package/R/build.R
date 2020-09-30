@@ -63,7 +63,7 @@ testbuild <- function(pkg, pac, specfile,
     logger(paste0("** testbuild for pkg ", pkg))
     cmd <- paste0("\""," cd ", pac,
                  "; osc build --prefer-pkgs=", binary.cache, " --keep-pkgs=", binary.cache,
-                 " --local-package --ccache ", specfile, "\"" )
+                 " --local-package ", specfile, "\"" )
 
     suppressWarnings(
         buildlog <- system2("bash", args=c("-c", cmd), stdout=TRUE, stderr=TRUE)
