@@ -69,8 +69,8 @@ testbuild <- function(pkg, pac, specfile,
         buildlog <- system2("bash", args=c("-c", cmd), stdout=TRUE, stderr=TRUE)
     )
 
-    buildlog <- trimws( gsub( "^\\[.*\\]", "", iconv(buildlog, "UTF-8", "UTF-8", sub="")), which="left")
-
+    buildlog <- cleanBuildlog(buildlog) ## lots of lines, usually no useful info
+    
     logger( buildlog, log)
                          
     
@@ -115,14 +115,18 @@ testbuild <- function(pkg, pac, specfile,
     ## no fatal flaws, may be lucky?
 
     if ( any( grep( "error: Installed (but unpackaged) file(s) found:", buildlog, fixed=TRUE))) {
-        cat( "Unpackaged file(s) in build R-", pkg, "\n", sep="")
-        cat( "Unpackaged file(s) in build R-", pkg, "\n", sep="", file=log, append=TRUE)
+        logger( paste0("Unpackaged file(s) in build R-", pkg))
         return(list(status="failed", value="unpackaged files", buildlog=buildlog)) 
+    }
+
+    if ( any( grep( "badness.*exceeds.*aborting", buildlog))){
+        logger( paste0("Probably must be split in ", pkg, " and ", pkg, "-devel"))
+        return( list( status="failed", value="badness exceeds limit", buildlog=buildlog))
     }
     
     if (length( grep( "Wrote:", buildlog, fixed=TRUE)) == 2) {
-        cat("Success: ", pkg, " rpm package created\n")
-        cat("Success: ", pkg, " rpm package created\n", file=log, append=TRUE)
+        logger( paste0("Success: ", pkg, " rpm package created"))
+
         print(buildlog[grep("Wrote:", buildlog, fixed=TRUE)])
         for (line in  buildlog[grep("Wrote:", buildlog, fixed=TRUE)]){
             cat(line, "\n", file=log, append=TRUE)

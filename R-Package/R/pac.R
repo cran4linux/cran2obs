@@ -242,7 +242,7 @@ pkg2pac <- function( pkg,
     ## due to binary.cache we can use packages still not publishes in OBS
     if (pkg.info$depLen > 0) {
         deps <- unlist(strsplit(pkg.info$recDep, " "))
-        depsinOBS <- intersect( deps, status$Package)
+        depsinOBS <- intersect( deps, status$Package[ ! is.na(status$OBSVersion) ])
         if ( pkg.info$depLen != length(depsinOBS)) { ## missing dependencies, no chance
             missing <- setdiff( deps, depsinOBS )
             msg <- "** missing R package dependencies"

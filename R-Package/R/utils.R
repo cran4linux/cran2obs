@@ -1,3 +1,17 @@
+#' cleanBuildlog removes useless parts of the output
+#' - timestamps get removed
+#' - whitespace gets removed
+#' - setup info from osc gets removed
+#' @param buildlog array of lines resulting from call to osc
+#' @return cleaned up version of input
+cleanBuildlog <- function(buildlog){
+    buildlog <- trimws( gsub( "^\\[.*\\]", "", iconv(buildlog, "UTF-8", "UTF-8", sub="")), which="left")
+    startoscsetup <- grep("^build R-", buildlog)
+    endoscsetup <- grep("^mktexlsr: Done.", buildlog)
+    buildlog[-(startoscsetup:endoscsetup)]
+}
+
+
 #' logger writes a character string in the console and append it to file
 #' If msg is more than one line, only written to file
 #' @param msg character string
