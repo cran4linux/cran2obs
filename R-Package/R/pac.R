@@ -265,7 +265,7 @@ pkg2pac <- function( pkg,
 
     if (result$status == "fail") {
         logger(paste0("Creating empty spec failed for pkg ", pkg))
-        return( list( status="fail", problem=paste( "creating empty spec failed")))
+        return( list( status="fail", value="creating empty spec failed"))
     }
 
     specfile <- result$value
@@ -274,8 +274,7 @@ pkg2pac <- function( pkg,
     result <- buildforfiles( pkg, pac, specfile, localOBS=localOBS, remoteprj=remoteprj, download.cache=download.cache, binary.cache=binary.cache, ap=status, log=log)
 
     if (! result$status == "done") {
-        cat( "Failed to construct files section for ", pkg, " \n", sep="")
-        cat( "Failed to construct files section for ", pkg, " \n", sep="", file = log, append =TRUE)
+        logger( paste0( "Failed to construct files section for ", pkg))
         return( list( status="fail", value="failed to construct files section"))
     }
 
