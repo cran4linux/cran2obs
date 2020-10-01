@@ -6,8 +6,8 @@
 #' @return cleaned up version of input
 cleanBuildlog <- function(buildlog){
     buildlog <- trimws( gsub( "^\\[.*\\]", "", iconv(buildlog, "UTF-8", "UTF-8", sub="")), which="left")
-    startoscsetup <- grep("^build R-", buildlog)
-    endoscsetup <- grep("^mktexlsr: Done.", buildlog)
+    startoscsetup <- grep("Scanning", buildlog)
+    endoscsetup <- grep("mktexlsr: Done.", buildlog)
     buildlog[-(startoscsetup:endoscsetup)]
 }
 
