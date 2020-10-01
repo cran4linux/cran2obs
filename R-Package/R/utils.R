@@ -8,7 +8,11 @@ cleanBuildlog <- function(buildlog){
     buildlog <- trimws( gsub( "^\\[.*\\]", "", iconv(buildlog, "UTF-8", "UTF-8", sub="")), which="left")
     startoscsetup <- grep("Scanning", buildlog)
     endoscsetup <- grep("mktexlsr: Done.", buildlog)
-    buildlog[-(startoscsetup:endoscsetup)]
+    if ( ( length( startoscsetup) == 1) &
+         ( length( endoscsetup) == 1) &
+         ( endoscsetup > startoscsetup)) {
+        buildlog[-(startoscsetup:endoscsetup)]
+    }
 }
 
 
