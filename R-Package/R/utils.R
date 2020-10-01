@@ -9,8 +9,7 @@ cleanBuildlog <- function(buildlog){
     startoscsetup <- grep("Scanning", buildlog)
     endoscsetup <- grep("mktexlsr: Done.", buildlog)
     if ( ( length( startoscsetup) == 1) &
-         ( length( endoscsetup) == 1) &
-         ( endoscsetup > startoscsetup)) {
+         ( length( endoscsetup) == 1)) {
         buildlog[-(startoscsetup:endoscsetup)]
     }
 }
