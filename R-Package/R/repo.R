@@ -23,7 +23,7 @@ cran2repo <- function(cran=getOption("c2o.cran"),
                       log = getOption("c2o.logfile")){
 
     status <- read.table(statusfile, header=TRUE, sep=";", colClasses="character")
-    all.deplength <- sort(unique(status$depLen))
+    all.deplength <- sort(unique(as.numeric(status$depLen)))
     for (level in all.deplength){
         pkgs <- which(status$depLen == level)
         for (pkg in status$Package[pkgs]) {
