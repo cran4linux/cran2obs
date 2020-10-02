@@ -29,19 +29,23 @@ cran2repo <- function(cran=getOption("c2o.cran"),
         for (pkg in status$Package[pkgs]) {
             logger(paste0("* Working on ", pkg ))
             num <- which(status$Package == pkg)
-            if ( (is.na(status$OBSVersion[num]) & is.na(status$triedVersion[num])) |
-                 ( !is.na(status$triedVersion[num]) &  status$Version[num] != status$triedVersion[num])  ){ 
-                result <- pkg2pac(pkg, localOBS=localOBS, remoteprj=remoteprj, status=status,
-                                  download.cache=download.cache, binary.cache=binary.cache, log=log)
-                if (result$status == "done") {
-                    logger(paste0("** Sync finished for ", pkg))
-                    uploadpac(pkg, status$Version[pkg], "initial build")
+            if (!is.na(status$Version[num])) {
+                if ( (is.na(status$OBSVersion[num]) & is.na(status$triedVersion[num])) |
+                     ( !is.na(status$triedVersion[num]) &  status$Version[num] != status$triedVersion[num])  ){ 
+                    result <- pkg2pac(pkg, localOBS=localOBS, remoteprj=remoteprj, status=status,
+                                      download.cache=download.cache, binary.cache=binary.cache, log=log)
+                    if (result$status == "done") {
+                        logger(paste0("** Sync finished for ", pkg))
+                        uploadpac(pkg, status$Version[pkg], "initial build")
+                    } else {
+                        logger(paste0("** Sync failed for ", pkg))
+                    }
+                    status <- updateStatusOfpkg ( status, pkg, result, file=statusfile, log=log) 
                 } else {
-                    logger(paste0("** Sync failed for ", pkg))
+                    logger( "latest version already tried for OBS")
                 }
-                status <- updateStatusOfpkg ( status, pkg, result, file=statusfile, log=log) 
             } else {
-                logger( "latest version already tried for OBS")
+                logger( paste0( "Pkg ", pkg, " no longer on CRAN"))
             }
         }
     }
