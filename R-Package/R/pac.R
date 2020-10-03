@@ -51,6 +51,54 @@ uploadpac <- function(pkg, version, buildtype,
     return( list( status="done", value=NA))
 }
 
+#' resetpac removes a pac completely and remoce the
+#' line from the status.
+#' pkg will be handled as new in next status construction.
+#' 
+#' @param pkg CRAN package name
+#' @param localOBS base directory for osc checkouts
+#' @param remoteprj the project for which packages are built
+#' @param cran CRAN mirror for download
+#' @param statusfile file holding the current sync status between
+#' CRAN and remoteprj
+#' @return list "status" and "value"
+#' @export
+resetpac <- function(pkg,
+                     localOBS  = getOption("c2o.localOBSdir"),
+                     remoteprj = getOption("c2o.auto"),
+                     statusfile = getOption("c2o.statusfile"),
+                     log       = getOption("c2o.logfile")){
+
+    cmd <- paste( "\"", "cd", file.path(localOBS, remoteprj) , " && osc delete --force ", paste0( "R-", pkg), "\"")
+    result <- system2( "bash", args = c("-c", cmd), stdout=TRUE, stderr=TRUE)
+
+    if( ! is.null(attributes(result))) {
+        logger(paste0( pkg, " could not clean up local pac"), log)
+        return( list( status="fail", value="could not clean up local pac"))
+    }
+
+    cmd <- paste("\"", "rm -rf", file.path(localOBS, remoteprj, paste0( "R-", pkg)), "\"")
+    result <- system2( "bash", args = c("-c", cmd), stdout=TRUE, stderr=TRUE)
+
+    if( ! is.null(attributes(result))) {
+        logger(paste0( pkg, " could not remove local pacdir"), log)
+        return( list( status="fail", value="could not remove local pacdir"))
+    }
+    cmd <- paste("\"", "osc rdelete ", remoteprj, " ", paste0("R-", pkg), " -m 'delete pkg' \"")
+    result <- system2( "bash", args = c("-c", cmd), stdout=TRUE, stderr=TRUE)
+    if( ! is.null(attributes(result))) {
+        logger(paste0( pkg, " could not remove remote pac"), log)
+        return( list( status="fail", value="could not clean up local pac"))
+    }
+    
+    status <- read.table(statusfile, sep=";", header=TRUE, colClasses="character")
+    status <- status[-which(status$Package == pkg),]
+    write.table(status, file=statusfile, row.names=FALSE, sep=";")
+    
+    return( list( status="done", value=NA))
+}
+
+
 #' cleanuppac removes a pac directory and removes the
 #' pkg from the local build service database.
 #' 
@@ -70,7 +118,7 @@ cleanuppac <- function(pkg,
     result <- system2( "bash", args = c("-c", cmd), stdout=TRUE, stderr=TRUE)
 
     if( ! is.null(attributes(result))) {
-        logger(paste0( pkg, " could clean up local pac"), log)
+        logger(paste0( pkg, " could not clean up local pac"), log)
         return( list( status="fail", value="could not clean up local pac"))
     }
     return( list( status="done", value=NA))
