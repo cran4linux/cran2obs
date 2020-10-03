@@ -51,3 +51,47 @@ cran2repo <- function(cran=getOption("c2o.cran"),
     }
     return(status)
 }
+                                        
+#' pk2repo does the same as cran2repo, but for a singl pkg
+#' @param cran CRAN mirror to use
+#' @param localOBS root directory to build remoteprj in locally
+#' @param repo OBS repo to use
+#' @param binary.cache directory where newly built pacs are found
+#' @param download.cache directory where source files from cran cached
+#' sync status
+#' @param log logfile to use
+#'
+#' @return dataframe containing new syncstatus
+#'
+#' @export
+pkg2repo <- function(pkg,
+                     cran=getOption("c2o.cran"),
+                     localOBS = getOption("c2o.localOBSdir"),
+                     remoteprj=getOption("c2o.auto"),
+                     statusfile = getOption("c2o.statusfile"),
+                     download.cache = getOption("c2o.download.cache"),
+                     binary.cache = getOption("c2o.binary.cache"),
+                     log = getOption("c2o.logfile")){
+    status <- read.table(statusfile, header=TRUE, sep=";", colClasses="character")
+    logger(paste0("* Working on ", pkg ))
+    num <- which(status$Package == pkg)
+    if (!is.na(status$Version[num])) {
+        if ( (is.na(status$OBSVersion[num]) & is.na(status$triedVersion[num])) |
+             ( !is.na(status$triedVersion[num]) &  status$Version[num] != status$triedVersion[num])  ){ 
+            result <- pkg2pac(pkg, localOBS=localOBS, remoteprj=remoteprj, status=status,
+                              download.cache=download.cache, binary.cache=binary.cache, log=log)
+            if (result$status == "done") {
+                logger(paste0("** Sync finished for ", pkg))
+                uploadpac(pkg, status$Version[pkg], "initial build")
+            } else {
+                logger(paste0("** Sync failed for ", pkg))
+            }
+            status <- updateStatusOfpkg ( status, pkg, result, file=statusfile, log=log) 
+        } else {
+            logger( "latest version already tried for OBS")
+        }
+    } else {
+        logger( paste0( "Pkg ", pkg, " not found on CRAN"))
+    }
+    return(status)
+}
