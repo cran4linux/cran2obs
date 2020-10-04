@@ -128,7 +128,7 @@ extractDevelFilesFromLog <- function(buildlog, pkg, systemRlib="/usr/lib64/R/lib
 #' @return vector of entries of %files section
 #'
 #' @export
-extractFilesFromSpec <- function(specfile){
+extractFilesFromSimpleSpec <- function(specfile){
     specLines <- readlines(specfile)
     files <- specLines[ grep("%files", specLines):(length(specLines)-2) ]
     return(files)
