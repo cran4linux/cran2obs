@@ -10,18 +10,23 @@ updateStatusOfpkg(
   pkg,
   syncresult,
   always.save = TRUE,
-  file = getOption("c2o.statusfile"),
+  statusfile = getOption("c2o.statusfile"),
   log = getOption("c2o.logfile")
 )
 }
 \arguments{
-\item{status}{the dataframe containing status information about remoteprj}
+\item{status}{datframe holding status information about remoteprj}
 
 \item{pkg}{CRAN package name which has new information}
 
-\item{version}{latest version tried}
+\item{syncresult}{holds a list with components status, version and hasDevel}
 
-\item{success}{if or not the build was successful}
+\item{statusfile}{file containing status information about ongoing sync}
+
+\item{log}{logfile}
+
+\item{always.safe}{boolean that defines if statusfile should be written for
+every package}
 }
 \value{
 updated status dataframe

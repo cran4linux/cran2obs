@@ -20,15 +20,18 @@ statusOBS <- function(pkg, remoteproj=getOption("c2o.auto")){
 
 #' updateStatusOfpkg incorporates new information about a tried build in
 #' the status dataframe.
-#' @param status the dataframe containing status information about remoteprj
+#' @param status datframe holding status information about remoteprj
 #' @param pkg CRAN package name which has new information
-#' @param version latest version tried
-#' @param success if or not the build was successful
+#' @param syncresult holds a list with components status, version and hasDevel
+#' @param always.safe boolean that defines if statusfile should be written for
+#' every package
+#' @param statusfile file containing status information about ongoing sync
+#' @param log logfile
 #'
 #' @return updated status dataframe
 #' 
 #' @export
-updateStatusOfpkg <- function( status, pkg, syncresult, always.save=TRUE, file= getOption("c2o.statusfile"), log=getOption("c2o.logfile")){
+updateStatusOfpkg <- function( status, pkg, syncresult, always.save=TRUE, statusfile= getOption("c2o.statusfile"), log=getOption("c2o.logfile")){
     logger("Update of pkg status")
     if (! pkg %in% status[, "Package"]) {
         msg <- paste0("Seems ", pkg, " has no status")
@@ -38,6 +41,7 @@ updateStatusOfpkg <- function( status, pkg, syncresult, always.save=TRUE, file= 
     i <- which ( status$Package == pkg )
     if (syncresult$status == "done") {
         status[i , "OBSVersion"] <- status[i, "Version" ]
+        status[i , "hasDevel"] <- syncresult$hasDevel
     }
     status[i , "triedVersion"] <- status[i, "Version" ]
     if (always.save) write.table(status, file=file, row.names=FALSE, sep=";")

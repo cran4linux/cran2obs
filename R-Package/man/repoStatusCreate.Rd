@@ -25,7 +25,7 @@ repoStatusCreate(
 \value{
 a datafram containing the columns "Package", "Version", "License",
 "NeedsCompilation", "recDep", "Suggests", "depLen", "OBSpkg", "File", "OBSVersion",
-"triedVersion"
+"triedVersion", "hasDevel"
 }
 \description{
 repoStatusCreate creates a dataframe from available.packages() and

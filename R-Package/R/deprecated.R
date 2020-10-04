@@ -12,7 +12,7 @@
 #' @export
 CranOBSstatus <- function(quiet=TRUE, cran=getOption("c2o.cran"), obs=getOption("c2o.auto"), oldstatus=NULL){
     if (is.null(cran)) cran <- cleanDeps(cran)
-    if (is.null(obs))  obs <- available.packages.OBS(obsproject=obs, quiet=quiet)
+    if (is.null(obs))  obs <- available.packages.OBS(obsproject=obs)
     status <- merge( cran, obs, by="row.names" , all.x=TRUE )
     status$Row.names <- NULL
     for (col in 1:dim(status)[2]) status[,col] <- as.character(status[,col])  
@@ -31,7 +31,7 @@ CranOBSstatus <- function(quiet=TRUE, cran=getOption("c2o.cran"), obs=getOption(
 #' @export
 createOBSstatus <- function(quiet=TRUE, cran=NULL, obs=NULL){
     if (is.null(cran)) cran <- cleanDeps(getOption("c2o.cran"))
-    if (is.null(obs))  obs <- available.packages.OBS(obsproject=getOption("c2o.auto"), quiet=quiet)
+    if (is.null(obs))  obs <- available.packages.OBS(obsproject=getOption("c2o.auto"))
     status <- merge( obs, cran, by="row.names" , all.x=TRUE )
     status$Row.names <- NULL
     for (col in 1:dim(status)[2]) status[,col] <- as.character(status[,col])  

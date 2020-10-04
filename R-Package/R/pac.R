@@ -337,7 +337,7 @@ pkg2pac <- function( pkg,
 
     if (result$status == "done") { ## pkg successfully built!
         logger( paste0( pkg, " automatically built"), log)
-        syncresult <- list( status="done", value=pkg.info$Version)
+        syncresult <- list( status="done", value=pkg.info$Version, hasDevel=FALSE)
         result <- uploadpac( pkg, pkg.info$Version, buildtype=buildtype, localOBS=localOBS, remoteprj=remoteprj, log=log)
 
         if (! result$status == "done") {
@@ -358,10 +358,13 @@ pkg2pac <- function( pkg,
         specfile <- result$value
         logger("** build with -devel package")
         result <- testbuild(pkg, pac, specfile, ap=status, log=log )
-        
-    } else {
-        logger( paste0( "Failed to automatically build ", pkg), log)
-        syncresult <- list( status="fail", value="unresolvable (automatically) error")
-    } 
+        if (result$status == "done"){
+            return( list( status="done", value=pkg.info$Version, hasDevel=TRUE))
+        }
+    }
 
+    ## if we end here, something went badly wrong.
+   
+    logger( paste0( "Failed to automatically build ", pkg), log)
+    syncresult <- list( status="fail", value="unresolvable (automatically) error")
 }

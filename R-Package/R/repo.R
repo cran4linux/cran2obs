@@ -50,7 +50,7 @@ cran2repo <- function(cran=getOption("c2o.cran"),
                     } else {
                         logger(paste0("** Sync failed for ", pkg))
                     }
-                    status <- updateStatusOfpkg ( status, pkg, result, file=statusfile, log=log) 
+                    status <- updateStatusOfpkg ( status, pkg, result, statusfile=statusfile, log=log) 
                 } else {
                     logger( "latest version already tried for OBS")
                 }
@@ -96,7 +96,7 @@ pkg2repo <- function(pkg,
             } else {
                 logger(paste0("** Sync failed for ", pkg))
             }
-            status <- updateStatusOfpkg ( status, pkg, result, file=statusfile, log=log) 
+            status <- updateStatusOfpkg ( status, pkg, result, statusfile=statusfile, log=log) 
         } else {
             logger( "latest version already tried for OBS")
         }
