@@ -21,13 +21,23 @@ cran2repo <- function(cran=getOption("c2o.cran"),
                       download.cache = getOption("c2o.download.cache"),
                       binary.cache = getOption("c2o.binary.cache"),
                       log = getOption("c2o.logfile")){
-
+    excludedpkgs <- c("gdata")
+    ## these are packages that have serious problems, if an rpm is built
+    ##
+    ## R-gdata provides some perl package. Source must be modified
+    ## if R-gdata should be built. (or some meta-information in the OBS
+    ## project must be set)
+    
     status <- read.table(statusfile, header=TRUE, sep=";", colClasses="character")
     all.deplength <- sort(unique(as.numeric(status$depLen)))
     for (level in all.deplength){
         pkgs <- which(status$depLen == level)
         for (pkg in status$Package[pkgs]) {
             logger(paste0("* Working on ", pkg ))
+            if (pkg %in% excludedpkgs) {
+                logger( paste0(pkg, " is excluded from build"))
+                next
+            }
             num <- which(status$Package == pkg)
             if (!is.na(status$Version[num])) {
                 if ( (is.na(status$OBSVersion[num]) & is.na(status$triedVersion[num])) |
