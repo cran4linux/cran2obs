@@ -2,7 +2,7 @@
 % Please edit documentation in R/repo.R
 \name{pkg2repo}
 \alias{pkg2repo}
-\title{pk2repo does the same as cran2repo, but for a singl pkg}
+\title{pkg2repo does the same as cran2repo, but for a singl pkg}
 \usage{
 pkg2repo(
   pkg,
@@ -33,5 +33,5 @@ sync status}
 dataframe containing new syncstatus
 }
 \description{
-pk2repo does the same as cran2repo, but for a singl pkg
+pkg2repo does the same as cran2repo, but for a singl pkg
 }

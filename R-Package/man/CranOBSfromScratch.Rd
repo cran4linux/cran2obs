@@ -2,9 +2,9 @@
 % Please edit documentation in R/deps.R
 \name{CranOBSfromScratch}
 \alias{CranOBSfromScratch}
-\title{getOBSVersion takes the name of an R package (from CRAN) and receives the corresponding
-information off of OBS
-This function is not exactly cheap run-time wise. Around 0.5s per package.}
+\title{CranOBSfromScratch combines available.packages() and info of two OBS repos, i.e.
+home:detlef:AutomaticCRAN and d:l:R:released into a datafram combining all information
+about the build status of the different packages.}
 \usage{
 CranOBSfromScratch(
   cran = getOption("c2o.cran"),
@@ -16,21 +16,12 @@ CranOBSfromScratch(
 \item{repo1}{and}
 
 \item{repo2}{Repos containing automatic builds and manually improved builds resp.}
-
-\item{pkg}{name of an R package as found in CRAN}
-
-\item{obsproject}{Project in OBS where packages are taken from.}
-
-\item{quiet}{If set to FALSE some progression info is given, default = TRUE.}
 }
 \value{
-A list with components file containing the source file name and
-version containing the version.
-
 A dataframe like cleanDeps with additional infos for OBS packages
 }
 \description{
-getOBSVersion takes the name of an R package (from CRAN) and receives the corresponding
-information off of OBS
-This function is not exactly cheap run-time wise. Around 0.5s per package.
+CranOBSfromScratch combines available.packages() and info of two OBS repos, i.e.
+home:detlef:AutomaticCRAN and d:l:R:released into a datafram combining all information
+about the build status of the different packages.
 }

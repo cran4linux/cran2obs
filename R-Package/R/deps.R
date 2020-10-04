@@ -132,8 +132,8 @@ available.packages.OBS <- function(obsproject=getOption("c2o.auto")){
 #' a boolean value hasDevel
 #'
 #' @export
-getOBSVersion2 <- function ( pkg, obsproject=getOption("c2o.auto")) {
-#    logger("** get Info off of OBS")
+getOBSVersion <- function ( pkg, obsproject=getOption("c2o.auto")) {
+    logger("** get Info off of OBS")
     cmd <- paste0( "osc ls -b ", obsproject, " R-", pkg, " openSUSE_Tumbleweed x86_64", sep="", collapse="")
     lst <- system( cmd , intern=TRUE )
     

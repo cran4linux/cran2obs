@@ -13,6 +13,9 @@ expandSpecForDevel(specfile, mainfiles, develfiles)
 
 \item{develfiles}{character vector with entries for the files -devel section}
 }
+\value{
+list of status "done" or "fail" and value, the specfile or NA
+}
 \description{
 expandSpecForDevel takes a specfile and adds a -devel section
 }
