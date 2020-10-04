@@ -59,7 +59,7 @@ updateStatusOfpkg <- function( status, pkg, syncresult, always.save=TRUE, status
 #'
 #' @return a datafram containing the columns "Package", "Version", "License",
 #' "NeedsCompilation", "recDep", "Suggests", "depLen", "OBSpkg", "File", "OBSVersion",
-#' "triedVersion", "hasDevel"
+#'  "hasDevel", "triedVersion
 #'
 #' @export
 repoStatusCreate <- function(cran=getOption("c2o.cran"), repo=getOption("c2o.auto"),
