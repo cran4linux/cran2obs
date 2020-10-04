@@ -352,7 +352,7 @@ pkg2pac <- function( pkg,
 
     if (result$value == "badness exceeds limit") { ## may be the split helps
         develfiles <- extractDevelFilesFromLog(result$buildlog, pkg)
-        mainfiles <- extractFilesFromSimpleSpec(specfile, pkg)
+        mainfiles <- extractFilesFromSimpleSpec(specfile)
         mainfiles <- setdiff(mainfiles, develfiles)
         result <- expandSpecForDevel(specfile, mainfiles, develfiles)
         specfile <- result$value
