@@ -13,7 +13,8 @@ expandSpecForDevel <- function(specfile, mainfiles, develfiles){
 
     ## add %package devel
     specLines <- c(specLines[1:(split-1)],
-                   c("%package        devel",
+                   c("",
+                     "%package        devel",
                      "Summary:        Development files for %{packname}",
                      "Requires:       %{name} = %{version}",
                      "Requires:       R-base-devel",
@@ -24,13 +25,13 @@ expandSpecForDevel <- function(specfile, mainfiles, develfiles){
 
     ## add %description devel
     specLines <- c(specLines[1:(split-1)],
-                   c("%desription     devel",
+                   c("%description     devel",
                      "Development files and header needed to build packages using %{packname}",
                      ""),
                    specLines[split:length(specLines)])
 
     ## rewrite %files and %files devel
-    split <- grep("%files", specLines)
+    split <- grep("%files", specLines)-1
     speclines <- c(specLines[1:split],
                    mainfiles,
                    "",
