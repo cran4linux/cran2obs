@@ -249,16 +249,16 @@ setuppac <- function(pkg,
 #' @export
 
 pkg2pac <- function( pkg,
-                      localOBS  = getOption( "c2o.localOBSdir"),
-                      remoteprj = getOption( "c2o.auto"),
-                      cran      = getOption( "c2o.cran"),
-                      status    = getOption( "c2o.status"),
-                      download.cache = getOption( "c2o.download.cache"),
-                      binary.cache = getOption( "c2o.binary.cache"),
-                      log       = getOption( "c2o.logfile")) {
+                      localOBS      = getOption( "c2o.localOBSdir"),
+                      remoteprj     = getOption( "c2o.auto"),
+                      cran          = getOption( "c2o.cran"),
+                      statusfile    = getOption( "c2o.statusfile"),
+                      download.cache= getOption( "c2o.download.cache"),
+                      binary.cache  = getOption( "c2o.binary.cache"),
+                      log           = getOption( "c2o.logfile")) {
     
     logger(paste0("* Syncing ", pkg, " to OBS"))
-
+    status <- read.table(statusfile, sep=";", header=TRUE, colClasses="character")
     if ( ! pkg %in% status[ , "Package"] ) {
         logger(paste0( "Seems ", pkg, " not in status file"))
         return( list( status="fail", problem=paste( "Package not in status file")))
@@ -319,6 +319,7 @@ pkg2pac <- function( pkg,
     specfile <- result$value
 
 ### first build
+    logger("** build for filelist")
     result <- buildforfiles( pkg, pac, specfile, localOBS=localOBS, remoteprj=remoteprj, download.cache=download.cache, binary.cache=binary.cache, ap=status, log=log)
 
     if (! result$status == "done") {
@@ -331,6 +332,7 @@ pkg2pac <- function( pkg,
     specfile <- result$value
     
     ## second build!
+    logger("** build with file list")
     result <- testbuild( pkg, pac, specfile, ap=status, log=log)
 
     if (result$status == "done") { ## pkg successfully built!
@@ -353,6 +355,10 @@ pkg2pac <- function( pkg,
         mainfiles <- extractFilesFromSimpleSpec(specfile, pkg)
         mainfiles <- setdiff(mainfiles, develfiles)
         result <- expandSpecForDevel(specfile, mainfiles, develfiles)
+        specfile <- result$value
+        logger("** build with -devel package")
+        result <- testbuild(pkg, pac, specfile, ap=status, log=log )
+        
     } else {
         logger( paste0( "Failed to automatically build ", pkg), log)
         syncresult <- list( status="fail", value="unresolvable (automatically) error")

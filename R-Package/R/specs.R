@@ -102,7 +102,7 @@ extractFilesFromLog <- function(buildlog, packname, systemRlib="/usr/lib64/R/lib
 
 extractDevelFilesFromLog <- function(buildlog, pkg, systemRlib="/usr/lib64/R/library/"){
     buildlog <- buildlog[ grep( "devel-file-in-non-devel-package", buildlog )]
-    buildlog <- gsub( paste0("R-",pkg,".x86_64: E: devel-file-in-non-devel-package (Badness: 50) ",systemRlib,pkg,"/"), "", buildlog)
+    buildlog <- gsub( paste0("R-",pkg,".x86_64: E: devel-file-in-non-devel-package \\(Badness: 50\\) ",systemRlib,pkg,"/"), "", buildlog)
     ## cleanup, so just filenames below pkg remain in buildlog
 
     filelist <- c()

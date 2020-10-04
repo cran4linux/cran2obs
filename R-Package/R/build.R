@@ -35,14 +35,14 @@ buildforfiles <- function(pkg, pac, specfile, localOBS=getOption("c2o.localOBSdi
     
     if (! result$value == "unpackaged files"){
         logger(paste0( "buildforfiles: Failed to build files section for ", pkg))
-        return(list(status="failed", problem=result$problem))
+        return(list(status="failed", problem=result$value))
     }
 
     filelist <- extractFilesFromLog( result$buildlog, pkg)
     version <- gsub( "-", ".", ap[ap$Package == pkg, "Version"])
     gsub(version, "%{version}", filelist) # if there are files with version in name, this will be caught, see abcrlda
     
-    speclines <- c( speclines[1:(length(speclines)-2)] , filelist, speclines[length(speclines-1):length(speclines)])
+    speclines <- c( speclines[1:(length(speclines)-2)] , filelist, speclines[(length(speclines)-1):length(speclines)])
     ## the last two lines contain the %changelog tag
     
     writeLines( speclines, specfile)
