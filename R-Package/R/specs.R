@@ -4,7 +4,7 @@
 #' @param mainfiles character vector with entries for the files section
 #' @param develfiles character vector with entries for the files -devel section
 #'
-#' @result list of status "done" or "fail" and value, the specfile or NA
+#' @return list of status "done" or "fail" and value, the specfile or NA
 #'
 #' @export
 expandSpecForDevel <- function(specfile, mainfiles, develfiles){

@@ -145,29 +145,6 @@ getOBSVersion2 <- function ( pkg, obsproject=getOption("c2o.auto")) {
     return(list(version=srcversion, hasDevel=hasDevel))
 }
 
-
-#' getOBSVersion takes the name of an R package (from CRAN) and receives the corresponding
-#' information off of OBS
-#' This function is not exactly cheap run-time wise. Around 0.5s per package.
-#' @param pkg name of an R package as found in CRAN
-#' @param obsproject Project in OBS where packages are taken from.
-#' @param quiet If set to FALSE some progression info is given, default = TRUE.
-#' 
-#' @return A list with components file containing the source file name and
-#' version containing the version.
-#'
-#' @export
-## getOBSVersion <- function ( pkg, obsproject=getOption("c2o.auto"), quiet=TRUE ) {
-##     if (! quiet) cat( "Checking ", pkg, "\n")
-##     cmd <- paste( "osc ls ", obsproject, " R-", pkg, sep="", collapse="")
-##     lst <- system( cmd , intern=TRUE )
-##     srcfile <- lst[ grep( paste( "^", pkg, sep="", collapse=""), lst)][1]
-##     ## the last [1] is needed if a package is linked to factory. In lst the files
-##     ## can appear multiple times then.
-##     srcversion <- gsub(paste0( pkg, "_"), "", gsub(".tar.gz", "", srcfile))
-##     return(srcversion)
-## }
-
 #' CranOBSfromScratch combines available.packages() and info of two OBS repos, i.e.
 #' home:detlef:AutomaticCRAN and d:l:R:released into a datafram combining all information
 #' about the build status of the different packages.
