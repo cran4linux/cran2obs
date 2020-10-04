@@ -1,0 +1,27 @@
+Building  quantmod 
+Building  quantmod 
+Failed:  quantmod  exists in local OBS. createOBSpac does no updates!Building  quantmod 
+quantmod  could not setup packname
+Building  quantmod 
+Building  quantmod 
+Building  TTR 
+Building  TTR 
+Building  TTR 
+Building  TTR 
+Building  TTR 
+Building  quantmod 
+Failed:  quantmod  exists in local OBS. createOBSpac does no updates!Building  quantmod 
+Building  tseries 
+Failed:  tseries  exists in OBS. createOBSpac does no updates!Building  qap 
+Failed:  qap  exists in local OBS. createOBSpac does no updates!Building  qap 
+Building  qap 
+Failed:  qap  exists in local OBS. createOBSpac does no updates!Building  qap 
+Building  qap 
+Failed:  qap  exists in local OBS. createOBSpac does no updates!Building  qap 
+Building  dendextend 
+Building  viridis 
+Building  dendextend 
+Failed:  dendextend  exists in local OBS. createOBSpac does no updates!Building  dendextend 
+Building  seriation 
+Failed:  seriation  exists in OBS. createOBSpac does no updates!Building  seriation 
+Failed:  seriation  exists in OBS. createOBSpac does no updates!

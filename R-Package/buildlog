@@ -1,0 +1,108 @@
+Failed to build quantmod unknown problem
+Failed to build quantmod unknown problem
+Failed to build TTR unknown problem
+Unpackaged file(s) in build R-TTR
+Unpackaged file(s) in build R-TTR
+Unpackaged file(s) in build R-TTR
+Unpackaged file(s) in build R-TTR
+Success:  TTR  rpm package created
+Wrote: /home/abuild/rpmbuild/SRPMS/R-TTR-0.23.6-0.src.rpm 
+Wrote: /home/abuild/rpmbuild/RPMS/x86_64/R-TTR-0.23.6-0.x86_64.rpm 
+Unpackaged file(s) in build R-TTR
+Success:  TTR  rpm package created
+Wrote: /home/abuild/rpmbuild/SRPMS/R-TTR-0.23.6-0.src.rpm 
+Wrote: /home/abuild/rpmbuild/RPMS/x86_64/R-TTR-0.23.6-0.x86_64.rpm 
+Unpackaged file(s) in build R-quantmod
+Success:  quantmod  rpm package created
+Wrote: /home/abuild/rpmbuild/SRPMS/R-quantmod-0.4.17-0.src.rpm 
+Wrote: /home/abuild/rpmbuild/RPMS/x86_64/R-quantmod-0.4.17-0.x86_64.rpm 
+Failed to build tseries unknown problem
+Bad exit status from build R-tseries
+The following missing dependencies must be available to build R-tseries
+The following missing dependencies must be available to build R-tseries
+ERROR: dependency 'quantmod' is not available for package 'tseries' 
+Failed: Missing dependency
+The following missing dependencies must be available to build R-tseries
+ERROR: dependency 'quantmod' is not available for package 'tseries' 
+Failed: Missing dependency
+Unpackaged file(s) in build R-tseries
+Unpackaged file(s) in build R-tseries
+Unpackaged file(s) in build R-tseries
+Unpackaged file(s) in build R-tseries
+Unpackaged file(s) in build R-tseries
+Unpackaged file(s) in build R-tseries
+Success:  tseries  rpm package created
+Wrote: /home/abuild/rpmbuild/SRPMS/R-tseries-0.10.47-0.src.rpm 
+Wrote: /home/abuild/rpmbuild/RPMS/x86_64/R-tseries-0.10.47-0.x86_64.rpm 
+Success:  tseries  rpm package created
+Wrote: /home/abuild/rpmbuild/SRPMS/R-tseries-0.10.47-0.src.rpm 
+Wrote: /home/abuild/rpmbuild/RPMS/x86_64/R-tseries-0.10.47-0.x86_64.rpm 
+Failed to build xts unknown problem
+Failed to build xts unknown problem
+Failed to build xts unknown problem
+Unpackaged file(s) in build R-xts
+Success:  xts  rpm package created
+Wrote: /home/abuild/rpmbuild/SRPMS/R-xts-0.12.0-0.src.rpm 
+Wrote: /home/abuild/rpmbuild/RPMS/x86_64/R-xts-0.12.0-0.x86_64.rpm 
+The following missing dependencies must be built first to build R-seriation
+The following missing dependencies must be built first to build R-seriation
+unresolvable: nothing provides R-qap 
+Failed: Missing R-packages
+nothing provides R-dendextend 
+Failed: Missing R-packages
+nothing provides R-viridis 
+Failed: Missing R-packages
+The following missing dependencies must be built first to build R-seriation
+unresolvable: nothing provides R-qap 
+Failed: Missing R-packages
+nothing provides R-dendextend 
+Failed: Missing R-packages
+nothing provides R-viridis 
+Failed: Missing R-packages
+The following missing dependencies must be built first to build R-seriation
+unresolvable: nothing provides R-qap 
+Failed: Missing R-packages
+nothing provides R-dendextend 
+Failed: Missing R-packages
+nothing provides R-viridis 
+Failed: Missing R-packages
+The following missing dependencies must be built first to build R-seriation
+unresolvable: nothing provides R-qap 
+Failed: Missing R-packages
+nothing provides R-dendextend 
+Failed: Missing R-packages
+nothing provides R-viridis 
+Failed: Missing R-packages
+The following missing dependencies must be built first to build R-seriation
+unresolvable: nothing provides R-qap 
+Failed: Missing R-packages
+nothing provides R-dendextend 
+Failed: Missing R-packages
+nothing provides R-viridis 
+Failed: Missing R-packages
+Unpackaged file(s) in build R-qap
+Unpackaged file(s) in build R-qap
+Success:  qap  rpm package created
+Wrote: /home/abuild/rpmbuild/SRPMS/R-qap-0.1.1-0.src.rpm 
+Wrote: /home/abuild/rpmbuild/RPMS/x86_64/R-qap-0.1.1-0.x86_64.rpm 
+The following missing dependencies must be built first to build R-dendextend
+unresolvable: nothing provides R-viridis 
+Failed: Missing R-packages
+Unpackaged file(s) in build R-viridis
+Success:  viridis  rpm package created
+Wrote: /home/abuild/rpmbuild/SRPMS/R-viridis-0.5.1-0.src.rpm 
+Wrote: /home/abuild/rpmbuild/RPMS/x86_64/R-viridis-0.5.1-0.x86_64.rpm 
+Unpackaged file(s) in build R-dendextend
+Success:  dendextend  rpm package created
+Wrote: /home/abuild/rpmbuild/SRPMS/R-dendextend-1.13.4-0.src.rpm 
+Wrote: /home/abuild/rpmbuild/RPMS/x86_64/R-dendextend-1.13.4-0.x86_64.rpm 
+Bad exit status from build R-seriation
+Bad exit status from build R-seriation
+Bad exit status from build R-seriation
+Unpackaged file(s) in build R-seriation
+Success:  seriation  rpm package created
+Wrote: /home/abuild/rpmbuild/SRPMS/R-seriation-1.2.8-0.src.rpm 
+Wrote: /home/abuild/rpmbuild/RPMS/x86_64/R-seriation-1.2.8-0.x86_64.rpm 
+Success:  deSolve  rpm package created
+Wrote: /home/abuild/rpmbuild/SRPMS/R-deSolve-1.28-1.src.rpm 
+Wrote: /home/abuild/rpmbuild/RPMS/x86_64/R-deSolve-1.28-1.x86_64.rpm 

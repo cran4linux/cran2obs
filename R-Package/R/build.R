@@ -126,7 +126,7 @@ testbuild <- function(pkg, pac, specfile,
         return( list( status="failed", value="badness exceeds limit", buildlog=buildlog))
     }
     
-    if (length( grep( "Wrote:", buildlog, fixed=TRUE)) == 2) {
+    if (length( grep( "Wrote:", buildlog, fixed=TRUE)) > 1) {
         logger( paste0("Success: ", pkg, " rpm package created"))
 
         print(buildlog[grep("Wrote:", buildlog, fixed=TRUE)])
