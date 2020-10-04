@@ -1,3 +1,4 @@
+
 #' buildforfiles performs a build without %files section
 #' and tries to contstruct all files from the build errors.
 #' 
@@ -8,6 +9,9 @@
 #' @param localOBSdir The top level directory of a checkout of the project
 #' you want to create your package in. 
 #' @param remoteprj Name of the OBS project
+#'
+#' @return
+#'
 #' @export
 buildforfiles <- function(pkg, pac, specfile, localOBS=getOption("c2o.localOBSdir"),
                           remoteprj=getOption("c2o.auto"), download.cache=getOption("c2o.download.cache"),
@@ -83,7 +87,7 @@ testbuild <- function(pkg, pac, specfile,
             logger(line)
             logger("testbuild failed: Missing dependency")
         }
-        return(list(status="failed", value="Missing dependencies in R CMD INSTALL", buildlog=buildlog))
+        return(list(status="fail", value="Missing dependencies in R CMD INSTALL", buildlog=buildlog))
     }
     
     if ( any ( grep( "nothing provides", buildlog, fixed=TRUE)) ) { ### missing R-rpms, no chance
@@ -91,9 +95,9 @@ testbuild <- function(pkg, pac, specfile,
 
         for (line in buildlog[ grep( "nothing provides", buildlog, fixed=TRUE)] ) {
             logger( line)
-            logger("testbuild Failed: Missing R-packages")
+            logger( "testbuild failed: Missing R-packages")
         }
-        return(list(status="failed", value="missing R-packages", buildlog=buildlog))
+        return(list(status="fail", value="missing R-packages", buildlog=buildlog))
     }
     
     if ( length( grep( "Failed build dependencies", buildlog, fixed=TRUE)) >0 ) { ### missing dependencies, no chance
@@ -103,27 +107,27 @@ testbuild <- function(pkg, pac, specfile,
             for (line in buildlog[ grep( "needed", buildlog, fixed=TRUE)] ) {
                 cat( line,"\n")
                 cat( line,"\n", file=log, append=TRUE)
-                cat("testbuild Failed: Missing dependencies\n", file=log, append=TRUE)
+                cat("testbuild failed: Missing dependencies\n", file=log, append=TRUE)
             }
         }
-        return(list(status="failed", value="missing dependencies", buildlog=buildlog))
+        return(list(status="fail", value="missing dependencies", buildlog=buildlog))
     }
 
     if ( any( grep("Bad exit status", buildlog, fixed=TRUE))) {
         cat( "Bad exit status from build R-", pkg, "\n", sep="")
         cat( "Bad exit status from build R-", pkg, "\n", sep="", file=log, append=TRUE)
-        return(list(status="failed", value="bad exit status", buildlog=buildlog))
+        return(list(status="fail", value="bad exit status", buildlog=buildlog))
     }
     ## no fatal flaws, may be lucky?
 
     if ( any( grep( "error: Installed (but unpackaged) file(s) found:", buildlog, fixed=TRUE))) {
         logger( paste0("Unpackaged file(s) in build R-", pkg))
-        return(list(status="failed", value="unpackaged files", buildlog=buildlog)) 
+        return(list(status="fail", value="unpackaged files", buildlog=buildlog)) 
     }
 
     if ( any( grep( "badness.*exceeds.*aborting", buildlog))){
         logger( paste0("Probably must be split in ", pkg, " and ", pkg, "-devel"))
-        return( list( status="failed", value="badness exceeds limit", buildlog=buildlog))
+        return( list( status="fail", value="badness exceeds limit", buildlog=buildlog))
     }
     
     if (length( grep( "Wrote:", buildlog, fixed=TRUE)) > 1) {
@@ -138,5 +142,5 @@ testbuild <- function(pkg, pac, specfile,
     ## if we end here some unknown condition has prevented a successful build
     cat( "Failed to build R-", pkg, " unknown problem\n", sep="")
     cat( "Failed to build R-", pkg, " unknown problem\n", sep="", file=log, append=TRUE)
-    return(list(status="failed", value="unknown problem", buildlog=buildlog))    
+    return(list(status="fail", value="unknown problem", buildlog=buildlog))    
 }

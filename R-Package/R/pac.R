@@ -317,7 +317,7 @@ pkg2pac <- function( pkg,
     }
 
     specfile <- result$value
-### speclines <- readLines(con=specfile)
+
 ### first build
     result <- buildforfiles( pkg, pac, specfile, localOBS=localOBS, remoteprj=remoteprj, download.cache=download.cache, binary.cache=binary.cache, ap=status, log=log)
 
@@ -333,33 +333,29 @@ pkg2pac <- function( pkg,
     ## second build!
     result <- testbuild( pkg, pac, specfile, ap=status, log=log)
 
-    if ( result$status == "fail") {
-        logger( paste0( "Failed to automatically build ", pkg), log)
-        syncresult <- list( status="fail", value="unresolvable (automatically) error")
-    } else {
+    if (result$status == "done") { ## pkg successfully built!
         logger( paste0( pkg, " automatically built"), log)
         syncresult <- list( status="done", value=pkg.info$Version)
+        result <- uploadpac( pkg, pkg.info$Version, buildtype=buildtype, localOBS=localOBS, remoteprj=remoteprj, log=log)
+
+        if (! result$status == "done") {
+            logger( paste0( "Failed to upload ", pkg , " to ", remoteprj), log)
+            return( list( status="fail", value="failed to construct files section"))
+        }
+        logger( paste0( pkg, " uploaded"), log)        
+        return( syncresult)
     }
 
-### package successfully built!
-### upload
-### cleanup
-    result <- uploadpac( pkg, pkg.info$Version, buildtype=buildtype, localOBS=localOBS, remoteprj=remoteprj, log=log)
+    ## there was a build error. Let's see, if it is about splitting in pkg and pkg-devel
 
-    if (! result$status == "done") {
-        logger( paste0( "Failed to upload ", pkg , " to ", remoteprj), log)
-        return( list( status="fail", value="failed to construct files section"))
-    }
+    if (result$value == "badness exceeds limit") { ## may be the split helps
+        develfiles <- extractDevelFilesFromLog(result$buildlog, pkg)
+        mainfiles <- extractFilesFromSimpleSpec(specfile, pkg)
+        mainfiles <- setdiff(mainfiles, develfiles)
+        result <- expandSpecForDevel(specfile, mainfiles, develfiles)
+    } else {
+        logger( paste0( "Failed to automatically build ", pkg), log)
+        syncresult <- list( status="fail", value="unresolvable (automatically) error")
+    } 
 
-    logger( paste0( pkg, " uploaded"), log)
-
-    ## result <- cleanuppac( pkg, localOBS=localOBS, remoteprj=remoteprj, log=log)
-    ## if (! result$status == "done") {
-    ##     logger( paste0( "Failed final cleanup for ", pac), log)
-    ##     return( list( status="fail", value="failed to cleanup after upload"))
-    ## }
-    
-    ## logger( paste0( pac, " cleaned up"), log)
-
-    return( syncresult)
 }

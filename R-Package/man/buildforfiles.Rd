@@ -31,6 +31,9 @@ buildforfiles(
 \item{localOBSdir}{The top level directory of a checkout of the project
 you want to create your package in.}
 }
+\value{
+
+}
 \description{
 buildforfiles performs a build without %files section
 and tries to contstruct all files from the build errors.

@@ -1,108 +1,47 @@
-#' desc2spec takes the name of an R package and generates a spec file
-#' to be used in OBS. The external tool rpmbuild is used to build
-#' the OpenSUSE package. The resulting spec file will reside where
-#' rpmbuild puts it. The %check section is deliberately empty. We rely
-#' on the checks on CRAN.
+#' expandSpecForDevel takes a specfile and adds a -devel section
 #'
-#' @param packname A package name of a package in a R repo like CRAN
-#' @param rpmbuildroot The directory where rpmbuild should do its work
-#' 
-#' @return The path to the generated specfile.
+#' @param specfile A spec file
+#' @param mainfiles character vector with entries for the files section
+#' @param develfiles character vector with entries for the files -devel section
+#'
+#' @result list of status "done" or "fail" and value, the specfile or NA
+#'
 #' @export
-desc2spec <- function(packname, rpmbuildroot="~/rpmbuild/",
-                      ap = data.frame(available.packages(repos="https://cloud.r-project.org"))) {
-    errorlog <- "desc2spec.err"
-    cat("Building ", packname, "\n", file=errorlog, append=TRUE)
+expandSpecForDevel <- function(specfile, mainfiles, develfiles){
+    specLines <- readLines(specfile)
+    split <- grep("%description", specLines)
 
-    specfile <- createEmptySpec(packname, rpmbuildroot, ap)
+    ## add %package devel
+    specLines <- c(specLines[1:(split-1)],
+                   c("%package        devel",
+                     "Summary:        Development files for %{packname}",
+                     "Requires:       %{name} = %{version}",
+                     "Requires:       R-base-devel",
+                     ""),
+                   specLines[split, length(specLines)])
 
-### call rpmbuild
+    split <- grep("%prep", specLines)
 
-    suppressWarnings(
-        rpmlog <- system2("rpmbuild", 
-                          args   = c("-ba", specfile),
-                          env    = "LANG=en;",
-                          stdout = TRUE,
-                          stderr = TRUE)
-    ## the first build will fail by construction.
-    ## the output of rpmbuild allows to build the %file section
-    ## in the spec
-    )
+    ## add %description devel
+    specLines <- c(specLines[1:(split-1)],
+                   c("%desription     devel",
+                     "Development files and header needed to build packages using %{packname}",
+                     ""),
+                   specLines[split, length(specLines)])
 
-    ## but we have to look for other errors preventing successful second run
+    ## rewrite %files and %files devel
+    split <- grep("%files", specLines)
+    speclines <- c(specLines[1:split],
+                   mainfiles,
+                   "",
+                   "%files devel",
+                   develfiles,
+                   "",
+                   "%changelog")
     
-    if ( length( grep( "Failed build dependencies", rpmlog, fixed=TRUE)) >0 ) { ### missing dependencies, no chance
-        cat( "The following missing dependencies must be installed to build R-", packname, "\n", sep="")
-        cat( "The following missing dependencies must be installed to build R-", packname, "\n", sep="", file=errorlog, append=TRUE)
-        for (line in rpmlog) if ( grepl( "needed", line, fixed=TRUE)) {
-                                 cat( line,"\n")
-                                 cat( line,"\n", file=errorlog, append=TRUE)
-                                 cat("Failed: Missing dependencies first run rpmbuild\n", file=errorlog, append=TRUE)
-                             }
-        return("Failed: Missing dependencies first run rpmbuild")
-    }
-
-    if (length( grep("Bad exit status", rpmlog, fixed=TRUE)) > 0 ) {
-        cat( "Bad exit status from build R-", packname, "\n", sep="")
-        cat( "Bad exit status from build R-", packname, "\n", sep="", file=errorlog, append=TRUE)
-        return("Failed: Bad exit status")
-    }
-
-### At this point something was build. But as the specfile.tpl has an empty file section.
-### that part must be constructed from error logs
+    writeLines(speclines, con=specfile)
     
-    # Double sub-setting needed because "Installed (but unpackaged) file(s) found" isn't
-    # necessarily right under "RPM build errors"...
-    rpmlog <- rpmlog[ (grep( "RPM build errors", rpmlog, fixed=TRUE)+1):length(rpmlog)]
-    rpmlog <- trimws( rpmlog[ (grep( "Installed (but unpackaged) file(s) found", rpmlog, fixed=TRUE)+1):length(rpmlog)], which="left")
-    rpmlog <- gsub(paste("/usr/lib64/R/library/",packname,"/",sep=""), "", rpmlog)
-    
-    dirlist <- NULL
-    for (line in rpmlog){
-        if ( grepl( "/", line, fixed=TRUE) ) { ## a file in a subdirectory, extract the unique directories
-            nextdir <- unlist( strsplit( line, "/") )[1]
-            if (! nextdir %in% dirlist){
-                dirlist <- c( dirlist, nextdir )
-                if (grepl( "html", line, fixed=TRUE) | grepl( "help", line, fixed=TRUE)) {
-                    cat( "%doc %{rlibdir}/%{packname}/", nextdir, "\n", sep="", file=specfile, append=TRUE)
-                } else {
-                    cat( "%{rlibdir}/%{packname}/", nextdir, "\n", sep="", file=specfile, append=TRUE)
-                }
-            }
-        } else { ## a file
-            if ( grepl( "LICENSE", line, fixed=TRUE)) {
-                cat( "%license %{rlibdir}/%{packname}/", line, "\n", sep="", file=specfile, append=TRUE )
-            } else if (grepl( "DESCRIPTION", line, fixed=TRUE)) {
-                cat( "%doc %{rlibdir}/%{packname}/", line, "\n", sep="", file=specfile, append=TRUE )
-            } else if (grepl( "NEWS", line, fixed=TRUE)) {
-                cat( "%doc %{rlibdir}/%{packname}/", line, "\n", sep="", file=specfile, append=TRUE )
-            } else {
-                cat( "%{rlibdir}/%{packname}/", line, "\n", sep="", file=specfile, append=TRUE)
-            }
-        }
-    }
-
-### second build!
-    rpmlog <- system2("rpmbuild", 
-                      args   = c("-ba", specfile),
-                      env    = "LANG=en;",
-                      stdout = TRUE,
-                      stderr = TRUE)
-    
-    if (length( grep( "Wrote:", rpmlog, fixed=TRUE)) == 2) {
-        cat("Successfully created rpm package\n")
-        cat("Successfully created rpm package\n", file=errorlog, append=TRUE)
-        print(rpmlog[grep("Wrote:", rpmlog, fixed=TRUE)])
-        for (line in  rpmlog[grep("Wrote:", rpmlog, fixed=TRUE)]){
-            cat(line, "\n", file=errorlog, append=TRUE)
-        }
-        cat("Succeded ", as.character(Sys.time()), "\n", file=errorlog, append=TRUE)
-    }
-    else {
-        cat( "Failed to build ", packname, " in second run rpmbuild\n", sep="")
-        return("Failed: Unknown error second run rpmbuild")
-    }
-    return(c(packname, version, specfile, rpmname))
+    return(list(status="done", value=specfile))
 }
 
 
@@ -147,6 +86,52 @@ extractFilesFromLog <- function(buildlog, packname, systemRlib="/usr/lib64/R/lib
         }
     }
     return(filelist)
+}
+
+#' extractDevelFilesFromLog takes the lines of an osc build log and
+#' extrats the list of files which need to be put in a devel packages.
+#' Times must be stripped already.
+#'
+#' @param buildlog Character vector containing the lines of an osc
+#' build log
+#'
+#' @return Character vector containing entries for the files section of
+#' a -devel package
+#'
+#' @export
+
+extractDevelFilesFromLog <- function(buildlog, pkg, systemRlib="/usr/lib64/R/library/"){
+    buildlog <- buildlog[ grep( "devel-file-in-non-devel-package", buildlog )]
+    buildlog <- gsub( paste0("R-",pkg,".x86_64: E: devel-file-in-non-devel-package (Badness: 50) ",systemRlib,pkg,"/"), "", buildlog)
+    ## cleanup, so just filenames below pkg remain in buildlog
+
+    filelist <- c()
+    dirlist <- NULL
+    for (line in buildlog){
+        if ( grepl( "/", line, fixed=TRUE) ) { ## a file in a subdirectory, extract the unique directories
+            nextdir <- unlist( strsplit( line, "/") )[1]
+            if (! nextdir %in% dirlist){
+                dirlist <- c( dirlist, nextdir )
+                filelist <- c( filelist, paste0("%{rlibdir}/%{packname}/", nextdir))
+            }
+        } else { ## a file
+            filelist <- c( filelist, paste0( "%{rlibdir}/%{packname}/", line))
+        }
+    }
+    return(filelist)
+}
+
+#' extract the lines off of the %files section of a simple, i.e. non-devel
+#' specfile
+#' @param specfile is a specfile
+#'
+#' @return vector of entries of %files section
+#'
+#' @export
+extractFilesFromSpec <- function(specfile){
+    specLines <- readlines(specfile)
+    files <- specLines[ grep("%files", specLines):(length(specLines)-2) ]
+    return(files)
 }
 
 
@@ -296,3 +281,111 @@ createEmptySpec <- function(pkg,
     }
     return(list(status="done", value=specfile))
 }
+
+#' desc2spec takes the name of an R package and generates a spec file
+#' to be used in OBS. The external tool rpmbuild is used to build
+#' the OpenSUSE package. The resulting spec file will reside where
+#' rpmbuild puts it. The %check section is deliberately empty. We rely
+#' on the checks on CRAN.
+#'
+#' @param packname A package name of a package in a R repo like CRAN
+#' @param rpmbuildroot The directory where rpmbuild should do its work
+#' 
+#' @return The path to the generated specfile.
+#' @export
+desc2spec <- function(packname, rpmbuildroot="~/rpmbuild/",
+                      ap = data.frame(available.packages(repos="https://cloud.r-project.org"))) {
+    errorlog <- "desc2spec.err"
+    cat("Building ", packname, "\n", file=errorlog, append=TRUE)
+
+    specfile <- createEmptySpec(packname, rpmbuildroot, ap)
+
+### call rpmbuild
+
+    suppressWarnings(
+        rpmlog <- system2("rpmbuild", 
+                          args   = c("-ba", specfile),
+                          env    = "LANG=en;",
+                          stdout = TRUE,
+                          stderr = TRUE)
+    ## the first build will fail by construction.
+    ## the output of rpmbuild allows to build the %file section
+    ## in the spec
+    )
+
+    ## but we have to look for other errors preventing successful second run
+    
+    if ( length( grep( "Failed build dependencies", rpmlog, fixed=TRUE)) >0 ) { ### missing dependencies, no chance
+        cat( "The following missing dependencies must be installed to build R-", packname, "\n", sep="")
+        cat( "The following missing dependencies must be installed to build R-", packname, "\n", sep="", file=errorlog, append=TRUE)
+        for (line in rpmlog) if ( grepl( "needed", line, fixed=TRUE)) {
+                                 cat( line,"\n")
+                                 cat( line,"\n", file=errorlog, append=TRUE)
+                                 cat("Failed: Missing dependencies first run rpmbuild\n", file=errorlog, append=TRUE)
+                             }
+        return("Failed: Missing dependencies first run rpmbuild")
+    }
+
+    if (length( grep("Bad exit status", rpmlog, fixed=TRUE)) > 0 ) {
+        cat( "Bad exit status from build R-", packname, "\n", sep="")
+        cat( "Bad exit status from build R-", packname, "\n", sep="", file=errorlog, append=TRUE)
+        return("Failed: Bad exit status")
+    }
+
+### At this point something was build. But as the specfile.tpl has an empty file section.
+### that part must be constructed from error logs
+    
+    # Double sub-setting needed because "Installed (but unpackaged) file(s) found" isn't
+    # necessarily right under "RPM build errors"...
+    rpmlog <- rpmlog[ (grep( "RPM build errors", rpmlog, fixed=TRUE)+1):length(rpmlog)]
+    rpmlog <- trimws( rpmlog[ (grep( "Installed (but unpackaged) file(s) found", rpmlog, fixed=TRUE)+1):length(rpmlog)], which="left")
+    rpmlog <- gsub(paste("/usr/lib64/R/library/",packname,"/",sep=""), "", rpmlog)
+    
+    dirlist <- NULL
+    for (line in rpmlog){
+        if ( grepl( "/", line, fixed=TRUE) ) { ## a file in a subdirectory, extract the unique directories
+            nextdir <- unlist( strsplit( line, "/") )[1]
+            if (! nextdir %in% dirlist){
+                dirlist <- c( dirlist, nextdir )
+                if (grepl( "html", line, fixed=TRUE) | grepl( "help", line, fixed=TRUE)) {
+                    cat( "%doc %{rlibdir}/%{packname}/", nextdir, "\n", sep="", file=specfile, append=TRUE)
+                } else {
+                    cat( "%{rlibdir}/%{packname}/", nextdir, "\n", sep="", file=specfile, append=TRUE)
+                }
+            }
+        } else { ## a file
+            if ( grepl( "LICENSE", line, fixed=TRUE)) {
+                cat( "%license %{rlibdir}/%{packname}/", line, "\n", sep="", file=specfile, append=TRUE )
+            } else if (grepl( "DESCRIPTION", line, fixed=TRUE)) {
+                cat( "%doc %{rlibdir}/%{packname}/", line, "\n", sep="", file=specfile, append=TRUE )
+            } else if (grepl( "NEWS", line, fixed=TRUE)) {
+                cat( "%doc %{rlibdir}/%{packname}/", line, "\n", sep="", file=specfile, append=TRUE )
+            } else {
+                cat( "%{rlibdir}/%{packname}/", line, "\n", sep="", file=specfile, append=TRUE)
+            }
+        }
+    }
+
+### second build!
+    rpmlog <- system2("rpmbuild", 
+                      args   = c("-ba", specfile),
+                      env    = "LANG=en;",
+                      stdout = TRUE,
+                      stderr = TRUE)
+    
+    if (length( grep( "Wrote:", rpmlog, fixed=TRUE)) == 2) {
+        cat("Successfully created rpm package\n")
+        cat("Successfully created rpm package\n", file=errorlog, append=TRUE)
+        print(rpmlog[grep("Wrote:", rpmlog, fixed=TRUE)])
+        for (line in  rpmlog[grep("Wrote:", rpmlog, fixed=TRUE)]){
+            cat(line, "\n", file=errorlog, append=TRUE)
+        }
+        cat("Succeded ", as.character(Sys.time()), "\n", file=errorlog, append=TRUE)
+    }
+    else {
+        cat( "Failed to build ", packname, " in second run rpmbuild\n", sep="")
+        return("Failed: Unknown error second run rpmbuild")
+    }
+    return(c(packname, version, specfile, rpmname))
+}
+
