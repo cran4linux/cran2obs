@@ -129,7 +129,7 @@ extractDevelFilesFromLog <- function(buildlog, pkg, systemRlib="/usr/lib64/R/lib
 #'
 #' @export
 extractFilesFromSimpleSpec <- function(specfile){
-    specLines <- readlines(specfile)
+    specLines <- readLines(specfile)
     files <- specLines[ grep("%files", specLines):(length(specLines)-2) ]
     return(files)
 }
