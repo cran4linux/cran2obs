@@ -166,9 +166,12 @@ dropFileSection <- function(speclines){
     if (length(filesLine) != 1) {
         return(list(status="fail", speclines, problem="No or more than one %files section! Don't know what to do."))
     } else {
-        speclines[filesLine+1]="%dir %{rlibdir}/%{packname}"
+        speclines[filesLine+1] <- "%dir %{rlibdir}/%{packname}"
+        ## keep the changelog section
+        speclines[filesLine+2] <- ""
+        speclines[filesLine+3] <- "%changelog"
     }
-    return(list(status="done", speclines=speclines[1:(filesLine+1)]))
+    return(list(status="done", speclines=speclines[1:(filesLine+3)]))
 }
 
 
@@ -244,7 +247,6 @@ createEmptySpec <- function(pkg,
     spectpl <- gsub( "{{license}}", license, spectpl, fixed=TRUE)
     
     spectpl <- gsub( "{{source0}}", source0, spectpl, fixed=TRUE)
-#    deps <-  cleanList( packname, "depends" )
     deps <- unlist(strsplit(pkg.info$recDep, " "))
     
     if (length(deps) >0) {

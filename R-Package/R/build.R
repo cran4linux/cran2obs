@@ -38,7 +38,9 @@ buildforfiles <- function(pkg, pac, specfile, localOBS=getOption("c2o.localOBSdi
     version <- gsub( "-", ".", ap[ap$Package == pkg, "Version"])
     gsub(version, "%{version}", filelist) # if there are files with version in name, this will be caught, see abcrlda
     
-    speclines <- c( speclines , filelist)
+    speclines <- c( speclines[1:(length(speclines)-2)] , filelist, speclines[length(speclines-1):length(speclines)])
+    ## the last two lines contain the %changelog tag
+    
     writeLines( speclines, specfile)
     return( list( status="done", value=specfile))
 }

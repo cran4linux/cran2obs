@@ -63,9 +63,10 @@ mkdir -p %{buildroot}%{rlibdir}
 test -d %{packname}/src && (cd %{packname}/src; rm -f *.o *.so)
 rm -f %{buildroot}%{rlibdir}/R.css
 
-#%check
-#%{_bindir}/R CMD check %{packname}
+#%%check
+#%%{_bindir}/R CMD check %%{packname}
 
 %files
 %dir %{rlibdir}/%{packname}
 
+%changelog
