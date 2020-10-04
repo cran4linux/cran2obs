@@ -62,7 +62,7 @@ cran2repo <- function(cran=getOption("c2o.cran"),
     return(status)
 }
                                         
-#' pk2repo does the same as cran2repo, but for a singl pkg
+#' pkg2repo does the same as cran2repo, but for a singl pkg
 #' @param cran CRAN mirror to use
 #' @param localOBS root directory to build remoteprj in locally
 #' @param repo OBS repo to use
