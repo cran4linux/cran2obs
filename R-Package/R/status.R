@@ -55,7 +55,7 @@ updateStatusOfpkg <- function( status, pkg, syncresult, always.save=TRUE, file= 
 #'
 #' @return a datafram containing the columns "Package", "Version", "License",
 #' "NeedsCompilation", "recDep", "Suggests", "depLen", "OBSpkg", "File", "OBSVersion",
-#' "triedVersion"
+#' "triedVersion", "hasDevel"
 #'
 #' @export
 repoStatusCreate <- function(cran=getOption("c2o.cran"), repo=getOption("c2o.auto"),
@@ -122,7 +122,7 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"),
     }
     
     status <- merge( ap[, c("Package", "Version", "License", "NeedsCompilation")],
-                    oldstatus[, c("Package", "recDep", "Suggests", "depLen", "OBSVersion", "triedVersion" )], by="Package", all=TRUE)
+                    oldstatus[, c("Package", "recDep", "Suggests", "depLen", "OBSVersion", "hasDevel", "triedVersion" )], by="Package", all=TRUE)
     
     retiredpkgs <- oldstatus$Package[ which(! oldstatus$Package %in% ap$Package)] ## no longer in available.packages, but in OBS
     logger(paste0("Retired packages: ", retiredpkgs))

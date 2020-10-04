@@ -95,7 +95,7 @@ cleanDeps <- function(repo=getOption("c2o.cran")){
 #' @return Matrix of all R packages avaialble in obsproject.
 #'
 #' @export
-available.packages.OBS <- function(obsproject=getOption("c2o.auto"), quiet=TRUE){
+available.packages.OBS <- function(obsproject=getOption("c2o.auto")){
     ## the names first
     cmd <- paste("osc ls", obsproject, sep=" ", collapse="")
     obspkgs <- system(cmd, intern=TRUE)
@@ -114,13 +114,37 @@ available.packages.OBS <- function(obsproject=getOption("c2o.auto"), quiet=TRUE)
             ## R-base-java is not a CRAN package.
         }
         cranpkgnames <- gsub("R-", "", obspkgs)
-        obsversion <- sapply(cranpkgnames, getOBSVersion, obsproject=obsproject)
-        obspkgs <- data.frame(Package=as.character(cranpkgnames), OBSVersion=as.character(obsversion))
+        obsinfo <- sapply(cranpkgnames, getOBSVersion, obsproject=obsproject)
+        obspkgs <- data.frame(Package=as.character(cranpkgnames), OBSVersion=as.character(unlist(obsinfo[1,])), hasDevel=unlist(obsinfo[2,]) )
     } else {
-        obspkgs <- data.frame(Package=character(), OBSVersion=character())
+        obspkgs <- data.frame(Package=character(), OBSVersion=character(), hasDevel=character())
     }
     return (obspkgs)
 }
+
+#' getOBSVersion takes the name of an R package (from CRAN) and receives the corresponding
+#' information off of OBS
+#' This function is not exactly cheap run-time wise. Around 0.5s per package.
+#' @param pkg name of an R package as found in CRAN
+#' @param obsproject Project in OBS where packages are taken from.
+#' 
+#' @return A list with components file containing the version number and
+#' a boolean value hasDevel
+#'
+#' @export
+getOBSVersion2 <- function ( pkg, obsproject=getOption("c2o.auto")) {
+#    logger("** get Info off of OBS")
+    cmd <- paste0( "osc ls -b ", obsproject, " R-", pkg, " openSUSE_Tumbleweed x86_64", sep="", collapse="")
+    lst <- system( cmd , intern=TRUE )
+    
+    if ( any( grep( "-devel", lst))) hasDevel <- TRUE else hasDevel=FALSE 
+
+    src <- lst[ grep( "src.rpm", lst) ]
+    srcversion <- unlist( strsplit( gsub( paste0( "R-", pkg, "-"), "", src), "-"))[1]
+    
+    return(list(version=srcversion, hasDevel=hasDevel))
+}
+
 
 #' getOBSVersion takes the name of an R package (from CRAN) and receives the corresponding
 #' information off of OBS
@@ -133,16 +157,16 @@ available.packages.OBS <- function(obsproject=getOption("c2o.auto"), quiet=TRUE)
 #' version containing the version.
 #'
 #' @export
-getOBSVersion <- function ( pkg, obsproject=getOption("c2o.auto"), quiet=TRUE ) {
-    if (! quiet) cat( "Checking ", pkg, "\n")
-    cmd <- paste( "osc ls ", obsproject, " R-", pkg, sep="", collapse="")
-    lst <- system( cmd , intern=TRUE )
-    srcfile <- lst[ grep( paste( "^", pkg, sep="", collapse=""), lst)][1]
-    ## the last [1] is needed if a package is linked to factory. In lst the files
-    ## can appear multiple times then.
-    srcversion <- gsub(paste0( pkg, "_"), "", gsub(".tar.gz", "", srcfile))
-    return(srcversion)
-}
+## getOBSVersion <- function ( pkg, obsproject=getOption("c2o.auto"), quiet=TRUE ) {
+##     if (! quiet) cat( "Checking ", pkg, "\n")
+##     cmd <- paste( "osc ls ", obsproject, " R-", pkg, sep="", collapse="")
+##     lst <- system( cmd , intern=TRUE )
+##     srcfile <- lst[ grep( paste( "^", pkg, sep="", collapse=""), lst)][1]
+##     ## the last [1] is needed if a package is linked to factory. In lst the files
+##     ## can appear multiple times then.
+##     srcversion <- gsub(paste0( pkg, "_"), "", gsub(".tar.gz", "", srcfile))
+##     return(srcversion)
+## }
 
 #' CranOBSfromScratch combines available.packages() and info of two OBS repos, i.e.
 #' home:detlef:AutomaticCRAN and d:l:R:released into a datafram combining all information
