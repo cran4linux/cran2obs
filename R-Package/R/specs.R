@@ -180,10 +180,11 @@ createEmptySpec <- function(pkg,
                             pac=file.path(getOption("c2o.localOBSdir"), getOption("c2o.auto"), paste0("R-",pkg)),
                             download.cache=getOption("c2o.download.cache"),
                             cran=getOption("c2o.cran"),
-                            status = getOption("c2o.status"),
+                            statusfile = getOption("c2o.statusfile"),
                             log = getOption("c2o.logfile")) {
                 
     logger(paste0("** Creating empty spec for pkg ", pkg))
+    status <- read.table(statusfile, sep=";", header=TRUE, colClasses="character")
     
     if (! file.exists(system.file("specfile.tpl", package="CRAN2OBS"))){
         logger("*** specfile template not found ?!")
@@ -266,7 +267,13 @@ createEmptySpec <- function(pkg,
             } else { next }
         } else if ( grepl( "{{builddepends}}", line, fixed=TRUE)) {
             if  ( length( deps) > 0)  {
-                for ( item in deps) cat( "BuildRequires:\t", item, "\n", sep="", file=specfile, append=TRUE)
+                for ( item in deps) {
+                    if (status$hasDevel[ which( status$Package == gsub("R-", "", item))]) {
+                        cat( "BuildRequires:\t", item, "-devel\n", sep="", file=specfile, append=TRUE)
+                    } else {
+                        cat( "BuildRequires:\t", item, "\n", sep="", file=specfile, append=TRUE)
+                    }
+                }
             } else { next }
         } else if ( grepl( "{{suggests}}", line, fixed=TRUE) ) {
             if ( length( suggests) > 0)  {

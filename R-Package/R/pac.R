@@ -320,7 +320,7 @@ pkg2pac <- function( pkg,
     }
 
     pac <- result$value
-    result <- createEmptySpec(pkg, pac=pac, download.cache=download.cache, status=status)
+    result <- createEmptySpec(pkg, pac=pac, download.cache=download.cache, statusfile=statusfile)
 
     if (result$status == "fail") {
         logger(paste0("Creating empty spec failed for pkg ", pkg))
