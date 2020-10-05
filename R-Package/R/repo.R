@@ -46,7 +46,7 @@ cran2repo <- function(cran=getOption("c2o.cran"),
                                       download.cache=download.cache, binary.cache=binary.cache, log=log)
                     if (result$status == "done") {
                         logger(paste0("** Sync finished for ", pkg))
-                        uploadpac(pkg, status$Version[pkg], "initial build")
+                        uploadpac(pkg, status$Version[num], "initial build")
                     } else {
                         logger(paste0("** Sync failed for ", pkg))
                     }
