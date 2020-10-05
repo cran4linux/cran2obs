@@ -154,9 +154,10 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"),
 
     for (pkg in which( is.na(status$OBSVersion) & (status$Package %in% obspkgs)  )){
         logger(paste0("Get OBS info for package ",status$Package[pkg] ))
-        obsversion <- getOBSVersion( status$Package[pkg], repo)
-        status$OBSVersion[pkg] <- as.character(obsversion)
-        status$triedVersion[pkg] <- as.character(obsversion)
+        obsinfo <- getOBSVersion( status$Package[pkg], repo)
+        status$OBSVersion[pkg] <- as.character(unlist(obsinfo[1,]))
+        status$triedVersion[pkg] <- as.character(unlist(obsinfo[1,]))
+        status$hasDevel[pkg] <- unlist(obsinfo[2,])
     }
     
     write.table(status, file=file, row.names=FALSE, sep=";")
