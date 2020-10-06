@@ -1,3 +1,31 @@
+#' readStatus reads a statusfile and return the datafram
+#' @param statusfile filename of statusfile
+#' @return status datafram
+#' @export
+readStatus <- function(statusfile = getOption("c2o.statusfile")){
+    invisible(read.table(statusfile, sep=";", header=TRUE, colClasses="character"))
+}
+
+#' writeStatus writes status dataframe to statusfile
+#' @param status dataframe with status info
+#' @param statusfile file to save info into
+#' @export
+writeStatus <- function(status, 
+                        statusfile = getOption("c2o.statusfile")){
+    write.table(status, file=statusfile, sep=";", row.names=FALSE)
+}
+
+#' resetPkg clears OBSVersion, triedVersion and hasDevel
+#' @param pkg package name
+#' @param status dataframe holding status
+#' @return updated dataframe holding status.
+#' @export
+resetPkg <- function(pkg, status){
+    i <- which(status$Package == pkg)
+    status[i, "OBSVersion"] <- status[i, "triedVersion"] <- status[i, "hasDevel"] <- NA
+    invisible(status)
+}
+
 #' cleanBuildlog removes useless parts of the output
 #' - timestamps get removed
 #' - whitespace gets removed
