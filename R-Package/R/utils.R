@@ -27,6 +27,13 @@ logger <- function( msg, file=getOption("c2o.logfile")) {
     }
 }
 
+#' obsVersion turns source version in OBS Version
+#' (just for readability) 
+#' @param version character string representing CRAN version
+#'
+#' @return normalized OBS Version
+obsVersion <- function(version){ gsub("-", ".", version) }
+
 #' versionFromTgz (deprecated) extracts the version info, normalizes it and return
 #' a charater string containing that version
 #'

@@ -214,8 +214,6 @@ setuppac <- function(pkg,
 
     ## pac checked out or created, get the sources
 
-    ## version <- gsub( "-", ".", status[ which( status$Package == pkg), "Version"])
-    ##    version <- status[ which( status$Package == pkg), "Version"]
     source0 <- paste0( pkg, "_", status[ which( status$Package == pkg), "Version"]   , ".tar.gz")
 
     if (! file.exists( file.path( download.cache, source0))) {
@@ -285,7 +283,7 @@ pkg2pac <- function( pkg,
     }
 
     if ( ! is.na( pkg.info$OBSVersion)) {
-        if ( pkg.info$OBSVersion != gsub("-",".",pkg.info$Version)) {
+        if ( pkg.info$OBSVersion != obsVersion(pkg.info$Version)) {
             logger( paste0( "Update ", pkg), log)
             buildtype = "update"
         } else {
@@ -348,7 +346,7 @@ pkg2pac <- function( pkg,
 
     if (result$status == "done") { ## pkg successfully built!
         logger( paste0( pkg, " automatically built"), log)
-        syncresult <- list( status="done", value=gsub("-",".",pkg.info$Version), hasDevel=FALSE)
+        syncresult <- list( status="done", value=obsVersion(pkg.info$Version), hasDevel=FALSE)
         return( syncresult)
     }
 
@@ -364,7 +362,7 @@ pkg2pac <- function( pkg,
         result <- testbuild(pkg, pac, specfile, ap=status, log=log )
         if (result$status == "done"){
             logger( paste0( pkg, " automatically built with -devel"), log)
-            syncresult <- list( status="done", value=gsub("-",".",pkg.info$Version), hasDevel=TRUE)
+            syncresult <- list( status="done", value=obsVersion(pkg.info$Version), hasDevel=TRUE)
             return( syncresult)
         }
     }

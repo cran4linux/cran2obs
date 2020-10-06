@@ -31,7 +31,7 @@ repoStatusUpdate(
 \value{
 a dataframe containing the columns "Package", "Version", "License",
 "NeedsCompilation", "recDep", "Suggests", "depLen", "OBSpkg", "File", "OBSVersion",
-"triedVersion"
+"hasDevel", "triedVersion"
 }
 \description{
 repoStatusUpdate takes a status file and incorporates information of
