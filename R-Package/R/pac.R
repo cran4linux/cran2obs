@@ -290,7 +290,7 @@ pkg2pac <- function( pkg,
             buildtype = "update"
         } else {
             logger(paste0( pkg, " already uptodate"), log)
-            return( list( status="fail", value="already uptodate))
+            return( list( status="fail", value="already uptodate"))
         }
     } else {
         logger( paste0( "initial build of ", pkg), log)
@@ -348,14 +348,7 @@ pkg2pac <- function( pkg,
 
     if (result$status == "done") { ## pkg successfully built!
         logger( paste0( pkg, " automatically built"), log)
-        syncresult <- list( status="done", value=pkg.info$Version, hasDevel=FALSE)
-        result <- uploadpac( pkg, pkg.info$Version, buildtype=buildtype, localOBS=localOBS, remoteprj=remoteprj, log=log)
-
-        if (! result$status == "done") {
-            logger( paste0( "Failed to upload ", pkg , " to ", remoteprj), log)
-            return( list( status="fail", value="failed to construct files section"))
-        }
-        logger( paste0( pkg, " uploaded"), log)        
+        syncresult <- list( status="done", value=gsub("-",".",pkg.info$Version), hasDevel=FALSE)
         return( syncresult)
     }
 
@@ -370,7 +363,9 @@ pkg2pac <- function( pkg,
         logger("** build with -devel package")
         result <- testbuild(pkg, pac, specfile, ap=status, log=log )
         if (result$status == "done"){
-            return( list( status="done", value=pkg.info$Version, hasDevel=TRUE))
+            logger( paste0( pkg, " automatically built with -devel"), log)
+            syncresult <- list( status="done", value=gsub("-",".",pkg.info$Version), hasDevel=TRUE)
+            return( syncresult)
         }
     }
 

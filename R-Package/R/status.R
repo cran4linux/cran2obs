@@ -42,8 +42,9 @@ updateStatusOfpkg <- function( status, pkg, syncresult, always.save=TRUE, status
     if (syncresult$status == "done") {
         status[i , "OBSVersion"] <- status[i, "Version" ]
         status[i , "hasDevel"] <- syncresult$hasDevel
+    } else {
+        status[i , "triedVersion"] <- status[i, "Version" ]
     }
-    status[i , "triedVersion"] <- status[i, "Version" ]
     if (always.save) write.table(status, file=statusfile, row.names=FALSE, sep=";")
     return(status)
 }
