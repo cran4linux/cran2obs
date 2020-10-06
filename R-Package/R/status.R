@@ -1,3 +1,20 @@
+#' defineActions returns a list of a partition in 5 sets of all
+#' packages with status information
+#' @param status dataframe read from datafile or constructed
+#'
+#' @return list with compoents "retired", "uptodate", "update" and
+#' "totry" , "tried" holding the names of respective packages
+defineActions <- function(status = getOption("c2o.status")){
+    totry <- status$Package[ which( ( !is.na( status$Version) & is.na( status$OBSVersion)) &
+                                    (( is.na( status$triedVersion) |
+                                       (obsVersion( status$Version) != status$triedVersion))))]
+    uptodate <- status$Package[ which(obsVersion( status$Version) == status$OBSVersion) ]
+    tried <- status$Package[ which(is.na(status$OBSVersion) & ( obsVersion(status$Version) != status$triedVersion  ))  ]
+    update <- status$Package[ which( !is.na( status$OBSVersion) & ( obsVersion( status$Version) != status$OBSVersion) )]
+    retired <- status$Package[ is.na(status$Version) ] 
+    return(list(retired=retired, uptodate=uptodate, update=update, tried= tried, totry=totry))
+}
+
 #' statusOBS checks if a package already exists either as remote pac on build.opensuse.org
 #'
 #' @param pkg CRAN R package name
