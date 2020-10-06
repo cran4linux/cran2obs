@@ -86,7 +86,7 @@ repoStatusCreate <- function(cran=getOption("c2o.cran"), repo=getOption("c2o.aut
 #' 
 #' @return a dataframe containing the columns "Package", "Version", "License",
 #' "NeedsCompilation", "recDep", "Suggests", "depLen", "OBSpkg", "File", "OBSVersion",
-#' "triedVersion"
+#' "hasDevel", "triedVersion"
 #'
 #' @export
 repoStatusUpdate <- function(cran=getOption("c2o.cran"),

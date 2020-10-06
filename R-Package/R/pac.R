@@ -285,12 +285,12 @@ pkg2pac <- function( pkg,
     }
 
     if ( ! is.na( pkg.info$OBSVersion)) {
-        if ( pkg.info$OBSVersion != pkg.info$Version) {
+        if ( pkg.info$OBSVersion != gsub("-",".",pkg.info$Version)) {
             logger( paste0( "Update ", pkg), log)
             buildtype = "update"
         } else {
             logger(paste0( pkg, " already uptodate"), log)
-            return( list( status="done", value=pkg.info$Version))
+            return( list( status="fail", value="already uptodate))
         }
     } else {
         logger( paste0( "initial build of ", pkg), log)
