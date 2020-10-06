@@ -268,6 +268,7 @@ pkg2pac <- function( pkg,
     
     logger(paste0("* Syncing ", pkg, " to OBS"))
     status <- read.table(statusfile, sep=";", header=TRUE, colClasses="character")
+
     if ( ! pkg %in% status[ , "Package"] ) {
         logger(paste0( "Seems ", pkg, " not in status file"))
         return( list( status="fail", problem=paste( "Package not in status file")))
@@ -337,7 +338,6 @@ pkg2pac <- function( pkg,
     }
 
     ## here the %file section is fully populated
-
     specfile <- result$value
     
     ## second build!

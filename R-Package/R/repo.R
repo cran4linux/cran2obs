@@ -36,9 +36,18 @@ cran2repo <- function(cran=getOption("c2o.cran"),
     for (level in all.deplength){
         pkgs <- which(status$depLen == level)
         for (pkg in status$Package[pkgs]) {
-            if ((pkg %in% actions$update) | (pkg %in% actions$totry))
+            buildtype <- NA
+            if (pkg %in% actions$update) {
+                buildtype <- "update"
+            } else {
+                if (pkg %in% actions$totry) {
+                    buildtype <- "initial build"
+                }
+            }
+            if (! is.na(buildtype))
                 {
                     logger(paste0("* Working on ", pkg ))
+                    
                 } else {
                     next
                 }
