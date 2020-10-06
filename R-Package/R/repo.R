@@ -60,7 +60,7 @@ cran2repo <- function(cran=getOption("c2o.cran"),
                               download.cache=download.cache, binary.cache=binary.cache, log=log)
 
             if (result$status == "done") {
-                upresult <- uploadpac( pkg, gsub("-",".",pkg.info$Version), buildtype=buildtype, localOBS=localOBS, remoteprj=remoteprj, log=log)
+                upresult <- uploadpac( pkg, obsVersion(status$Version[num]), buildtype=buildtype, localOBS=localOBS, remoteprj=remoteprj, log=log)
                 if (! upresult$status == "done") {
                     logger( paste0( "Failed to upload ", pkg , " to ", remoteprj), log)
                     return( list( status="fail", value="failed to upload built package"))
@@ -107,7 +107,7 @@ pkg2repo <- function(pkg,
                           download.cache=download.cache, binary.cache=binary.cache, log=log)
         if (result$status == "done") {
             logger(paste0("** Sync finished for ", pkg))
-            uploadpac(pkg, status$Version[pkg], "initial build")
+            uploadpac(pkg, status$Version[num], "initial build")
         } else {
             logger(paste0("** Sync failed for ", pkg))
         }

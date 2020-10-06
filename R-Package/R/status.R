@@ -57,7 +57,7 @@ updateStatusOfpkg <- function( status, pkg, syncresult, always.save=TRUE, status
     }
     i <- which ( status$Package == pkg )
     if (syncresult$status == "done") {
-        status[i , "OBSVersion"] <- status[i, "Version" ]
+        status[i , "OBSVersion"] <- obsVersion(status[i, "Version" ])
         status[i , "hasDevel"] <- syncresult$hasDevel
     } else {
         status[i , "triedVersion"] <- status[i, "Version" ]
