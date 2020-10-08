@@ -206,6 +206,11 @@ createEmptySpec <- function(pkg,
     untar( file.path( pac, source0), desc.file)
     
     description <- readLines( desc.file)
+
+    if ( any( grep( "SystemRequirements:", descrition))) {
+        logger( paste0( pkg, " has non-empty SystemReqirements"))
+        logger( description[ grep( "SystemRequirements", description)])
+    }
     
     if ( any(grep("Encoding: ", description, fixed=TRUE))) {
         ## some DESCRIPTIONs seem to be encoded differently, i.e leerSIECyL
