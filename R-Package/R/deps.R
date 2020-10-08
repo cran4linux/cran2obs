@@ -97,9 +97,12 @@ cleanDeps <- function(repo=getOption("c2o.cran")){
 #' @export
 available.packages.OBS <- function(obsproject=getOption("c2o.auto")){
     ## the names first
-    cmd <- paste("osc ls", obsproject, sep=" ", collapse="")
-    obspkgs <- system(cmd, intern=TRUE)
+    ##cmd <- paste("osc ls", obsproject, sep=" ", collapse="")
+    ##obspkgs <- system(cmd, intern=TRUE)
 
+    cmd <- paste("osc prjresults -V", repo, "-r openSUSE_Tumbleweed -a x86_64 | grep '^\\.'  ",   sep=" ", collapse="")
+    obspkgs <- gsub(".  ", "", system(cmd, intern=TRUE))
+    
     ## may contain additional stuff related to compiling some packages
     ## only R-* packages are relevant
     if (length(obspkgs) > 0) { ## i.e. not a new empty repo

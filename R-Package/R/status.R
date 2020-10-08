@@ -165,10 +165,9 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"),
         }
     }
 
-    ## now check for new in repo
-    cmd <- paste("osc ls", repo, sep=" ", collapse="")
-    obspkgs <- gsub("R-", "", system(cmd, intern=TRUE))
-
+    ## now check for new and successfully built in repo
+    cmd <- paste("osc prjresults -V", repo, "-r openSUSE_Tumbleweed -a x86_64 | grep '^\\.'  ",   sep=" ", collapse="")
+    obspkgs <- gsub(".  R-", "", system(cmd, intern=TRUE))
 
     for (pkg in which( is.na(status$OBSVersion) & (status$Package %in% obspkgs)  )){
         logger(paste0("Get OBS info for package ",status$Package[pkg] ))
