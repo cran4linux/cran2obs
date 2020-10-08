@@ -333,8 +333,8 @@ pkg2pac <- function( pkg,
     result <- buildforfiles( pkg, pac, specfile, localOBS=localOBS, remoteprj=remoteprj, download.cache=download.cache, binary.cache=binary.cache, ap=status, log=log)
 
     if (! result$status == "done") {
-        logger( paste0( "Failed to construct files section for ", pkg))
-        return( list( status="fail", value="failed to construct files section"))
+        logger( paste0( "Failed initial build, probably missing system lib for ", pkg))
+        return( list( status="fail", value=result$value))
     }
 
     ## here the %file section is fully populated
@@ -352,7 +352,7 @@ pkg2pac <- function( pkg,
 
     ## there was a build error. Let's see, if it is about splitting in pkg and pkg-devel
 
-    if (result$value == "badness exceeds limit") { ## may be the split helps
+    if (result$value == "split devel") { ## may be the split helps
         develfiles <- extractDevelFilesFromLog(result$buildlog, pkg)
         mainfiles <- extractFilesFromSimpleSpec(specfile)
         mainfiles <- setdiff(mainfiles, develfiles)
@@ -370,5 +370,5 @@ pkg2pac <- function( pkg,
     ## if we end here, something went badly wrong.
    
     logger( paste0( "Failed to automatically build ", pkg), log)
-    syncresult <- list( status="fail", value="unresolvable (automatically) error")
+    syncresult <- list( status="fail", value=result$value)
 }

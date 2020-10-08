@@ -20,7 +20,7 @@ buildforfiles <- function(pkg, pac, specfile, localOBS=getOption("c2o.localOBSdi
                           log=getOption("c2o.logfile")){
     logger("** Build to construct files section")
     speclines <- readLines( specfile)
-    result <- dropFileSection( speclines)
+    result <- dropFileSection( speclines) ### only needed if manual constructed spec is used
     
     if ( result$status != "done") {
         logger("dropping file section failed")
@@ -33,9 +33,9 @@ buildforfiles <- function(pkg, pac, specfile, localOBS=getOption("c2o.localOBSdi
     
     ## we dont need to check for success, because %files section is empty and therefore fail by design
     
-    if (! result$value == "unpackaged files"){
-        logger(paste0( "buildforfiles: Failed to build files section for ", pkg))
-        return(list(status="failed", problem=result$value))
+    if (! result$value == "unpackaged files"){ ## every other error is fatal at this point
+        logger(paste0( "Failed initial build, probably missing system lib for  ", pkg))
+        return(list(status="failed", value=result$value))
     }
 
     filelist <- extractFilesFromLog( result$buildlog, pkg)
@@ -125,10 +125,17 @@ testbuild <- function(pkg, pac, specfile,
         return(list(status="fail", value="unpackaged files", buildlog=buildlog)) 
     }
 
-    if ( any( grep( "badness.*exceeds.*aborting", buildlog))){
+    if ( any( grep( "devel-file-in-non-devel-package", buildlog)) &
+         any( grep( "badness*exceeds threshold", buildlog))){
         logger( paste0("Probably must be split in ", pkg, " and ", pkg, "-devel"))
-        return( list( status="fail", value="badness exceeds limit", buildlog=buildlog))
+        return( list( status="fail", value="split devel", buildlog=buildlog))
     }
+
+    if ( any( grep( "badness*exceeds threshold", buildlog)){
+        logger( paste0("Some RPMlint problems "))
+        return( list( status="fail", value="rpmlint problem", buildlog=buildlog))
+    }
+
     
     if (length( grep( "Wrote:", buildlog, fixed=TRUE)) > 1) {
         logger( paste0("Success: ", pkg, " rpm package created"))
