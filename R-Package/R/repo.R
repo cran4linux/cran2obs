@@ -74,6 +74,7 @@ cran2repo <- function(cran=getOption("c2o.cran"),
             
         }
     }
+    logger( paste0("Sync finished at ", Sys.time() ))
     return(status)
 }
                                         
