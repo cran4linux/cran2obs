@@ -126,7 +126,7 @@ testbuild <- function(pkg, pac, specfile,
     }
 
     if ( any( grep( "devel-file-in-non-devel-package", buildlog)) &
-         any( grep( "badness*exceeds threshold", buildlog))){
+         any( grep( "badness.*exceeds threshold", buildlog))){
         logger( paste0("Probably must be split in ", pkg, " and ", pkg, "-devel"))
         return( list( status="fail", value="split devel", buildlog=buildlog))
     }

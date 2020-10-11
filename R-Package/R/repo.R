@@ -28,6 +28,7 @@ cran2repo <- function(cran=getOption("c2o.cran"),
     ## if R-gdata should be built. (or some meta-information in the OBS
     ## project must be set)
     
+    logger( paste0("Sync started at ", Sys.time() ))
     status <- read.table(statusfile, header=TRUE, sep=";", colClasses="character")
 
     actions <- defineActions(status)
