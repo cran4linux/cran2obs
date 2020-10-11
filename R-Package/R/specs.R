@@ -207,7 +207,7 @@ createEmptySpec <- function(pkg,
     
     description <- readLines( desc.file)
 
-    if ( any( grep( "SystemRequirements:", descrition))) {
+    if ( any( grep( "SystemRequirements:", description))) {
         logger( paste0( pkg, " has non-empty SystemReqirements"))
         logger( description[ grep( "SystemRequirements", description)])
     }
@@ -218,7 +218,7 @@ createEmptySpec <- function(pkg,
                                  description[ grep( "Encoding: ", description, fixed=TRUE)]), which="both")
         if (encoding %in% c("latin1", "latin2")) {
             ##            system2( "recode", args=c( "..UTF-8", desc.file))
-            ## re-read re-encoded DESCRITION
+            ## re-read re-encoded DESCRIPTION
             ##description <- readLines(desc.file)
             description <- iconv(description, encoding, "UTF-8")
         }
@@ -226,7 +226,7 @@ createEmptySpec <- function(pkg,
 
     unlink( pkg, recursive=TRUE)
     
-    ## template and descrition have been read in now populate the specfile tempalte
+    ## template and description have been read in now populate the specfile tempalte
     
     spectpl <- gsub( "{{year}}", format( Sys.time(), "%Y" ), spectpl, fixed=TRUE)    
     spectpl <- gsub( "{{packname}}", pkg, spectpl, fixed=TRUE)
