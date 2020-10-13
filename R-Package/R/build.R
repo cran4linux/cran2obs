@@ -131,7 +131,7 @@ testbuild <- function(pkg, pac, specfile,
         return( list( status="fail", value="split devel", buildlog=buildlog))
     }
 
-    if ( any( grep( "badness*exceeds threshold", buildlog))){
+    if ( any( grep( "badness.*exceeds threshold", buildlog))){
         logger( paste0("Some RPMlint problems "))
         return( list( status="fail", value="rpmlint problem", buildlog=buildlog))
     }
