@@ -28,8 +28,9 @@ setuppac(
 CRAN and remoteprj}
 }
 \value{
-list( status, value) where 'status' is "done" or "fail"
-and 'value' is the created directory or a string with an error message
+list( status, buildtype, value) where 'status' is "done" or "fail",
+buildtype is "first" or "update", 'value' is the created directory
+or a string with an error message
 }
 \description{
 setuppac creates the OBS project for pkg on the local machine

@@ -133,8 +133,9 @@ cleanuppac <- function(pkg,
 #' @param cran CRAN mirror for download
 #' @param status dataframe holding the current sync status between
 #' CRAN and remoteprj
-#' @return list( status, value) where 'status' is "done" or "fail"
-#' and 'value' is the created directory or a string with an error message 
+#' @return list( status, buildtype, value) where 'status' is "done" or "fail",
+#' buildtype is "first" or "update", 'value' is the created directory
+#' or a string with an error message 
 #'
 #' @export
 setuppac <- function(pkg,
@@ -177,7 +178,7 @@ setuppac <- function(pkg,
             cat(pkg, " could not checkout from OBS\n", file=log, append=TRUE)
             return( list( status="fail", value="could not checkout"))
         } else {
-            buildtype <- "initial release"
+            buildtype <- "first"
         }
     } else { ## co was possible
         buildtype <- "update"
@@ -196,7 +197,6 @@ setuppac <- function(pkg,
     }
 
     ## pac checked out or created, get the sources
-
 
     if (buildtype == "update") { ## rm old sources
         oldsource <- list.files(file.path(pac, paste0("R-",pkg)), "\\.*tgz")
@@ -230,7 +230,7 @@ setuppac <- function(pkg,
         return( list( status="fail", value="copy of sources failed"))
     }
     
-    return( list( status="done", value=pac))
+    return( list( status="done", buildtype=buildtype, value=pac))
 }
 
 #' pkg2pac takes the name of an R package and creates or updates 
@@ -245,10 +245,10 @@ setuppac <- function(pkg,
 #' you want to create your package in. 
 #' @param remoteprj Name of the OBS project
 #' @param cran CRAN mirror to use
-#' @param ap A dataframe containing the sync status of cran and remoteprj
+#' @param statusfile a file holding current syncstate
 #' 
-#' @return list of 'status', "done" or "fail" and 'problem' set to NA
-#' or character string
+#' @return list of 'status', "done" or "fail", 'buildtype', 'value' set to NA
+#' or character string and 'hasDevel'
 #' @export
 
 pkg2pac <- function( pkg,
@@ -311,8 +311,9 @@ pkg2pac <- function( pkg,
         logger(paste0( "Setting up OBS dir failed for pkg ", pkg))
         return( list( status="fail", problem=result$value))
     }
-
+    buildtype <- result$buildtype
     pac <- result$value
+    
     result <- createEmptySpec(pkg, pac=pac, download.cache=download.cache, statusfile=statusfile)
 
     if (result$status == "fail") {
@@ -340,7 +341,7 @@ pkg2pac <- function( pkg,
 
     if (result$status == "done") { ## pkg successfully built!
         logger( paste0( pkg, " automatically built"), log)
-        syncresult <- list( status="done", value=obsVersion(pkg.info$Version), hasDevel=FALSE)
+        syncresult <- list( status="done", buildtype=buildtype, value=obsVersion(pkg.info$Version), hasDevel=FALSE)
         return( syncresult)
     }
 
@@ -356,7 +357,7 @@ pkg2pac <- function( pkg,
         result <- testbuild(pkg, pac, specfile, ap=status, log=log )
         if (result$status == "done"){
             logger( paste0( pkg, " automatically built with -devel"), log)
-            syncresult <- list( status="done", value=obsVersion(pkg.info$Version), hasDevel=TRUE)
+            syncresult <- list( status="done", buildtype=buildtype, value=obsVersion(pkg.info$Version), hasDevel=TRUE)
             return( syncresult)
         }
     }

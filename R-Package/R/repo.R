@@ -61,7 +61,7 @@ cran2repo <- function(cran=getOption("c2o.cran"),
                               download.cache=download.cache, binary.cache=binary.cache, log=log)
 
             if (result$status == "done") {
-                upresult <- uploadpac( pkg, obsVersion(status$Version[num]), buildtype=buildtype, localOBS=localOBS, remoteprj=remoteprj, log=log)
+                upresult <- uploadpac( pkg, obsVersion(status$Version[num]), buildtype=result$buildtype, localOBS=localOBS, remoteprj=remoteprj, log=log)
                 if (! upresult$status == "done") {
                     logger( paste0( "Failed to upload ", pkg , " to ", remoteprj), log)
                     logger( paste0( "with error ", upresult$value))
@@ -104,6 +104,7 @@ pkg2repo <- function(pkg,
 
     status <- read.table(statusfile, header=TRUE, sep=";", colClasses="character")
     actions <- defineActions(status)
+
     logger(paste0("* Working on ", pkg ))
     num <- which(status$Package == pkg)
 
@@ -111,7 +112,7 @@ pkg2repo <- function(pkg,
         result <- pkg2pac(pkg, localOBS=localOBS, remoteprj=remoteprj, statusfile=statusfile,
                           download.cache=download.cache, binary.cache=binary.cache, log=log)
         if (result$status == "done") {
-            upresult <- uploadpac( pkg, obsVersion(status$Version[num]), buildtype=buildtype, localOBS=localOBS, remoteprj=remoteprj, log=log)
+            upresult <- uploadpac( pkg, obsVersion(status$Version[num]), buildtype=result$buildtype, localOBS=localOBS, remoteprj=remoteprj, log=log)
             if (! upresult$status == "done") {
                 logger( paste0( "Failed to upload ", pkg , " to ", remoteprj), log)
                 logger( paste0( "with error ", upresult$value))

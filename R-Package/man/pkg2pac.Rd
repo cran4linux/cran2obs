@@ -29,13 +29,13 @@ you want to create your package in.}
 
 \item{cran}{CRAN mirror to use}
 
-\item{rpmbuildroot}{The directory where rpmbuild should do its work}
+\item{statusfile}{a file holding current syncstate}
 
-\item{ap}{A dataframe containing the sync status of cran and remoteprj}
+\item{rpmbuildroot}{The directory where rpmbuild should do its work}
 }
 \value{
-list of 'status', "done" or "fail" and 'problem' set to NA
-or character string
+list of 'status', "done" or "fail", 'buildtype', 'value' set to NA
+or character string and 'hasDevel'
 }
 \description{
 pkg2pac takes the name of an R package and creates or updates 
