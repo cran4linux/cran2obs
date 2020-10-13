@@ -34,6 +34,24 @@ statusOBS <- function(pkg, remoteproj=getOption("c2o.auto")){
     }
 }
 
+#' resetStatusOfpkg removes entries for OBSVersion, hasDevel and
+#' triedVersion
+#' @param pkg a packagename
+#' @param status a dataframe containing current status. If NA statusfile
+#' will be read
+#' @param statusfile file containing status information about ongoing sync
+#' @param log logfile
+#'
+#' @return dataframe holding updated status
+#'
+#' @export
+resetStatusOfpkg <- function( pkg, status=NA, statusfile= getOption("c2o.statusfile"), log=getOption("c2o.logfile")){
+    if (is.na(status)) status <- readStatus(statusfile)
+    num <- which(status$Package == pkg)
+    status$OBSVersion[num] <- status$hasDevel[num] <- status$triedVersion[num] <- NA
+    writeStatus(status, statusfile)
+    invisible(status)
+}
 
 #' updateStatusOfpkg incorporates new information about a tried build in
 #' the status dataframe.
