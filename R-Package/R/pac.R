@@ -154,53 +154,36 @@ setuppac <- function(pkg,
     pac <- file.path( localOBS, remoteprj, paste0( "R-", pkg))
 
     inOBSVersion <-  status[ which( status$Package == pkg) , "OBSVersion"]
+
+    ## if there is pac dir, remove it anyways
+    if ( dir.exists( pac )){
+        cmd <- paste("\"", "cd", file.path(localOBS, remoteprj) , "&& rm -rf  ", paste0( "R-", pkg)  , "\"")
+        result <- system2(  "bash",  args = c("-c", cmd), stdout=TRUE, stderr=TRUE)
+            
+        if( ! is.null(attributes(result))) {
+            cat(result, "\n")
+            logger(paste0(pkg, " could not rm dir"))
+            return(list(status="fail", value="could not remove dir"))
+        }
+    }
+
+    ## try to checkout pac
+    cmd <- paste( "\"", "cd", file.path( localOBS, remoteprj), " && osc co ", paste0( "R-", pkg), "\"")
+    result <- system2( "bash",  args = c("-c", cmd), stdout=TRUE, stderr=TRUE)
+    if( !is.null(attributes(result)) ) {
+        if (! any( grep( "Package not found", result))) {
+            cat(result)
+            cat(pkg, " could not checkout from OBS\n")
+            cat(pkg, " could not checkout from OBS\n", file=log, append=TRUE)
+            return( list( status="fail", value="could not checkout"))
+        } else {
+            buildtype <- "initial release"
+        }
+    } else { ## co was possible
+        buildtype <- "update"
+    }
     
-    if (! is.na( inOBSVersion )) { # update
-        if ( dir.exists( pac )){ # just update
-            cmd <- paste( "\"", "cd", pac, " && osc up \"")
-            result <- system2( "bash", args = c("-c", cmd), stdout=TRUE, stderr=TRUE)
-            
-            if( ! is.null(attributes(result))) {
-                cat(result, "\n")
-                cat(pkg, " could not update local OBS pkg\n")
-                cat(pkg, " could not update local OBS pkg\n", file=log, append=TRUE)
-                return( list( status="fail", value="could not update"))
-            }
-        } else { ## checkout
-            cmd <- paste( "\"", "cd", file.path( localOBS, remoteprj), " && osc co ", paste0( "R-", pkg), "\"")
-            result <- system2( "bash",  args = c("-c", cmd), stdout=TRUE, stderr=TRUE)
-            if( !is.null(attributes(result))) {
-                cat(result)
-                cat(pkg, " could not checkout from OBS\n")
-                cat(pkg, " could not checkout from OBS\n", file=log, append=TRUE)
-                return( list( status="fail", value="could not checkout"))
-            }
-        }
-    } else { # create
-        if ( dir.exists( pac )){ # cleanup neccessary
-            logger( paste0("cleanup of existing local ", pac))
-            
-            cmd <- paste("\"", "cd", file.path(localOBS, remoteprj) , "&& osc delete --force ", paste0( "R-", pkg)  , "\"")
-            result <- system2(  "bash",  args = c("-c", cmd), stdout=TRUE, stderr=TRUE)
-            
-            if( ! is.null(attributes(result))) {
-                cat(result, "\n")
-                logger(paste0(pkg, " could not setup"))
-                return(list(status="fail", value="could not remove existing pac"))
-            }
-
-            cmd <- paste("\"", "cd", file.path(localOBS, remoteprj) , "&& rm -rf  ", paste0( "R-", pkg)  , "\"")
-            result <- system2(  "bash",  args = c("-c", cmd), stdout=TRUE, stderr=TRUE)
-            
-            if( ! is.null(attributes(result))) {
-                cat(result, "\n")
-                logger(paste0(pkg, " could not rm dir"))
-                return(list(status="fail", value="could not remove dir"))
-            }
-
-            logger( paste0( pac, " should be cleared"))
-        }
-        
+    if (buildtype == "initial release") { 
         ## create dir to hold package for OBS
         cmd <- paste("\"", "cd", file.path( localOBS, remoteprj), " ; osc mkpac ",paste0( "R-", pkg)  , "\"")
         result <- system2(  "bash",  args = c("-c", cmd), stdout=TRUE, stderr=TRUE)
@@ -213,6 +196,23 @@ setuppac <- function(pkg,
     }
 
     ## pac checked out or created, get the sources
+
+
+    if (buildtype == "update") { ## rm old sources
+        oldsource <- list.files(file.path(pac, paste0("R-",pkg)), "\\.*tgz")
+        ## CRAN packages have one source file in tgz format
+        if (length(oldsource) > 0) { ## if no source, everthing is fine
+            if (length(oldsource) == 1) { 
+                if ( !file.remove( file.path( pac, paste0( pkg, "_", inOBSVersion, ".tar.gz")))){
+                    logger(paste0(pkg, ": could not rm old sources"))
+                    return( list( status="fail", value="could not rm old sources"))
+                }
+            } else {
+                logger(paste0("more than one source file in pkg ", pkg))
+                return( list( status="fail", value="more than one source package"))
+            }
+        }
+    }
 
     source0 <- paste0( pkg, "_", status[ which( status$Package == pkg), "Version"]   , ".tar.gz")
 
@@ -230,12 +230,6 @@ setuppac <- function(pkg,
         return( list( status="fail", value="copy of sources failed"))
     }
     
-    if (! is.na( inOBSVersion)){ # it is an update, there must be an old source file, just remove it
-        if ( !file.remove( file.path( pac, paste0( pkg, "_", inOBSVersion, ".tar.gz")))){
-            logger(paste0(pkg, ": could not rm old sources"))
-            return( list( status="fail", value="could not rm old sources"))
-        }
-    }
     return( list( status="done", value=pac))
 }
 
