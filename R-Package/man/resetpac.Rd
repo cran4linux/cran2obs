@@ -2,7 +2,7 @@
 % Please edit documentation in R/pac.R
 \name{resetpac}
 \alias{resetpac}
-\title{resetpac removes a pac completely and remoce the
+\title{resetpac removes a pac completely and removes the
 line from the status.
 pkg will be handled as new in next status construction.}
 \usage{
@@ -30,7 +30,7 @@ CRAN and remoteprj}
 list "status" and "value"
 }
 \description{
-resetpac removes a pac completely and remoce the
+resetpac removes a pac completely and removes the
 line from the status.
 pkg will be handled as new in next status construction.
 }
