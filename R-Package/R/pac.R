@@ -51,7 +51,7 @@ uploadpac <- function(pkg, version, buildtype,
     return( list( status="done", value=NA))
 }
 
-#' resetpac removes a pac completely and remoce the
+#' resetpac removes a pac completely and removes the
 #' line from the status.
 #' pkg will be handled as new in next status construction.
 #' 
