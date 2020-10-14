@@ -30,7 +30,7 @@ License:        {{license}}
 URL:            http://cran.r-project.org/web/packages/%{packname}
 Source:         {{source0}}
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
-Requires:        R-base
+Requires:       R-base
 {{depends}}
 
 %if 0%{?sle_version} > 120400 || 0%{?is_opensuse}
