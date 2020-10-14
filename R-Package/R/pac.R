@@ -184,7 +184,7 @@ setuppac <- function(pkg,
         buildtype <- "update"
     }
     
-    if (buildtype == "initial release") { 
+    if (buildtype == "first") { 
         ## create dir to hold package for OBS
         cmd <- paste("\"", "cd", file.path( localOBS, remoteprj), " ; osc mkpac ",paste0( "R-", pkg)  , "\"")
         result <- system2(  "bash",  args = c("-c", cmd), stdout=TRUE, stderr=TRUE)
