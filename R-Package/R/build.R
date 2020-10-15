@@ -34,7 +34,7 @@ buildforfiles <- function(pkg, pac, specfile, localOBS=getOption("c2o.localOBSdi
     ## we dont need to check for success, because %files section is empty and therefore fail by design
     
     if (! result$value == "unpackaged files"){ ## every other error is fatal at this point
-        logger(paste0( "Failed initial build, probably missing system lib for  ", pkg))
+        logger(paste0( "Failed initial build of R-", pkg, " Error was: ", result$value))
         return(list(status="failed", value=result$value))
     }
 
@@ -101,21 +101,18 @@ testbuild <- function(pkg, pac, specfile,
     }
     
     if ( length( grep( "Failed build dependencies", buildlog, fixed=TRUE)) >0 ) { ### missing dependencies, no chance
-        cat( "The following missing dependencies must be installed to build R-", pkg, "\n", sep="")
-        cat( "The following missing dependencies must be installed to build R-", pkg, "\n", sep="", file=log, append=TRUE)
+        logger( paste0( "The following missing dependencies must be installed to build R-", pkg))
         if (any ( grep( "needed", buildlog, fixed=TRUE))) {
             for (line in buildlog[ grep( "needed", buildlog, fixed=TRUE)] ) {
-                cat( line,"\n")
-                cat( line,"\n", file=log, append=TRUE)
-                cat("testbuild failed: Missing dependencies\n", file=log, append=TRUE)
+                logger( line)
             }
+                logger("testbuild failed: Missing dependencies")
         }
         return(list(status="fail", value="missing dependencies", buildlog=buildlog))
     }
 
     if ( any( grep("Bad exit status", buildlog, fixed=TRUE))) {
-        cat( "Bad exit status from build R-", pkg, "\n", sep="")
-        cat( "Bad exit status from build R-", pkg, "\n", sep="", file=log, append=TRUE)
+        logger( paste0( "Bad exit status from build R-", pkg))
         return(list(status="fail", value="bad exit status", buildlog=buildlog))
     }
     ## no fatal flaws, may be lucky?
