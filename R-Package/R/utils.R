@@ -42,6 +42,14 @@ cleanBuildlog <- function(buildlog){
     }
 }
 
+#' showPkg return the line of status file for pkg
+#' @param pkg pkgname
+#' @param status datafram conataining sync state
+#'
+#' @export
+showPkg <- function(pkg, status=readStatus(getOption("c2o.statusfile"))){
+    status[ which(status$Package == pkg), ]
+}
 
 #' logger writes a character string in the console and append it to file
 #' If msg is more than one line, only written to file

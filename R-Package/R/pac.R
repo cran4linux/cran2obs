@@ -177,22 +177,35 @@ setuppac <- function(pkg,
             cat(pkg, " could not checkout from OBS\n")
             cat(pkg, " could not checkout from OBS\n", file=log, append=TRUE)
             return( list( status="fail", value="could not checkout"))
-        } else {
+        } else { ## package not found, ergo new
             buildtype <- "first"
         }
     } else { ## co was possible
         buildtype <- "update"
     }
     
-    if (buildtype == "first") { 
+    if (buildtype == "first") { ## i.e. no version in OBS
         ## create dir to hold package for OBS
         cmd <- paste("\"", "cd", file.path( localOBS, remoteprj), " ; osc mkpac ",paste0( "R-", pkg)  , "\"")
         result <- system2(  "bash",  args = c("-c", cmd), stdout=TRUE, stderr=TRUE)
         if( ! is.null(attributes(result))) {
-            cat(result)
-            cat(pkg, " could not create pac for ", pkg, "\n")
-            cat(pkg, " could not create pac for ", pkg, "\n", file=log, append=TRUE)
-            return( list( status="fail", value="could not setup pac"))
+            logger(paste0( " Problem creating pac for ", pkg, " Error: ", result))
+            if ( any( grep( "already under version control", result))) {
+                ## try to free pkg from version control
+                cmd <- paste("\"", "cd", file.path( localOBS, remoteprj), " ; osc delete --force ",paste0( "R-", pkg)  , "\"")
+                result <- system2(  "bash",  args = c("-c", cmd), stdout=TRUE, stderr=TRUE)
+                if( ! is.null(attributes(result))) {
+                    logger(paste0( " Could not release ", pkg, " from osc control. Error: ", result))
+                    return(list(status="fail", value="could not setup pac"))
+                }
+            } ## released
+        }
+        ## retry mkpac
+        cmd <- paste("\"", "cd", file.path( localOBS, remoteprj), " ; osc mkpac ",paste0( "R-", pkg)  , "\"")
+        result <- system2(  "bash",  args = c("-c", cmd), stdout=TRUE, stderr=TRUE)
+        if( ! is.null(attributes(result))) { ## fail
+            logger(paste0( " Could not create pac for ", pkg, ". Error: ", result))
+            return(list(status="fail", value="could not setup pac")) 
         }
     }
 
