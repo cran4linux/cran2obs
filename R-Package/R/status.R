@@ -158,7 +158,9 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"),
     if ( length( removedpkgs > 0)) { ## we keep them in repo as long, as they build
         ## but if not in OBS, remove every mention of package.
         pkgnumbers <- which( (oldstatus$Package %in% removedpkgs) & is.na(oldstatus$OBSVersion) )
-        oldstatus <- oldstatus[-pkgnumbers,]
+        if (length(pkgnumbers) > 0){
+            oldstatus <- oldstatus[-pkgnumbers,]
+        }
     }
     
     status <- merge( ap[, c("Package", "Version", "License", "NeedsCompilation")],
@@ -176,10 +178,13 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"),
     
     if ( length( newpkgs > 0)) {
         for (pkg in which(status$Package %in% newpkgs) ) {
-            logger(paste0("Dependencies for pkg ", status$Package[pkg]))
+            logger( paste0( "Dependencies for pkg ", status$Package[pkg]))
             status[ pkg , "recDep"]   <- cleanList( status$Package[pkg], "depends", repo=cran)
+            logger( paste0( " Depends: ",  status[ pkg , "recDep"]))
             status[ pkg , "Suggests"] <- cleanList( status$Package[pkg], "suggests", repo=cran)
+            logger( paste0(" Suggests: ",  status[ pkg , "Suggests"]))
             status[ pkg , "depLen"]   <- length( unlist( strsplit( status[ pkg, "recDep"], " ")))
+            logger( paste0(" depLen: ",  status[ pkg , "depLen"]))
         }
     }
 
