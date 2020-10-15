@@ -282,7 +282,7 @@ pkg2pac <- function( pkg,
     }
     
     pkg.info <- status[ status$Package == pkg, ]
-    logger("pkg info", log)
+    logger(paste0("Pkg ", pkg, " depLen: ", pkg.info$depLen))
     logger(paste(pkg.info),log)
     
     if ( is.na( pkg.info$Version) ) {
