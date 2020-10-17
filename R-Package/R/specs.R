@@ -286,7 +286,7 @@ createEmptySpec <- function(pkg,
                 for ( item in deps) cat( "Requires:\t", item, "\n", sep="", file=specfile, append=TRUE)
             }
             if ( length( sysreqs$depends) > 0) {
-                for ( item in sysreq$depends) cat( "Requires:\t", item, "\n", sep="", file=specfile, append=TRUE)
+                for ( item in sysreqs$depends) cat( "Requires:\t", item, "\n", sep="", file=specfile, append=TRUE)
             } else { next }
         } else if ( grepl( "{{builddepends}}", line, fixed=TRUE)) {
             if  ( length( deps) > 0)  {
