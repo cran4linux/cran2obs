@@ -160,6 +160,20 @@ dropFileSection <- function(speclines){
     return(list(status="done", speclines=speclines[1:(filesLine+3)]))
 }
 
+#' sysreq2depends generats Requires and BuildRequires
+#' from SystemRequirements: lines in DESCRIPTION
+#'
+#' @param line the line from DESCRIPTION
+#'
+#' @return list with components 'sysdepends' and 'sysbuilddepends'
+#'
+#' @export
+sysreq2depends <- function(line){
+    if ( grep("ICU4C", line) ) {
+        return( list(depends="icu" , builddepends="libicu-devel"))
+    }
+    return( list(depends="" , builddepends=""))
+}
 
 #' createEmptySpec takes the name of an R package and creates an specfile
 #' with empty file section from its DESCRIPTION file. The OBS directory must
@@ -210,6 +224,7 @@ createEmptySpec <- function(pkg,
     if ( any( grep( "SystemRequirements:", description))) {
         logger( paste0( pkg, " has non-empty SystemReqirements"))
         logger( description[ grep( "SystemRequirements", description)])
+        sysreqs <- sysreq2depends( description[ grep( "SystemRequirements", description) ]  )
     }
     
     if ( any(grep("Encoding: ", description, fixed=TRUE))) {
@@ -269,6 +284,9 @@ createEmptySpec <- function(pkg,
         if ( grepl( "{{depends}}", line, fixed=TRUE)) {
             if ( length( deps) > 0) {
                 for ( item in deps) cat( "Requires:\t", item, "\n", sep="", file=specfile, append=TRUE)
+            }
+            if ( length( sysreqs$depends) > 0) {
+                for ( item in sysreq$depends) cat( "Requires:\t", item, "\n", sep="", file=specfile, append=TRUE)
             } else { next }
         } else if ( grepl( "{{builddepends}}", line, fixed=TRUE)) {
             if  ( length( deps) > 0)  {
@@ -278,6 +296,11 @@ createEmptySpec <- function(pkg,
                     } else {
                         cat( "BuildRequires:\t", item, "\n", sep="", file=specfile, append=TRUE)
                     }
+                }
+            }
+            if  ( length( sysreqs$builddepends) > 0)  {
+                for ( item in sysreqs$builddepends) {
+                    cat( "BuildRequires:\t", item, "\n", sep="", file=specfile, append=TRUE)
                 }
             } else { next }
         } else if ( grepl( "{{suggests}}", line, fixed=TRUE) ) {
