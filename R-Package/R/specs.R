@@ -225,6 +225,8 @@ createEmptySpec <- function(pkg,
         logger( paste0( pkg, " has non-empty SystemReqirements"))
         logger( description[ grep( "SystemRequirements", description)])
         sysreqs <- sysreq2depends( description[ grep( "SystemRequirements", description) ]  )
+    } else {
+        sysreqs <- list(depends="", builddepends="")
     }
     
     if ( any(grep("Encoding: ", description, fixed=TRUE))) {
