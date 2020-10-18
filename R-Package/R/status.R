@@ -146,7 +146,7 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"),
         logger("Status file exists, overwrite='FALSE' and no alternative filename given!")
         stop("Status file exists, overwrite='FALSE' and no alternative filename given!") 
     }
-
+    
     if ( !file.exists(file)){
         logger("Status file does not exist")
         stop("Status file does not exist")
@@ -158,13 +158,13 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"),
     ## first merge new info from available packages
     
     ap <- as.data.frame(available.packages(repos=cran))
-
+    
     newpkgs <- setdiff( ap$Package, oldstatus$Package )
     ##logger(paste0("New packages: ", newpkgs))
     
     removedpkgs <- oldstatus$Package[ which(! oldstatus$Package %in% ap$Package)] ## no longer in available.packages
     ##logger(paste0("Removed packages: ", removedpkgs))
-
+    
     if ( length( removedpkgs > 0)) { ## we keep them in repo as long, as they build
         ## but if not in OBS, remove every mention of package.
         pkgnumbers <- which( (oldstatus$Package %in% removedpkgs) & is.na(oldstatus$OBSVersion) )
@@ -175,19 +175,19 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"),
     
     status <- merge( ap[, c("Package", "Version", "License", "NeedsCompilation")],
                     oldstatus[, c("Package", "recDep", "Suggests", "depLen", "OBSVersion", "hasDevel", "triedVersion" )], by="Package", all=TRUE)
+    
 
-    action <- defineActions(status)
     
-##    retiredpkgs <- oldstatus$Package[ which(! oldstatus$Package %in% ap$Package)] ## no longer in available.packages, but in OBS
-##    logger(paste0("Retired packages: ", retiredpkgs))
+    retiredpkgs <- oldstatus$Package[ which(! oldstatus$Package %in% ap$Package)] ## no longer in available.packages, but in OBS
+    logger(paste0("Retired packages: ", retiredpkgs))
     
-    if ( length( action$retired) > 0)) { ## we keep them in repo as long, as they build
-        pkgnumbers <- which( status$Package %in% action$retired)
+    if ( length( retiredpkgs) > 0) { ## we keep them in repo as long, as they build
+        pkgnumbers <- which( status$Package %in% retiredpkgs)
         for (pkg in pkgnumbers ) { # not found in CRAN
             status[ pkg , "Version"] <- NA
         }
     }
-    
+
     if ( length( newpkgs > 0)) {
         for (pkg in which(status$Package %in% newpkgs) ) {
             logger( paste0( "Dependencies for pkg ", status$Package[pkg]))
@@ -200,15 +200,35 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"),
         }
     }
 
-    if ( length( action$update) > 0)) {
+    action <- defineActions(status)
+    
+    if ( length( action$update) > 0) {
+        reversecalc <- c()
         for (pkg in which(status$Package %in% action$update) ) {
+            oldeps <- status$recDep[pkg]
             logger( paste0( "Dependencies for pkg ", status$Package[pkg]))
+            
             status[ pkg , "recDep"]   <- cleanList( status$Package[pkg], "depends", repo=cran)
             logger( paste0( " Depends: ",  status[ pkg , "recDep"]))
+            
+            if (oldeps != status$recDep[pkg]) reversecalc <- c(reversecalc, status$Package[pkg])
+            
             status[ pkg , "Suggests"] <- cleanList( status$Package[pkg], "suggests", repo=cran)
             logger( paste0(" Suggests: ",  status[ pkg , "Suggests"]))
+            
             status[ pkg , "depLen"]   <- length( unlist( strsplit( status[ pkg, "recDep"], " ")))
             logger( paste0(" depLen: ",  status[ pkg , "depLen"]))
+        }
+    }
+
+    while( length(reversecalc) > 0){
+        toppkg <- reversecalc[1]
+        reversecalc <- reversecalc[-1]
+        for (pkg  in which( grepl( toppkg, status$"recDep"))) {
+            logger( paste0( "recalculate deps of ", status$Package[pkg]))
+            oldeps <- status$recDep[pkg]
+            status[ pkg , "recDep"]   <- cleanList( status$Package[pkg], "depends", repo=cran)
+            if (oldeps != status$recDep[pkg]) reversecalc <- c(reversecalc, status$Package[pkg])
         }
     }
 
