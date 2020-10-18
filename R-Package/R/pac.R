@@ -173,8 +173,8 @@ setuppac <- function(pkg,
     result <- system2( "bash",  args = c("-c", cmd), stdout=TRUE, stderr=TRUE)
     if( !is.null(attributes(result)) ) {
         if (! any( grepl( "Package not found", result))) {
-            cat(result)
-            logger(paste0( pkg, " could not checkout from OBS")
+            logger(result)
+            logger(paste0( pkg, " could not checkout from OBS"))
             return( list( status="fail", value="could not check out"))
         } else { ## package not found, ergo new
             buildtype <- "first"
@@ -183,8 +183,6 @@ setuppac <- function(pkg,
         buildtype <- "update"
     }
 
-    logger(paste0( "buildtype: " , buildtype))
-        
     if (buildtype == "first") { ## i.e. no version in OBS
         ## create dir to hold package for OBS
         cmd <- paste("\"", "cd", file.path( localOBS, remoteprj), " ; osc mkpac ", paste0( "R-", pkg)  , "\"")
