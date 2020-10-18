@@ -154,7 +154,7 @@ setuppac <- function(pkg,
     
     pac <- file.path( localOBS, remoteprj, paste0( "R-", pkg))
 
-    inOBSVersion <-  status[ which( status$Package == pkg) , "OBSVersion"]
+#    inOBSVersion <-  status[ which( status$Package == pkg) , "OBSVersion"]
 
     ## if there is pac dir, remove it anyways
     if ( dir.exists( pac )){
@@ -172,25 +172,26 @@ setuppac <- function(pkg,
     cmd <- paste( "\"", "cd", file.path( localOBS, remoteprj), " && osc co ", paste0( "R-", pkg), "\"")
     result <- system2( "bash",  args = c("-c", cmd), stdout=TRUE, stderr=TRUE)
     if( !is.null(attributes(result)) ) {
-        if (! any( grep( "Package not found", result))) {
+        if (! any( grepl( "Package not found", result))) {
             cat(result)
-            cat(pkg, " could not checkout from OBS\n")
-            cat(pkg, " could not checkout from OBS\n", file=log, append=TRUE)
-            return( list( status="fail", value="could not checkout"))
+            logger(paste0( pkg, " could not checkout from OBS")
+            return( list( status="fail", value="could not check out"))
         } else { ## package not found, ergo new
             buildtype <- "first"
         }
     } else { ## co was possible
         buildtype <- "update"
     }
-    
+
+    logger(paste0( "buildtype: " , buildtype))
+        
     if (buildtype == "first") { ## i.e. no version in OBS
         ## create dir to hold package for OBS
-        cmd <- paste("\"", "cd", file.path( localOBS, remoteprj), " ; osc mkpac ",paste0( "R-", pkg)  , "\"")
+        cmd <- paste("\"", "cd", file.path( localOBS, remoteprj), " ; osc mkpac ", paste0( "R-", pkg)  , "\"")
         result <- system2(  "bash",  args = c("-c", cmd), stdout=TRUE, stderr=TRUE)
         if( ! is.null(attributes(result))) {
             logger(paste0( " Problem creating pac for ", pkg, " Error: ", result))
-            if ( any( grep( "already under version control", result))) {
+            if ( any( grepl( "already under version control", result))) {
                 ## try to free pkg from version control
                 cmd <- paste("\"", "cd", file.path( localOBS, remoteprj), " ; osc delete --force ",paste0( "R-", pkg)  , "\"")
                 result <- system2(  "bash",  args = c("-c", cmd), stdout=TRUE, stderr=TRUE)
@@ -198,22 +199,15 @@ setuppac <- function(pkg,
                     logger(paste0( " Could not release ", pkg, " from osc control. Error: ", result))
                     return(list(status="fail", value="could not setup pac"))
                 }
-                cmd <- paste("\"", "cd", file.path(localOBS, remoteprj) , "&& rm -rf  ", paste0( "R-", pkg)  , "\"")
-                result <- system2(  "bash",  args = c("-c", cmd), stdout=TRUE, stderr=TRUE)
-                
-                if( ! is.null(attributes(result))) {
-                    cat(result, "\n")
-                    logger(paste0(pkg, " could not rm dir"))
-                    return(list(status="fail", value="could not remove dir after release "))
-                }
             } ## released
-        }
-        ## retry mkpac
-        cmd <- paste("\"", "cd", file.path( localOBS, remoteprj), " ; osc mkpac ",paste0( "R-", pkg)  , "\"")
-        result <- system2(  "bash",  args = c("-c", cmd), stdout=TRUE, stderr=TRUE)
-        if( ! is.null(attributes(result))) { ## fail
-            logger(paste0( " Could not create pac for ", pkg, ". Error: ", result))
-            return(list(status="fail", value="could not setup pac")) 
+        
+            ## retry mkpac
+            cmd <- paste("\"", "cd", file.path( localOBS, remoteprj), " ; osc mkpac ",paste0( "R-", pkg)  , "\"")
+            result <- system2(  "bash",  args = c("-c", cmd), stdout=TRUE, stderr=TRUE)
+            if( ! is.null(attributes(result))) { ## fail
+                logger(paste0( " Could not create pac for ", pkg, ". Error: ", result))
+                return(list(status="fail", value="could not setup pac")) 
+            }
         }
     }
 
