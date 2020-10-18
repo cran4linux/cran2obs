@@ -198,6 +198,14 @@ setuppac <- function(pkg,
                     logger(paste0( " Could not release ", pkg, " from osc control. Error: ", result))
                     return(list(status="fail", value="could not setup pac"))
                 }
+                cmd <- paste("\"", "cd", file.path(localOBS, remoteprj) , "&& rm -rf  ", paste0( "R-", pkg)  , "\"")
+                result <- system2(  "bash",  args = c("-c", cmd), stdout=TRUE, stderr=TRUE)
+                
+                if( ! is.null(attributes(result))) {
+                    cat(result, "\n")
+                    logger(paste0(pkg, " could not rm dir"))
+                    return(list(status="fail", value="could not remove dir after release "))
+                }
             } ## released
         }
         ## retry mkpac
