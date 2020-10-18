@@ -169,7 +169,7 @@ dropFileSection <- function(speclines){
 #'
 #' @export
 sysreq2depends <- function(line){
-    if ( grep("ICU4C", line) ) {
+    if ( grepl("ICU4C", line) ) {
         return( list(depends="icu" , builddepends="libicu-devel"))
     }
     return( list(depends="" , builddepends=""))
