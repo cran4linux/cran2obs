@@ -8,10 +8,20 @@ defineActions <- function(status = getOption("c2o.status")){
     totry <- status$Package[ which( ( !is.na( status$Version) & is.na( status$OBSVersion)) &
                                     (( is.na( status$triedVersion) |
                                        (obsVersion( status$Version) != status$triedVersion))))]
+    logger( paste0( "pkgs to try ", totry))
+
     uptodate <- status$Package[ which(obsVersion( status$Version) == status$OBSVersion) ]
+    ##logger( paste0( "pkgs uptodate ", uptodate))
+    
     tried <- status$Package[ which(is.na(status$OBSVersion) & ( obsVersion(status$Version) != status$triedVersion  ))  ]
+    ##logger( paste0( "pkgs unsuccessful ", tried))
+    
     update <- status$Package[ which( !is.na( status$OBSVersion) & ( obsVersion( status$Version) != status$OBSVersion) )]
+    logger( paste0( "pkgs to update ", update))
+
     retired <- status$Package[ is.na(status$Version) ] 
+    logger( paste0( "pkgs which retired ", retired))
+    
     return(list(retired=retired, uptodate=uptodate, update=update, tried= tried, totry=totry))
 }
 
@@ -150,10 +160,10 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"),
     ap <- as.data.frame(available.packages(repos=cran))
 
     newpkgs <- setdiff( ap$Package, oldstatus$Package )
-    logger(paste0("New packages: ", newpkgs))
+    ##logger(paste0("New packages: ", newpkgs))
     
     removedpkgs <- oldstatus$Package[ which(! oldstatus$Package %in% ap$Package)] ## no longer in available.packages
-    logger(paste0("Removed packages: ", removedpkgs))
+    ##logger(paste0("Removed packages: ", removedpkgs))
 
     if ( length( removedpkgs > 0)) { ## we keep them in repo as long, as they build
         ## but if not in OBS, remove every mention of package.
@@ -165,12 +175,14 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"),
     
     status <- merge( ap[, c("Package", "Version", "License", "NeedsCompilation")],
                     oldstatus[, c("Package", "recDep", "Suggests", "depLen", "OBSVersion", "hasDevel", "triedVersion" )], by="Package", all=TRUE)
+
+    action <- defineActions(status)
     
-    retiredpkgs <- oldstatus$Package[ which(! oldstatus$Package %in% ap$Package)] ## no longer in available.packages, but in OBS
-    logger(paste0("Retired packages: ", retiredpkgs))
+##    retiredpkgs <- oldstatus$Package[ which(! oldstatus$Package %in% ap$Package)] ## no longer in available.packages, but in OBS
+##    logger(paste0("Retired packages: ", retiredpkgs))
     
-    if ( length( retiredpkgs > 0)) { ## we keep them in repo as long, as they build
-        pkgnumbers <- which( status$Package %in% retiredpkgs)
+    if ( length( action$retired) > 0)) { ## we keep them in repo as long, as they build
+        pkgnumbers <- which( status$Package %in% action$retired)
         for (pkg in pkgnumbers ) { # not found in CRAN
             status[ pkg , "Version"] <- NA
         }
@@ -187,6 +199,19 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"),
             logger( paste0(" depLen: ",  status[ pkg , "depLen"]))
         }
     }
+
+    if ( length( action$update) > 0)) {
+        for (pkg in which(status$Package %in% action$update) ) {
+            logger( paste0( "Dependencies for pkg ", status$Package[pkg]))
+            status[ pkg , "recDep"]   <- cleanList( status$Package[pkg], "depends", repo=cran)
+            logger( paste0( " Depends: ",  status[ pkg , "recDep"]))
+            status[ pkg , "Suggests"] <- cleanList( status$Package[pkg], "suggests", repo=cran)
+            logger( paste0(" Suggests: ",  status[ pkg , "Suggests"]))
+            status[ pkg , "depLen"]   <- length( unlist( strsplit( status[ pkg, "recDep"], " ")))
+            logger( paste0(" depLen: ",  status[ pkg , "depLen"]))
+        }
+    }
+
 
     ## now check for new and successfully built in repo
     cmd <- paste("osc prjresults -V", repo, "-r openSUSE_Tumbleweed -a x86_64 | grep '^\\.'  ",   sep=" ", collapse="")
