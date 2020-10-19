@@ -321,7 +321,7 @@ createEmptySpec <- function(pkg,
                 for ( item in deps) cat( "Requires:\t", item, "\n", sep="", file=specfile, append=TRUE)
             }
             if ( sysreqs$depends != "") {
-                for ( item in strsplit(sysreqs$depends, " ")) cat( "Requires:\t", item, "\n", sep="", file=specfile, append=TRUE)
+                for ( item in strsplit(sysreqs$depends, " ")[[1]]) cat( "Requires:\t", item, "\n", sep="", file=specfile, append=TRUE)
             } else { next }
         } else if ( grepl( "{{builddepends}}", line, fixed=TRUE)) {
             if  ( length( deps) > 0)  {
@@ -334,7 +334,7 @@ createEmptySpec <- function(pkg,
                 }
             }
             if  ( sysreqs$builddepends != "")  {
-                for ( item in strplit(sysreqs$builddepends, " ")[[1]] {
+                for ( item in strplit(sysreqs$builddepends, " ")[[1]]) {
                     cat( "BuildRequires: \t", item, "\n", sep="", file=specfile, append=TRUE)
                 }
             } else { next }
