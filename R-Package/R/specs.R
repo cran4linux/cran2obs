@@ -179,7 +179,7 @@ sysreq2depends <- function(line){
         return( list( depends="", builddepends="libjpeg8-devel"))
     }
     if ( grepl( "libpng", line)) {
-        return( list( depends="", builddepends="libpng16-devel"))
+        return( list( depends="", builddepends="libpng16-devel libpng-compat-devel"))
     }
     if ( grepl( "libxml2", line)) {
         return( list( depends="", builddepends="libxml2-devel"))
@@ -301,21 +301,21 @@ createEmptySpec <- function(pkg,
                 for ( item in deps) cat( "Requires:\t", item, "\n", sep="", file=specfile, append=TRUE)
             }
             if ( sysreqs$depends != "") {
-                for ( item in sysreqs$depends) cat( "Requires:\t", item, "\n", sep="", file=specfile, append=TRUE)
+                for ( item in strsplit(sysreqs$depends, " ")) cat( "Requires:\t", item, "\n", sep="", file=specfile, append=TRUE)
             } else { next }
         } else if ( grepl( "{{builddepends}}", line, fixed=TRUE)) {
             if  ( length( deps) > 0)  {
                 for ( item in deps) {
                     if (status$hasDevel[ which( status$Package == gsub("R-", "", item))]) {
-                        cat( "BuildRequires:\t", item, "-devel\n", sep="", file=specfile, append=TRUE)
+                        cat( "BuildRequires: \t", item, "-devel\n", sep="", file=specfile, append=TRUE)
                     } else {
-                        cat( "BuildRequires:\t", item, "\n", sep="", file=specfile, append=TRUE)
+                        cat( "BuildRequires: \t", item, "\n", sep="", file=specfile, append=TRUE)
                     }
                 }
             }
             if  ( sysreqs$builddepends != "")  {
-                for ( item in sysreqs$builddepends) {
-                    cat( "BuildRequires:\t", item, "\n", sep="", file=specfile, append=TRUE)
+                for ( item in strplit(sysreqs$builddepends, " ")[[1]] {
+                    cat( "BuildRequires: \t", item, "\n", sep="", file=specfile, append=TRUE)
                 }
             } else { next }
         } else if ( grepl( "{{suggests}}", line, fixed=TRUE) ) {
