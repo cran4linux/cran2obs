@@ -169,9 +169,19 @@ dropFileSection <- function(speclines){
 #'
 #' @export
 sysreq2depends <- function(line){
-    if ( grepl("ICU4C", line) ) {
+    if ( grepl( "ICU4C", line) ) {
         return( list(depends="icu" , builddepends="libicu-devel"))
     }
+    if ( grepl( "zlib", line) ) {
+        return( list( depends="", builddepends="zlib-devel"))
+    }
+    if (grepl( "libjpeg", line){
+        return( list( depends="", builddepends="libjpeg8-devel"))
+    }
+    if (grepl( "libpng", line){
+        return( list( depends="", builddepends="libpng16-devel"))
+    }
+
     return( list(depends="" , builddepends=""))
 }
 
