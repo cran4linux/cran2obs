@@ -190,7 +190,7 @@ sysreq2depends <- function(line){
     }
 
     if ( grepl( "libpng", line)) {
-        return( list( depends="", builddepends="libpng16-devel libpng-compat-devel"))
+        return( list( depends="", builddepends="libpng16-devel libpng16-compat-devel"))
     }
 
     if ( grepl( "libxml2", line)) {
