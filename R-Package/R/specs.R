@@ -334,7 +334,7 @@ createEmptySpec <- function(pkg,
                 }
             }
             if  ( sysreqs$builddepends != "")  {
-                for ( item in strplit(sysreqs$builddepends, " ")[[1]]) {
+                for ( item in strsplit(sysreqs$builddepends, " ")[[1]]) {
                     cat( "BuildRequires: \t", item, "\n", sep="", file=specfile, append=TRUE)
                 }
             } else { next }
