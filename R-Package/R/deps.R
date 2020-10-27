@@ -95,7 +95,7 @@ cleanDeps <- function(repo=getOption("c2o.cran")){
 #' @return Matrix of all R packages avaialble in obsproject.
 #'
 #' @export
-available.packages.OBS <- function(obsproject=getOption("c2o.auto")){
+available.packages.OBS <- function(repo=getOption("c2o.auto")){
     ## the names first
     ##cmd <- paste("osc ls", obsproject, sep=" ", collapse="")
     ##obspkgs <- system(cmd, intern=TRUE)
@@ -117,7 +117,7 @@ available.packages.OBS <- function(obsproject=getOption("c2o.auto")){
             ## R-base-java is not a CRAN package.
         }
         cranpkgnames <- gsub("R-", "", obspkgs)
-        obsinfo <- sapply(cranpkgnames, getOBSVersion, obsproject=obsproject)
+        obsinfo <- sapply(cranpkgnames, getOBSVersion, obsproject=repo)
         obspkgs <- data.frame(Package=as.character(cranpkgnames), OBSVersion=as.character(unlist(obsinfo[1,])), hasDevel=unlist(obsinfo[2,]) )
     } else {
         obspkgs <- data.frame(Package=character(), OBSVersion=character(), hasDevel=character())
