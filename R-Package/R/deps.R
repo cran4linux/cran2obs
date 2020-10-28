@@ -100,14 +100,17 @@ available.packages.OBS <- function(obsproject=getOption("c2o.auto")){
     ##cmd <- paste("osc ls", obsproject, sep=" ", collapse="")
     ##obspkgs <- system(cmd, intern=TRUE)
 
-    cmd <- paste("osc prjresults -V", obsproject, "-r openSUSE_Tumbleweed -a x86_64 | grep '^\\.'  ",   sep=" ", collapse="")
-    obspkgs <- gsub(".  ", "", system(cmd, intern=TRUE))
-    
+    cmd <- paste("osc prjresults -V", obsproject, "-r openSUSE_Tumbleweed -a x86_64 ",   sep=" ", collapse="")
+
+    obspkgs <- system(cmd, intern=TRUE)
+
+
     ## may contain additional stuff related to compiling some packages
     ## only R-* packages are relevant
-    if (length(obspkgs) > 0) { ## i.e. not a new empty repo
-        obspkgs <- obspkgs[grep("R-", obspkgs)]
-        
+    if ( any (grepl( "R-", obspkgs))) { ## i.e. not a new empty repo
+    ##    if (length(obspkgs) > 0) { ## i.e. not a new empty repo
+        obspkgs <- gsub(". ", "",  obspkgs[grep("R-", obspkgs)])
+        ## only succeeded packages are counted, that is an oversimplification
         ## all packages start with "R-" by convention, see page in build service
         if (obsproject == "devel:languages:R:released") {
             ## other OBS Project shouldn't contain non-CRAN R packages
