@@ -221,14 +221,22 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"),
         }
     }
 
+    logger( paste0( "Packages of which reversedependencies must be calculated: ", length(reversecalc)))
+    logger( reversecalc)
+
+    pkgseen <- c()
     while( length(reversecalc) > 0){
         toppkg <- reversecalc[1]
         reversecalc <- reversecalc[-1]
-        for (pkg  in which( grepl( toppkg, status$"recDep"))) {
-            logger( paste0( "recalculate deps of ", status$Package[pkg]))
-            oldeps <- status$recDep[pkg]
-            status[ pkg , "recDep"]   <- cleanList( status$Package[pkg], "depends", repo=cran)
-            if (oldeps != status$recDep[pkg]) reversecalc <- c(reversecalc, status$Package[pkg])
+        for (pkg  in which( grepl( toppkg, status$recDep))) {
+            logger( paste0( "recalculate deps of ", status$Package[pkg], ", which is reversedep of ", toppkg))
+            if (! pkg %in% pkgseen) {
+                oldeps <- status$recDep[pkg]
+                status[ pkg , "recDep"]   <- cleanList( status$Package[pkg], "depends", repo=cran)
+                pkgseen <- c(pkgseen, pkg)
+            } else {
+                logger( paste0( "Dependencies for ", pkg, "already re-caclulated. Skipping."))
+            }
         }
     }
 
