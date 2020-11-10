@@ -235,7 +235,7 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"),
                 status[ pkg , "recDep"]   <- cleanList( status$Package[pkg], "depends", repo=cran)
                 pkgseen <- c(pkgseen, pkg)
             } else {
-                logger( paste0( "Dependencies for ", pkg, "already re-caclulated. Skipping."))
+                logger( paste0( "Dependencies for ", status$Package[pkg], "already re-caclulated. Skipping."))
             }
         }
     }
