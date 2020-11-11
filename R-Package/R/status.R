@@ -23,8 +23,13 @@ defineActions <- function(status = getOption("c2o.status")){
 
     retired <- status$Package[ is.na(status$Version) ] 
     logger( paste0( "pkgs which retired ", retired))
-    
-    return(list(retired=retired, uptodate=uptodate, update=update, tried= tried, totry=totry))
+
+    revdepup <-c()
+    for (pkg in update) { revdepup <- c(revdepup, which( grepl( pkg, status$recDep ) )) }
+    revdepup <- unique(revdepup)
+
+    return(list(retired=retired, uptodate=uptodate, update=update, tried= tried,
+                revdepup=revdepup, totry=totry))
 }
 
 #' statusOBS checks if a package already exists either as remote pac on build.opensuse.org

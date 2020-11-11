@@ -38,7 +38,7 @@ cran2repo <- function(cran=getOption("c2o.cran"),
         pkgs <- which(status$depLen == level)
         for (pkg in status$Package[pkgs]) {
             buildtype <- NA
-            if (pkg %in% actions$update) {
+            if (pkg %in% unique(c(actions$update, actions$revdepup))) {
                 buildtype <- "update"
             } else {
                 if (pkg %in% actions$totry) {
