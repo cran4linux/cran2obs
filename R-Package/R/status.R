@@ -159,15 +159,14 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"),
     newpkgs <- setdiff( cranstatus$Package, oldstatus$Package )
     
     removedpkgs <- setdiff( oldstatus$Package, cranstatus$Package) ## no longer in available.packages
-
+    logger(paste0("** Removed packages: ", removedpkgs))
+    
     if ( length( removedpkgs > 0)) {
-
         pkgnumbers <- which( (oldstatus$Package %in% removedpkgs) & !is.na(oldstatus$OBSVersion) )
         if (length(pkgnumbers) > 0) {  ## we keep them in repo as long, as they build
             oldstatus[ pkgnumbers, "Version" ] <- NA
             retiredpkgs <- oldstatus$Package[pkgnumbers]
         }
-        
         pkgnumbers <- which( (oldstatus$Package %in% removedpkgs) & is.na(oldstatus$OBSVersion) )
         if (length(pkgnumbers) > 0){   ## but if not in OBS, remove every mention of package.
             oldstatus <- oldstatus[-pkgnumbers,]
@@ -182,8 +181,8 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"),
     logger(paste0("** Retired packages: ", retiredpkgs))
     logger(paste0("** New packages: ", newpkgs))
 
-    action <- defineActions(status)
-    logger(paste0("** Updated packages: ", action$update))
+    updatedpkgs <- status$Package[ which( !is.na( status$OBSVersion) & ( obsVersion( status$Version) != status$OBSVersion) )]
+    logger(paste0("** Updated packages: ", updatedpkgs))
 
     write.table(status, file=file, row.names=FALSE, sep=";")
     logger("new status file written")

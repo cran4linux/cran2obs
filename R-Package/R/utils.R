@@ -57,7 +57,7 @@ showPkg <- function(pkg, status=readStatus(getOption("c2o.statusfile"))){
 #' @param file to write to
 #' @return no return value
 logger <- function( msg, file=getOption("c2o.logfile")) {
-    if (length(msg) == 1)  cat( msg, "\n")
+    cat( msg[1], "\n")
     for ( line in msg) {
         cat( line, "\n", file=file, append=TRUE)
     }
