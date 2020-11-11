@@ -4,6 +4,8 @@
 #'
 #' @return list with compoents "retired", "uptodate", "update" and
 #' "totry" , "tried" holding the names of respective packages
+#'
+#' @export
 defineActions <- function(status = getOption("c2o.status")){
     totry <- status$Package[ which( ( !is.na( status$Version) & is.na( status$OBSVersion)) &
                                     (( is.na( status$triedVersion) |
