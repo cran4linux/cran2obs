@@ -141,7 +141,7 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"),
                              new.file=NA,
                              overwrite=FALSE,
                              log=getOption("c2o.logfile")) {
-    logger("** repoStatusUpdate")
+    logger("* repoStatusUpdate")
     if ( file.exists(file) & is.na(new.file) & !overwrite  ){
         logger("Status file exists, overwrite='FALSE' and no alternative filename given!")
         stop("Status file exists, overwrite='FALSE' and no alternative filename given!") 
@@ -151,111 +151,183 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"),
         logger("Status file does not exist")
         stop("Status file does not exist")
     }
-    
+
+    cranstatus <- cleanDeps(cran)
     oldstatus <- read.table( file, header=TRUE, sep=";", colClasses="character")
     if (! is.na(new.file) ) file=new.file
     
-    ## first merge new info from available packages
+    newpkgs <- setdiff( cranstatus$Package, oldstatus$Package )
     
-    ap <- as.data.frame(available.packages(repos=cran))
-    
-    newpkgs <- setdiff( ap$Package, oldstatus$Package )
-    ##logger(paste0("New packages: ", newpkgs))
-    
-    removedpkgs <- oldstatus$Package[ which(! oldstatus$Package %in% ap$Package)] ## no longer in available.packages
-    ##logger(paste0("Removed packages: ", removedpkgs))
-    
-    if ( length( removedpkgs > 0)) { ## we keep them in repo as long, as they build
-        ## but if not in OBS, remove every mention of package.
+    removedpkgs <- setdiff( oldstatus$Package, cranstatus$Package) ## no longer in available.packages
+
+    if ( length( removedpkgs > 0)) {
+
+        pkgnumbers <- which( (oldstatus$Package %in% removedpkgs) & !is.na(oldstatus$OBSVersion) )
+        if (length(pkgnumbers) > 0) {  ## we keep them in repo as long, as they build
+            oldstatus[ pkgnumbers, "Version" ] <- NA
+            retiredpkgs <- oldstatus$Package[pkgnumbers]
+        }
+        
         pkgnumbers <- which( (oldstatus$Package %in% removedpkgs) & is.na(oldstatus$OBSVersion) )
-        if (length(pkgnumbers) > 0){
+        if (length(pkgnumbers) > 0){   ## but if not in OBS, remove every mention of package.
             oldstatus <- oldstatus[-pkgnumbers,]
         }
+        
     }
-    
+
     status <- merge( ap[, c("Package", "Version", "License", "NeedsCompilation")],
-                    oldstatus[, c("Package", "recDep", "Suggests", "depLen", "OBSVersion", "hasDevel", "triedVersion" )], by="Package", all=TRUE)
-    
+                    oldstatus[, c("Package", "recDep", "Suggests", "depLen", "OBSVersion", "hasDevel", "triedVersion" )],
+                    by="Package", all=TRUE)
 
-    
-    retiredpkgs <- oldstatus$Package[ which(! oldstatus$Package %in% ap$Package)] ## no longer in available.packages, but in OBS
-    logger(paste0("Retired packages: ", retiredpkgs))
-    
-    if ( length( retiredpkgs) > 0) { ## we keep them in repo as long, as they build
-        pkgnumbers <- which( status$Package %in% retiredpkgs)
-        for (pkg in pkgnumbers ) { # not found in CRAN
-            status[ pkg , "Version"] <- NA
-        }
-    }
-
-    if ( length( newpkgs > 0)) {
-        for (pkg in which(status$Package %in% newpkgs) ) {
-            logger( paste0( "Dependencies for pkg ", status$Package[pkg]))
-            status[ pkg , "recDep"]   <- cleanList( status$Package[pkg], "depends", repo=cran)
-            logger( paste0( " Depends: ",  status[ pkg , "recDep"]))
-            status[ pkg , "Suggests"] <- cleanList( status$Package[pkg], "suggests", repo=cran)
-            logger( paste0(" Suggests: ",  status[ pkg , "Suggests"]))
-            status[ pkg , "depLen"]   <- length( unlist( strsplit( status[ pkg, "recDep"], " ")))
-            logger( paste0(" depLen: ",  status[ pkg , "depLen"]))
-        }
-    }
+    logger(paste0("** Retired packages: ", retiredpkgs))
+    logger(paste0("** New packages: ", newpkgs))
 
     action <- defineActions(status)
-    
-    if ( length( action$update) > 0) {
-        reversecalc <- c()
-        for (pkg in which(status$Package %in% action$update) ) {
-            oldeps <- status$recDep[pkg]
-            logger( paste0( "Dependencies for pkg ", status$Package[pkg]))
-            
-            status[ pkg , "recDep"]   <- cleanList( status$Package[pkg], "depends", repo=cran)
-            logger( paste0( " Depends: ",  status[ pkg , "recDep"]))
-            
-            if (oldeps != status$recDep[pkg]) reversecalc <- c(reversecalc, status$Package[pkg])
-            
-            status[ pkg , "Suggests"] <- cleanList( status$Package[pkg], "suggests", repo=cran)
-            logger( paste0(" Suggests: ",  status[ pkg , "Suggests"]))
-            
-            status[ pkg , "depLen"]   <- length( unlist( strsplit( status[ pkg, "recDep"], " ")))
-            logger( paste0(" depLen: ",  status[ pkg , "depLen"]))
-        }
-    }
+    logger(paste0("** Updated packages: ", action$update))
 
-    logger( paste0( "Packages of which reversedependencies must be calculated: ", length(reversecalc)))
-    logger( reversecalc)
-
-    pkgseen <- c()
-    while( length(reversecalc) > 0){
-        toppkg <- reversecalc[1]
-        reversecalc <- reversecalc[-1]
-        for (pkg  in which( grepl( toppkg, status$recDep))) {
-            logger( paste0( "recalculate deps of ", status$Package[pkg], ", which is reversedep of ", toppkg))
-            if (! pkg %in% pkgseen) {
-                oldeps <- status$recDep[pkg]
-                status[ pkg , "recDep"]   <- cleanList( status$Package[pkg], "depends", repo=cran)
-                pkgseen <- c(pkgseen, pkg)
-            } else {
-                logger( paste0( "Dependencies for ", status$Package[pkg], "already re-caclulated. Skipping."))
-            }
-        }
-    }
-
-
-    ## now check for new and successfully built in repo
-    cmd <- paste("osc prjresults -V", repo, "-r openSUSE_Tumbleweed -a x86_64 | grep '^\\.'  ",   sep=" ", collapse="")
-    obspkgs <- gsub(".  R-", "", system(cmd, intern=TRUE))
-
-    for (pkg in which( is.na(status$OBSVersion) & (status$Package %in% obspkgs)  )){
-        logger(paste0("Get OBS info for package ",status$Package[pkg] ))
-        obsinfo <- getOBSVersion( status$Package[pkg], repo)
-        status$OBSVersion[pkg] <- obsinfo$version
-        status$triedVersion[pkg] <- obsinfo$version
-        status$hasDevel[pkg] <- obsinfo$hasDevel
-    }
-    
     write.table(status, file=file, row.names=FALSE, sep=";")
     logger("new status file written")
     return(status)
 }
+
+#' repoStatusUpdate takes a status file and incorporates information of
+#' new packages, not in the file both from available.packages() and
+#' OBS.
+#' @param cran is a CRAN mirror
+#' @param repo is an OBS repo
+#' @param file is the name of the file where the information is stored
+#' @param new.file is the name of the file which will store the information
+#' @param overwrite is a flag if an existing status file shall be overwritten
+#' @param log logfile
+#' 
+#' @return a dataframe containing the columns "Package", "Version", "License",
+#' "NeedsCompilation", "recDep", "Suggests", "depLen", "OBSpkg", "File", "OBSVersion",
+#' "hasDevel", "triedVersion"
+#'
+#' @export
+## repoStatusUpdate <- function(cran=getOption("c2o.cran"),
+##                              repo=getOption("c2o.auto"),
+##                              file=getOption("c2o.statusfile"),
+##                              new.file=NA,
+##                              overwrite=FALSE,
+##                              log=getOption("c2o.logfile")) {
+##     logger("* repoStatusUpdate")
+##     if ( file.exists(file) & is.na(new.file) & !overwrite  ){
+##         logger("Status file exists, overwrite='FALSE' and no alternative filename given!")
+##         stop("Status file exists, overwrite='FALSE' and no alternative filename given!") 
+##     }
+    
+##     if ( !file.exists(file)){
+##         logger("Status file does not exist")
+##         stop("Status file does not exist")
+##     }
+    
+##     oldstatus <- read.table( file, header=TRUE, sep=";", colClasses="character")
+##     if (! is.na(new.file) ) file=new.file
+    
+##     ## first merge new info from available packages
+    
+##     ap <- as.data.frame(available.packages(repos=cran))
+    
+##     newpkgs <- setdiff( ap$Package, oldstatus$Package )
+##     ##logger(paste0("New packages: ", newpkgs))
+    
+##     removedpkgs <- oldstatus$Package[ which(! oldstatus$Package %in% ap$Package)] ## no longer in available.packages
+##     ##logger(paste0("Removed packages: ", removedpkgs))
+    
+##     if ( length( removedpkgs > 0)) { ## we keep them in repo as long, as they build
+##         ## but if not in OBS, remove every mention of package.
+##         pkgnumbers <- which( (oldstatus$Package %in% removedpkgs) & is.na(oldstatus$OBSVersion) )
+##         if (length(pkgnumbers) > 0){
+##             oldstatus <- oldstatus[-pkgnumbers,]
+##         }
+##     }
+    
+##     status <- merge( ap[, c("Package", "Version", "License", "NeedsCompilation")],
+##                     oldstatus[, c("Package", "recDep", "Suggests", "depLen", "OBSVersion", "hasDevel", "triedVersion" )], by="Package", all=TRUE)
+    
+
+    
+##     retiredpkgs <- oldstatus$Package[ which(! oldstatus$Package %in% ap$Package)] ## no longer in available.packages, but in OBS
+##     logger(paste0("** Retired packages: ", retiredpkgs))
+    
+##     if ( length( retiredpkgs) > 0) { ## we keep them in repo as long, as they build
+##         pkgnumbers <- which( status$Package %in% retiredpkgs)
+##         for (pkg in pkgnumbers ) { # not found in CRAN
+##             status[ pkg , "Version"] <- NA
+##         }
+##     }
+    
+##     logger(paste0("** New packages: ", newpkgs))
+##     if ( length( newpkgs > 0)) {
+##         for (pkg in which(status$Package %in% newpkgs) ) {
+##             logger( paste0( "Dependencies for pkg ", status$Package[pkg]))
+##             status[ pkg , "recDep"]   <- cleanList( status$Package[pkg], "depends", repo=cran)
+##             logger( paste0( " Depends: ",  status[ pkg , "recDep"]))
+##             status[ pkg , "Suggests"] <- cleanList( status$Package[pkg], "suggests", repo=cran)
+##             logger( paste0(" Suggests: ",  status[ pkg , "Suggests"]))
+##             status[ pkg , "depLen"]   <- length( unlist( strsplit( status[ pkg, "recDep"], " ")))
+##             logger( paste0(" depLen: ",  status[ pkg , "depLen"]))
+##         }
+##     }
+
+##     action <- defineActions(status)
+##     logger(paste0("** Updated packages: ", action$update))
+    
+##     if ( length( action$update) > 0) {
+##         reversecalc <- c()
+##         for (pkg in which(status$Package %in% action$update) ) {
+##             oldeps <- status$recDep[pkg]
+##             logger( paste0( "Dependencies for pkg ", status$Package[pkg]))
+            
+##             status[ pkg , "recDep"]   <- cleanList( status$Package[pkg], "depends", repo=cran)
+##             logger( paste0( " Depends: ",  status[ pkg , "recDep"]))
+            
+##             if (oldeps != status$recDep[pkg]) reversecalc <- c(reversecalc, status$Package[pkg])
+            
+##             status[ pkg , "Suggests"] <- cleanList( status$Package[pkg], "suggests", repo=cran)
+##             logger( paste0(" Suggests: ",  status[ pkg , "Suggests"]))
+            
+##             status[ pkg , "depLen"]   <- length( unlist( strsplit( status[ pkg, "recDep"], " ")))
+##             logger( paste0(" depLen: ",  status[ pkg , "depLen"]))
+##         }
+##     }
+
+##     logger( paste0( "Packages of which reversedependencies must be calculated: ", length(reversecalc)))
+##     logger( pasteo(reversecalc))
+
+##     pkgseen <- c()
+##     while( length(reversecalc) > 0){
+##         toppkg <- reversecalc[1]
+##         reversecalc <- reversecalc[-1]
+##         for (pkg  in which( grepl( toppkg, status$recDep))) {
+##             logger( paste0( "recalculate deps of ", status$Package[pkg], ", which is reversedep of ", toppkg))
+##             if (! pkg %in% pkgseen) {
+##                 oldeps <- status$recDep[pkg]
+##                 status[ pkg , "recDep"]   <- cleanList( status$Package[pkg], "depends", repo=cran)
+##                 pkgseen <- c(pkgseen, pkg)
+##             } else {
+##                 logger( paste0( "Dependencies for ", status$Package[pkg], "already re-caclulated. Skipping."))
+##             }
+##         }
+##     }
+
+
+##     ## now check for new and successfully built in repo
+##     cmd <- paste("osc prjresults -V", repo, "-r openSUSE_Tumbleweed -a x86_64 | grep '^\\.'  ",   sep=" ", collapse="")
+##     obspkgs <- gsub(".  R-", "", system(cmd, intern=TRUE))
+
+##     for (pkg in which( is.na(status$OBSVersion) & (status$Package %in% obspkgs)  )){
+##         logger(paste0("Get OBS info for package ",status$Package[pkg] ))
+##         obsinfo <- getOBSVersion( status$Package[pkg], repo)
+##         status$OBSVersion[pkg] <- obsinfo$version
+##         status$triedVersion[pkg] <- obsinfo$version
+##         status$hasDevel[pkg] <- obsinfo$hasDevel
+##     }
+    
+##     write.table(status, file=file, row.names=FALSE, sep=";")
+##     logger("new status file written")
+##     return(status)
+## }
 
 

@@ -308,8 +308,8 @@ pkg2pac <- function( pkg,
     if (pkg.info$depLen > 0) {
         deps <- unlist(strsplit(pkg.info$recDep, " "))
         depsinOBS <- intersect( deps, status$Package[ ! is.na(status$OBSVersion) ])
-        if ( pkg.info$depLen != length(depsinOBS)) { ## missing dependencies, no chance
-            missing <- setdiff( deps, depsinOBS )
+        missing <- setdiff( deps, depsinOBS )
+        if ( length(missing) > 0) { ## missing dependencies, no chance
             msg <- "** missing R package dependencies"
             logger( paste0(msg, " to build " , pkg), log)
             logger( paste0( paste( "R-", missing, sep=""), collapse=" "), log)

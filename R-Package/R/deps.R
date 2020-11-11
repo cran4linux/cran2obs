@@ -63,14 +63,14 @@ cleanDeps <- function(repo=getOption("c2o.cran")){
     suggests <- tools::package_dependencies(ap[,"Package"], db =ap,
                                        which = c("Suggests"),
                                        recursive=FALSE, reverse=FALSE )
-    ## There are "Suggests" in ap, but package_dependency does very useful normalisation
+    ## There are "Suggests" in ap, but package_dependencies does very useful normalisation
 
     ## This takes a few seconds to a minute on a fairly fast computer
 
     rmpkgs <- installed.packages()
     rmpkgs <- rmpkgs[ which( (rmpkgs[, "Priority"] == "base") |
                              (rmpkgs[, "Priority"] == "recommended")), "Package"]
-    ## base and recommended always already installed
+    ## base and recommended always installed
 
     ap <- ap[, c("Package", "Version", "License", "NeedsCompilation")]
     
@@ -103,7 +103,7 @@ available.packages.OBS <- function(obsproject=getOption("c2o.auto")){
     cmd <- paste("osc prjresults -V", obsproject, "-r openSUSE_Tumbleweed -a x86_64 ",   sep=" ", collapse="")
 
     obspkgs <- system(cmd, intern=TRUE)
-
+    logger(paste0("New packages: ", newpkgs))
 
     ## may contain additional stuff related to compiling some packages
     ## only R-* packages are relevant
