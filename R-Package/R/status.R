@@ -175,8 +175,8 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"),
         
     }
 
-    status <- merge( ap[, c("Package", "Version", "License", "NeedsCompilation")],
-                    oldstatus[, c("Package", "recDep", "Suggests", "depLen", "OBSVersion", "hasDevel", "triedVersion" )],
+    status <- merge( cranstatus[, c("Package", "Version", "License", "NeedsCompilation", "recDep", "Suggests", "depLen")],
+                    oldstatus[, c("Package", "OBSVersion", "hasDevel", "triedVersion" )],
                     by="Package", all=TRUE)
 
     logger(paste0("** Retired packages: ", retiredpkgs))
