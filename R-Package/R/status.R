@@ -32,7 +32,7 @@ defineActions <- function(status = getOption("c2o.status")){
     revdepup <- unique(revdepup)
 
     logger( paste0( "pkgs with new reverse dependencies ", length(revdepup)))
-    logger( paste0( "pkgs with new reverse dependencies ", status$Pacakge[revdepup]))
+    logger( paste0( "pkgs with new reverse dependencies ", status$Package[revdepup]))
     
     return(list(retired=retired, uptodate=uptodate, update=update, tried= tried,
                 revdepup=revdepup, totry=totry))
