@@ -10,6 +10,7 @@ defineActions <- function(status = getOption("c2o.status")){
     totry <- status$Package[ which( ( !is.na( status$Version) & is.na( status$OBSVersion)) &
                                     (( is.na( status$triedVersion) |
                                        (obsVersion( status$Version) != status$triedVersion))))]
+    logger( paste0( "pkgs to try ", length(totry)))
     logger( paste0( "pkgs to try ", totry))
 
     uptodate <- status$Package[ which(obsVersion( status$Version) == status$OBSVersion) ]
@@ -19,15 +20,20 @@ defineActions <- function(status = getOption("c2o.status")){
     ##logger( paste0( "pkgs unsuccessful ", tried))
     
     update <- status$Package[ which( !is.na( status$OBSVersion) & ( obsVersion( status$Version) != status$OBSVersion) )]
+    logger( paste0( "pkgs to update ", length(update)))
     logger( paste0( "pkgs to update ", update))
 
     retired <- status$Package[ is.na(status$Version) ] 
+    logger( paste0( "pkgs which retired ", length(retired)))
     logger( paste0( "pkgs which retired ", retired))
 
     revdepup <-c()
     for (pkg in update) { revdepup <- c(revdepup, which( grepl( pkg, status$recDep ) )) }
     revdepup <- unique(revdepup)
 
+    logger( paste0( "pkgs with new reverse dependencies ", length(revdepup)))
+    logger( paste0( "pkgs with new reverse dependencies ", revdepup))
+    
     return(list(retired=retired, uptodate=uptodate, update=update, tried= tried,
                 revdepup=revdepup, totry=totry))
 }
