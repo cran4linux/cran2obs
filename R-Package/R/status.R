@@ -35,7 +35,7 @@ defineActions <- function(status = getOption("c2o.status")){
     logger( paste0( "pkgs with new reverse dependencies ", status$Package[revdepup]))
     
     return(list(retired=retired, uptodate=uptodate, update=update, tried= tried,
-                revdepup=revdepup, totry=totry))
+                revdepup=status$Package[revdepup], totry=totry))
 }
 
 #' statusOBS checks if a package already exists either as remote pac on build.opensuse.org

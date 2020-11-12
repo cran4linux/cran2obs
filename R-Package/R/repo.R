@@ -108,7 +108,7 @@ pkg2repo <- function(pkg,
     logger(paste0("* Working on ", pkg ))
     num <- which(status$Package == pkg)
 
-    if ( (pkg %in% actions$totry) | (pkg %in% actions$update )){
+    if ( (pkg %in% actions$totry) | (pkg %in% actions$update | (pkg %in% actions$revdepup)){
         result <- pkg2pac(pkg, localOBS=localOBS, remoteprj=remoteprj, statusfile=statusfile,
                           download.cache=download.cache, binary.cache=binary.cache, log=log)
         if (result$status == "done") {
