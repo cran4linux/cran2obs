@@ -212,7 +212,7 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"),
     
     for (pkg in revdepup) {
         i <- which(status$Package == pkg)
-        status[i, "OBSVersion"] <- "0"
+        if (! is.na( status[ i, "OBSVersion"])) status[i, "OBSVersion"] <- "0"
         status[i, "triedVersion"] <- status[i, "hasDevel"] <- NA 
     }
     logger( paste0("** Number of Packages to be rebuilt: ", length(revdepup)))
