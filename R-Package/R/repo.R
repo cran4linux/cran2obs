@@ -38,7 +38,7 @@ cran2repo <- function(cran=getOption("c2o.cran"),
         pkgs <- which(status$depLen == level)
         for (pkg in status$Package[pkgs]) {
             buildtype <- NA
-            if (pkg %in% unique(c(actions$update, actions$revdepup))) {
+            if (pkg %in% actions$update) {
                 buildtype <- "update"
             } else {
                 if (pkg %in% actions$totry) {
@@ -108,7 +108,7 @@ pkg2repo <- function(pkg,
     logger(paste0("* Working on ", pkg ))
     num <- which(status$Package == pkg)
 
-    if ( (pkg %in% actions$totry) | (pkg %in% actions$update | (pkg %in% actions$revdepup)){
+    if ( (pkg %in% actions$totry) | (pkg %in% actions$update)){
         result <- pkg2pac(pkg, localOBS=localOBS, remoteprj=remoteprj, statusfile=statusfile,
                           download.cache=download.cache, binary.cache=binary.cache, log=log)
         if (result$status == "done") {
