@@ -188,6 +188,7 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"),
     logger(paste0("** New packages: ", newpkgs))
 
     updatedpkgs <- status$Package[ which( !is.na( status$OBSVersion) & ( obsVersion( status$Version) != status$OBSVersion) )]
+    logger( paste0("** Number of *updated* packages: ", length(updatedpkgs)))
     logger(paste0("** Updated packages: ", updatedpkgs))
 
     ## For reverse dependencies of updated packages
@@ -205,7 +206,7 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"),
     }   
 
     revdepup <-c()
-    for (pkg in upandnewdep) { revdepup <- c( revdepup, which( grepl( pkg, status$recDep ))) }
+    for (pkg in upandnewdep) { revdepup <- c( revdepup, status$Package[ which( grepl( pkg, status$recDep ))]) }
     revdepup <- unique(revdepup)        
     
     for (pkg in revdepup) {
@@ -213,7 +214,8 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"),
         status[i, "OBSVersion"] <- "0"
         status[i, "triedVersion"] <- status[i, "hasDevel"] <- NA 
     }
-    logger( paste0("** Packages to rebuild because of dependencies: ", revdepup))
+    logger( paste0("** Number of Packages to be rebuilt: ", length(redepup)))
+    logger( paste0("Packages to rebuild because of dependencies: ", status$Package[revdepup]))
         
     write.table(status, file=file, row.names=FALSE, sep=";")
     logger("new status file written")
