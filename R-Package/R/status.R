@@ -183,13 +183,14 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"),
     status <- merge( cranstatus[, c("Package", "Version", "License", "NeedsCompilation", "recDep", "Suggests", "depLen")],
                     oldstatus[, c("Package", "OBSVersion", "hasDevel", "triedVersion" )],
                     by="Package", all=TRUE)
-
-    logger(paste0("** Retired packages: ", retiredpkgs))
-    logger(paste0("** New packages: ", newpkgs))
+    logger(paste0("** Number of retired packages: ", length( retiredpkgs)))
+    logger(paste0("   Retired packages: ", retiredpkgs))
+    logger(paste0("** Number of new packages: ", length( newpkgs)))
+    logger(paste0("   New packages: ", newpkgs))
 
     updatedpkgs <- status$Package[ which( !is.na( status$OBSVersion) & ( obsVersion( status$Version) != status$OBSVersion) )]
     logger( paste0("** Number of *updated* packages: ", length(updatedpkgs)))
-    logger(paste0("** Updated packages: ", updatedpkgs))
+    logger( paste0("   Updated packages: ", updatedpkgs))
 
     ## For reverse dependencies of updated packages
     ## if the updated pgk has a different set of packages as dependencies
@@ -215,7 +216,7 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"),
         status[i, "triedVersion"] <- status[i, "hasDevel"] <- NA 
     }
     logger( paste0("** Number of Packages to be rebuilt: ", length(revdepup)))
-    logger( paste0("Packages to rebuild because of dependencies: ", revdepup))
+    logger( paste0("   Packages to rebuild because of dependencies: ", revdepup))
         
     write.table(status, file=file, row.names=FALSE, sep=";")
     logger("new status file written")
