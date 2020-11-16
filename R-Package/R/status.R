@@ -197,9 +197,10 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"),
 
     upandnewdep <- c()
     for (pkg in updatedpkgs) {
-        if ( oldstatus$recDep[ which(oldstatus$Package == pkg)] != status$recDep[ which( status$Package == pkg)]) {
-            upandnewdep <- c(upandnewdep, pkg)
-        }
+        cat( pkg , " ",  which(oldstatus$Package == pkg), " ", which( status$Package == pkg),"\n")
+#        if ( oldstatus$recDep[ which(oldstatus$Package == pkg)] != status$recDep[ which( status$Package == pkg)]) {
+#            upandnewdep <- c(upandnewdep, pkg)
+#        }
     }   
 
     revdepup <-c()
