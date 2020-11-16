@@ -215,7 +215,7 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"),
         status[i, "triedVersion"] <- status[i, "hasDevel"] <- NA 
     }
     logger( paste0("** Number of Packages to be rebuilt: ", length(revdepup)))
-    logger( paste0("Packages to rebuild because of dependencies: ", status$Package[revdepup]))
+    logger( paste0("Packages to rebuild because of dependencies: ", revdepup))
         
     write.table(status, file=file, row.names=FALSE, sep=";")
     logger("new status file written")
