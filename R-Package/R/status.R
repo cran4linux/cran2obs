@@ -199,7 +199,7 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"),
     for (pkg in updatedpkgs) {
         cat( pkg , " ",  which(oldstatus$Package == pkg), " ", which( status$Package == pkg),"\n")
         cat( pkg , " ",  oldstatus$recDep[ which(oldstatus$Package == pkg)], " ", status$recDep[ which( status$Package == pkg)],"\n")
-        if ( is.na(oldstatus$recDep) | oldstatus$recDep[ which(oldstatus$Package == pkg)] != status$recDep[ which( status$Package == pkg)]) {
+        if ( is.na(oldstatus$recDep) | (oldstatus$recDep[ which(oldstatus$Package == pkg)] != status$recDep[ which( status$Package == pkg)])) {
             upandnewdep <- c(upandnewdep, pkg)
         }
     }   
