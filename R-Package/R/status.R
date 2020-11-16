@@ -197,8 +197,8 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"),
 
     upandnewdep <- c()
     for (pkg in updatedpkgs) {
-        cat( pkg , " ",  which(oldstatus$Package == pkg), " ", which( status$Package == pkg),"\n")
-        cat( pkg , " ",  oldstatus$recDep[ which(oldstatus$Package == pkg)], " ", status$recDep[ which( status$Package == pkg)],"\n")
+###        cat( pkg , " ",  which(oldstatus$Package == pkg), " ", which( status$Package == pkg),"\n")
+###        cat( pkg , " ",  oldstatus$recDep[ which(oldstatus$Package == pkg)], " ", status$recDep[ which( status$Package == pkg)],"\n")
         if ( is.na(oldstatus$recDep[which(oldstatus$Package == pkg)]) | (oldstatus$recDep[ which(oldstatus$Package == pkg)] != status$recDep[ which( status$Package == pkg)])) {
             upandnewdep <- c(upandnewdep, pkg)
         }
@@ -207,12 +207,13 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"),
     revdepup <-c()
     for (pkg in upandnewdep) { revdepup <- c( revdepup, which( grepl( pkg, status$recDep ))) }
     revdepup <- unique(revdepup)        
-
+    
     for (pkg in revdepup) {
         i <- which(status$Package == pkg)
         status[i, "OBSVersion"] <- "0"
         status[i, "triedVersion"] <- status[i, "hasDevel"] <- NA 
     }
+    logger( paste0("** Packages to rebuild because of dependencies: ", revdepup))
         
     write.table(status, file=file, row.names=FALSE, sep=";")
     logger("new status file written")
