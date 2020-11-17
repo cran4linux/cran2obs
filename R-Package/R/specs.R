@@ -169,43 +169,50 @@ dropFileSection <- function(speclines){
 #'
 #' @export
 sysreq2depends <- function(line){
+    result <- list( depends="", builddepends="")
+    addtoresult <- function( r, a, b) { return( list( depends=paste(r$depends, a), builddepends=paste(r$builddepends, b)  ))}
+    
     if ( grepl( "ICU4C", line)) {
-        return( list(depends="icu" , builddepends="libicu-devel"))
+        result <- addtoresult(result, "icu", "libicu-devel")
     }
 
     if ( grepl( "git2r", line)){
-        return( list( depends="libgit2 openssl libssh2", builddepends="libgit2-devel zlib-devel openssl-devel libssh2-devel"))
+        result <- addtoresult( result, "libgit2 openssl libssh2", "libgit2-devel zlib-devel openssl-devel libssh2-devel")
+    }
+
+    if ( grepl( "glpk", line)){
+        result <- addtoresult( result, "glpk", "glpk-devel")
     }
     
     if ( grepl( "gmp", line)){
-        return( list( depends="", builddepends="libgmp-devel"))
+        result <- addtoresult( result, "", "libgmp-devel")
     }
 
     if ( grepl( "libcurl", line)){
-        return( list( depends="", builddepends="libcurl-devel"))
+        result <- addtoresult( result, "", "libcurl-devel")
     }
 
     if ( grepl( "libjpeg", line)){
-        return( list( depends="", builddepends="libjpeg8-devel"))
+        result <- addtoresult( result, "", "libjpeg8-devel")
     }
 
     if ( grepl( "libpng", line)) {
-        return( list( depends="", builddepends="libpng16-devel libpng16-compat-devel"))
+        result <- addtoresult( result, "", "libpng16-devel libpng16-compat-devel")
     }
 
     if ( grepl( "libxml2", line)) {
-        return( list( depends="", builddepends="libxml2-devel"))
+        result <- addtoresult( result, "", "libxml2-devel")
     }
 
     if ( grepl( "OpenSSL", line)) {
-        return( list( depends="openssl", builddepends="openssl-devel"))
+        result <- addtoresult( result, "openssl", "openssl-devel")
     }
     
     if ( grepl( "zlib", line)) {
-        return( list( depends="", builddepends="zlib-devel"))
+        result <- addtoresult( result, "", "zlib-devel")
     }
 
-    return( list(depends="" , builddepends=""))
+    result
 }
 
 #' createEmptySpec takes the name of an R package and creates an specfile
