@@ -211,7 +211,11 @@ sysreq2depends <- function(line){
     if ( grepl( "OpenSSL", line)) {
         result <- addtoresult( result, "openssl", "openssl-devel")
     }
-    
+
+    if ( grepl( "udunits", line)){
+        result <- addtoresult( result, "udunits2", "udunits2-devel")
+    }
+
     if ( grepl( "zlib", line)) {
         result <- addtoresult( result, "", "zlib-devel")
     }
