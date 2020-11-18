@@ -185,7 +185,7 @@ sysreq2depends <- function(line){
     }
     
     if ( grepl( "gmp", line)){
-        result <- addtoresult( result, "gmp", "gmp-devel")
+        result <- addtoresult( result, "libgmp10", "gmp-devel")
     }
 
     if ( grepl( "Gnu Scientific Library", line)){
