@@ -220,6 +220,8 @@ sysreq2depends <- function(line){
         result <- addtoresult( result, "", "zlib-devel")
     }
 
+    result$depends <- trimws(result$depends)
+    result$builddepends <- trimws(result$builddepends)
     result
 }
 
