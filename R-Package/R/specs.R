@@ -177,7 +177,7 @@ sysreq2depends <- function(line){
     }
 
     if ( grepl( "git2r", line)){
-        result <- addtoresult( result, "libgit2 openssl libssh2", "libgit2-devel zlib-devel openssl-devel libssh2-devel")
+        result <- addtoresult( result, "libgit2-1_1 openssl libssh2-1", "libgit2-devel zlib-devel openssl-devel libssh2-devel")
     }
 
     if ( grepl( "glpk", line)){
