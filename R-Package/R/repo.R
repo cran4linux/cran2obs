@@ -21,12 +21,6 @@ cran2repo <- function(cran=getOption("c2o.cran"),
                       download.cache = getOption("c2o.download.cache"),
                       binary.cache = getOption("c2o.binary.cache"),
                       log = getOption("c2o.logfile")){
-    excludedpkgs <- c("gdata")
-    ## these are packages that have serious problems, if an rpm is built
-    ##
-    ## R-gdata provides some perl package. Source must be modified
-    ## if R-gdata should be built. (or some meta-information in the OBS
-    ## project must be set)
     
     logger( paste0("Sync started at ", Sys.time() ))
     status <- read.table(statusfile, header=TRUE, sep=";", colClasses="character")
