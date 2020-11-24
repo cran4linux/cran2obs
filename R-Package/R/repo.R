@@ -46,10 +46,6 @@ cran2repo <- function(cran=getOption("c2o.cran"),
                 } else {
                     next
                 }
-            if (pkg %in% excludedpkgs) {
-                logger( paste0(pkg, " is excluded from build"))
-                next
-            }
             num <- which(status$Package == pkg)
             result <- pkg2pac(pkg, localOBS=localOBS, remoteprj=remoteprj, statusfile=statusfile,
                               download.cache=download.cache, binary.cache=binary.cache, log=log)
