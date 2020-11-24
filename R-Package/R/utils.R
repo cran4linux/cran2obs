@@ -33,7 +33,7 @@ resetPkg <- function(pkg, status){
 #' @return updated dataframe holding status.
 #' @export
 resetPkgRevDeps <- function(pkg, status){
-    indices <- c( which(status$Package == pkg), which( grepl( pkg, status$recDep)))
+    i <- c( which(status$Package == pkg), which( grepl( pkg, status$recDep)))
     status[i, "OBSVersion"] <- status[i, "triedVersion"] <- status[i, "hasDevel"] <- NA
     
     invisible(status)
