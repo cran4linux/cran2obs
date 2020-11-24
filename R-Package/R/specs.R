@@ -216,6 +216,15 @@ sysreq2depends <- function(line){
         result <- addtoresult( result, "pandoc", "")
     }
 
+    if ( grepl( "perl", line)) {
+        result <- addtoresult( result, "perl", "")
+    }
+
+    if ( grepl( "PROJ", line)) {
+        result <- addtoresult( result, "proj", "proj-devel")
+    }
+
+    
     if ( grepl( "udunits", line)){
         result <- addtoresult( result, "udunits2", "udunits2-devel")
     }
