@@ -186,7 +186,9 @@ setuppac <- function(pkg,
     if (buildtype == "first") { ## i.e. no version in OBS
         ## create dir to hold package for OBS
         cmd <- paste("\"", "cd", file.path( localOBS, remoteprj), " ; osc mkpac ", paste0( "R-", pkg)  , "\"")
-        result <- system2(  "bash",  args = c("-c", cmd), stdout=TRUE, stderr=TRUE)
+        suppressWarnings(
+            result <- system2(  "bash",  args = c("-c", cmd), stdout=TRUE, stderr=TRUE)
+        )
         if( ! is.null(attributes(result))) {
             logger(paste0( " Problem creating pac for ", pkg, " Error: ", result))
             if ( any( grepl( "already under version control", result))) {
