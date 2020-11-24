@@ -221,9 +221,9 @@ sysreq2depends <- function(line){
     }
 
     if ( grepl( "PROJ", line)) {
-        result <- addtoresult( result, "proj", "proj-devel")
+        result <- addtoresult( result, "proj gdal", "proj-devel gdal-devel")
     }
-
+    ### TODO if multiline sysreqs work, correct above
     
     if ( grepl( "udunits", line)){
         result <- addtoresult( result, "udunits2", "udunits2-devel")
