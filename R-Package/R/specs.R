@@ -192,6 +192,10 @@ sysreq2depends <- function(line){
         result <- addtoresult( result, "gsl", "gsl-devel")
     }
 
+    if ( grepl( "GEOS", line)) {
+        result <- addtoresult( result, "libgeos-3_8_1 libgeos_c1", "geos-devel libgeos-3_8_1 libgeos_c1")
+    }
+
     if ( grepl( "libcurl", line)){
         result <- addtoresult( result, "", "libcurl-devel")
     }
