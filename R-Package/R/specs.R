@@ -212,6 +212,10 @@ sysreq2depends <- function(line){
         result <- addtoresult( result, "openssl", "openssl-devel")
     }
 
+    if ( grepl( "pandoc", line)) {
+        result <- addtoresult( result, "pandoc", "")
+    }
+
     if ( grepl( "udunits", line)){
         result <- addtoresult( result, "udunits2", "udunits2-devel")
     }
