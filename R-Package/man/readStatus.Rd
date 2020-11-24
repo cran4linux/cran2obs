@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{readStatus}
 \alias{readStatus}
-\title{readStatus reads a statusfile and return the datafram}
+\title{readStatus reads a statusfile and returns the dataframe}
 \usage{
 readStatus(statusfile = getOption("c2o.statusfile"))
 }
@@ -10,8 +10,8 @@ readStatus(statusfile = getOption("c2o.statusfile"))
 \item{statusfile}{filename of statusfile}
 }
 \value{
-status datafram
+status dataframe
 }
 \description{
-readStatus reads a statusfile and return the datafram
+readStatus reads a statusfile and returns the dataframe
 }

@@ -1,6 +1,6 @@
-#' readStatus reads a statusfile and return the datafram
+#' readStatus reads a statusfile and returns the dataframe
 #' @param statusfile filename of statusfile
-#' @return status datafram
+#' @return status dataframe
 #' @export
 readStatus <- function(statusfile = getOption("c2o.statusfile")){
     invisible(read.table(statusfile, sep=";", header=TRUE, colClasses="character"))
@@ -23,6 +23,19 @@ writeStatus <- function(status,
 resetPkg <- function(pkg, status){
     i <- which(status$Package == pkg)
     status[i, "OBSVersion"] <- status[i, "triedVersion"] <- status[i, "hasDevel"] <- NA
+    invisible(status)
+}
+
+#' resetPkgRevDeps clears OBSVersion, triedVersion and hasDevel 
+#' from a package and all reverse dependencies of named package
+#' @param pkg package name
+#' @param status dataframe holding status
+#' @return updated dataframe holding status.
+#' @export
+resetPkgRevDeps <- function(pkg, status){
+    indices <- c( which(status$Package == pkg), which( grepl( pkg, status$recDep)))
+    status[i, "OBSVersion"] <- status[i, "triedVersion"] <- status[i, "hasDevel"] <- NA
+    
     invisible(status)
 }
 
