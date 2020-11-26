@@ -228,6 +228,10 @@ sysreq2depends <- function(line){
         result <- addtoresult( result, "proj gdal", "proj proj-devel gdal gdal-devel")
     }
     ### TODO if multiline sysreqs work, correct above, pkg rgdal
+
+    if ( grepl( "sqlite3", line)) {
+        result <- addtoresult( result, "sqlite3", "sqlite3-devel")
+    }
     
     if ( grepl( "udunits", line)){
         result <- addtoresult( result, "udunits2", "udunits2-devel")
