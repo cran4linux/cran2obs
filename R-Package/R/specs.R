@@ -225,7 +225,7 @@ sysreq2depends <- function(line){
     }
 
     if ( grepl( "PROJ", line)) {
-        result <- addtoresult( result, "proj gdal", "proj-devel gdal gdal-devel")
+        result <- addtoresult( result, "proj gdal", "proj proj-devel gdal gdal-devel")
     }
     ### TODO if multiline sysreqs work, correct above, pkg rgdal
     
