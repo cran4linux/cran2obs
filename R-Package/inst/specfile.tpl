@@ -42,9 +42,9 @@ BuildRequires:  tex(natbib.sty)
 %else
 BuildRequires:  texlive
 %endif
-BuildRequires:   texinfo
-BuildRequires:   fdupes
-BuildRequires:   R-base
+BuildRequires:  texinfo
+BuildRequires:  fdupes
+BuildRequires:  R-base
 {{builddepends}}
 {{needscompilation}}
 

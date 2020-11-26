@@ -176,8 +176,12 @@ sysreq2depends <- function(line){
         result <- addtoresult(result, "icu", "libicu-devel")
     }
 
-    if ( grepl( "git2r", line)){
-        result <- addtoresult( result, "libgit2-1_1 openssl libssh2-1", "libgit2-devel zlib-devel openssl-devel libssh2-devel")
+    if ( grepl( "GDAL", line)) {
+        result <- addtoresult( result, "gdal", "gdal gdal-devel")
+    }
+
+    if ( grepl( "GEOS", line)) {
+        result <- addtoresult( result, "libgeos-3_8_1 libgeos_c1", "geos-devel libgeos-3_8_1 libgeos_c1")
     }
 
     if ( grepl( "glpk", line)){
@@ -192,12 +196,12 @@ sysreq2depends <- function(line){
         result <- addtoresult( result, "gsl", "gsl-devel")
     }
 
-    if ( grepl( "GEOS", line)) {
-        result <- addtoresult( result, "libgeos-3_8_1 libgeos_c1", "geos-devel libgeos-3_8_1 libgeos_c1")
-    }
-
     if ( grepl( "libcurl", line)){
         result <- addtoresult( result, "", "libcurl-devel")
+    }
+
+    if ( grepl( "libgit2", line)){
+        result <- addtoresult( result, "libgit2-1_1", "libgit2-devel")
     }
 
     if ( grepl( "libjpeg", line)){
@@ -206,6 +210,10 @@ sysreq2depends <- function(line){
 
     if ( grepl( "libpng", line)) {
         result <- addtoresult( result, "", "libpng16-devel libpng16-compat-devel")
+    }
+
+    if ( grepl( "libSSH2", line)){
+        result <- addtoresult( result, "libssh2-1", "libssh2-devel")
     }
 
     if ( grepl( "libxml2", line)) {
@@ -225,9 +233,8 @@ sysreq2depends <- function(line){
     }
 
     if ( grepl( "PROJ", line)) {
-        result <- addtoresult( result, "proj gdal", "proj proj-devel gdal gdal-devel")
+        result <- addtoresult( result, "proj", "proj proj-devel")
     }
-    ### TODO if multiline sysreqs work, correct above, pkg rgdal
 
     if ( grepl( "sqlite3", line)) {
         result <- addtoresult( result, "sqlite3", "sqlite3-devel")
@@ -290,40 +297,35 @@ createEmptySpec <- function(pkg,
     desc.file <- paste(pkg, "/DESCRIPTION", sep="")
     untar( file.path( pac, source0), desc.file)
     
-    description <- readLines( desc.file)
+#    description <- readLines( desc.file)
 
-    if ( any( grep( "SystemRequirements:", description))) {
+    desc <- read.dcf(desc.file)[1,] # only one package
+    unlink( pkg, recursive=TRUE)
+    ## template and description have been read in now populate the specfile tempalte
+
+    
+    if ( "Encoding" %in% names(desc)){
+        if ( desc["Encoding"] %in% c("latin1", "latin2")) desc <- iconv( desc, desc["Encoding"], "UTF-8")
+    }
+
+    if ( "SystemRequirements" %in% names(desc)) {
         logger( paste0( pkg, " has non-empty SystemReqirements"))
-        logger( description[ grep( "SystemRequirements", description)])
-        sysreqs <- sysreq2depends( description[ grep( "SystemRequirements", description) ]  )
+        logger( desc[ "SystemRequirements"])
+        sysreqs <- sysreq2depends( desc[ "SystemRequirements"]  )
     } else {
         sysreqs <- list(depends="", builddepends="")
     }
-    
-    if ( any(grep("Encoding: ", description, fixed=TRUE))) {
-        ## some DESCRIPTIONs seem to be encoded differently, i.e leerSIECyL
-        encoding <- trimws( gsub( "Encoding: ", "",
-                                 description[ grep( "Encoding: ", description, fixed=TRUE)]), which="both")
-        if (encoding %in% c("latin1", "latin2")) {
-            ##            system2( "recode", args=c( "..UTF-8", desc.file))
-            ## re-read re-encoded DESCRIPTION
-            ##description <- readLines(desc.file)
-            description <- iconv(description, encoding, "UTF-8")
-        }
-    }
-
-    unlink( pkg, recursive=TRUE)
-    
-    ## template and description have been read in now populate the specfile tempalte
     
     spectpl <- gsub( "{{year}}", format( Sys.time(), "%Y" ), spectpl, fixed=TRUE)    
     spectpl <- gsub( "{{packname}}", pkg, spectpl, fixed=TRUE)
     spectpl <- gsub( "{{version}}", version, spectpl, fixed=TRUE)	
     
-    summary.str <- sub( "Title: ", "", description[ grep("Title:", description) ], fixed=TRUE)
+#    summary.str <- sub( "Title: ", "", description[ grep("Title:", description) ], fixed=TRUE)
+    summary.str <- desc[ "Title"]
     spectpl <- gsub( "{{summary}}", summary.str, spectpl, fixed=TRUE)
     
-    license <- sub( "License: ", "", description[ grep("License:", description) ], fixed=TRUE)
+#    license <- sub( "License: ", "", description[ grep("License:", description) ], fixed=TRUE)
+    license <- desc[ "License"]
     spectpl <- gsub( "{{license}}", license, spectpl, fixed=TRUE)
     
     spectpl <- gsub( "{{source0}}", source0, spectpl, fixed=TRUE)
@@ -335,7 +337,6 @@ createEmptySpec <- function(pkg,
         deps <- c()
     }
 
-#    suggests <- cleanList( packname, "suggests")
     suggests <- unlist(strsplit(pkg.info$Suggests, " "))
     if (length(suggests) > 0) {
         suggests <- paste( "R-", suggests, sep="")
@@ -343,11 +344,12 @@ createEmptySpec <- function(pkg,
         suggests <- c()
     }
     
-    descstart <- grep( "Description:", description, fixed=TRUE)
-    descend <- descstart + grep( "^[A-Z][a-z]+:", description[ (descstart+1):length(description)])[1] -1
-    description.str <- trimws( paste( description[ descstart:descend ] ), which="both")
-    description.str[1] <- gsub("Description: ", "", description.str[1])
+#    descstart <- grep( "Description:", description, fixed=TRUE)
+#    descend <- descstart + grep( "^[A-Z][a-z]+:", description[ (descstart+1):length(description)])[1] -1
+#    description.str <- trimws( paste( description[ descstart:descend ] ), which="both")
+#    description.str[1] <- gsub("Description: ", "", description.str[1])
 ### TODO still needs formating! textwrap for R?
+    description.str <- desc[ "Description"]
     
     needs.compilation <- pkg.info$NeedsCompilation
     
@@ -383,7 +385,8 @@ createEmptySpec <- function(pkg,
         } else if ( grepl( "{{needscompilation}}", line, fixed=TRUE) ) {
             if ( needs.compilation == "yes") cat( "BuildRequires:   gcc gcc-c++ gcc-fortran\n", file=specfile, append=TRUE)
         } else if ( grepl( "{{description}}", line, fixed=TRUE) ) {
-            for ( item in description.str) cat( item, "\n", file=specfile, append=TRUE)
+                                        #for ( item in description.str) cat( item, "\n", file=specfile, append=TRUE)
+            for (line in strwrap( gsub("\n", " ", desc[ "Description"]), 72)) cat( line, "\n", file=specfile, append=TRUE)
         } else {
             cat( line, "\n", file=specfile, append=TRUE)
         }
