@@ -1,0 +1,16 @@
+image: alpine:latest
+
+pages:
+  stage: deploy
+  script:
+  - echo 'Nothing to do...'
+  artifacts:
+    paths:
+    - public
+  only:
+  - master
+
+test:
+  script:
+  - echo "This command runs on any branch casue I didn't specify 'only'. Also notice how the jobs are done differently."
+  - echo "You can run more then one too, and it could just be a script that you run that does all the things."
