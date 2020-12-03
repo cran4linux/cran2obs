@@ -274,7 +274,12 @@ createEmptySpec <- function(pkg,
                             cran=getOption("c2o.cran"),
                             statusfile = getOption("c2o.statusfile"),
                             log = getOption("c2o.logfile")) {
-                
+    manual.sysreq.pkgs <- c("haven")
+    manual.sysreqs <- list(
+        haven = list(depends=c(), builddepends=c("zlib-devel"))
+        )
+
+    
     logger(paste0("** Creating empty spec for pkg ", pkg))
     status <- read.table(statusfile, sep=";", header=TRUE, colClasses="character")
     
@@ -312,6 +317,13 @@ createEmptySpec <- function(pkg,
         logger( paste0( pkg, " has non-empty SystemReqirements"))
         logger( desc[ "SystemRequirements"])
         sysreqs <- sysreq2depends( desc[ "SystemRequirements"]  )
+
+        if (pkg %in% manual.sysreq.pkgs) {
+            sysreqs <- manual.sysreqs$pkg
+            logger(paste0("  Building ", pkg, " using manual sysreqs. Pls check if still needed!"))
+        } else {
+            sysreqs <- sysreq2depends( description[ grep( "SystemRequirements", description) ]  )
+        }
     } else {
         sysreqs <- list(depends="", builddepends="")
     }

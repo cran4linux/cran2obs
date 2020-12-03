@@ -83,7 +83,7 @@ resetStatusOfpkg <- function( pkg, status=NA, statusfile= getOption("c2o.statusf
 #' 
 #' @export
 updateStatusOfpkg <- function( status, pkg, syncresult, always.save=TRUE, statusfile= getOption("c2o.statusfile"), log=getOption("c2o.logfile")){
-    logger("Update of pkg status")
+    logger("  Update of pkg status")
     if (! pkg %in% status[, "Package"]) {
         msg <- paste0("Seems ", pkg, " has no status")
         logger(msg, log)
