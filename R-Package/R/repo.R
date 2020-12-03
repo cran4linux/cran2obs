@@ -48,7 +48,7 @@ cran2repo <- function(cran=getOption("c2o.cran"),
             {
                 build.counter <- build.counter + 1
                 pkg.build.start <- Sys.time()
-                logger(paste0("* Working on ", pkg, "( ,", build.counter, "/", total.to.build,")" ))
+                logger(paste0("* Working on ", pkg, "( ", build.counter, "/", total.to.build,")" ))
                 logger(paste0("  Begin:     ", pkg.build.start))
             } else {
                 next
