@@ -72,9 +72,9 @@ cran2repo <- function(cran=getOption("c2o.cran"),
             }
             status <- updateStatusOfpkg ( status, pkg, result, statusfile=statusfile, log=log) 
             pkg.build.end <- Sys.time()
-            logger( paste0("  Work on ",pkg, "ended at", pkg.build.end, "after ",
+            logger( paste0("  Work on ",pkg, " ended at", pkg.build.end, " after ",
                            floor(as.numeric(difftime(pkg.build.end, pkg.build.start, units="sec"))*100)/100, "s" ))
-            avg.time <- as.numeric(difftime(pk.build.end, sync.start,units="secs"))/build.counter
+            avg.time <- as.numeric(difftime(pkg.build.end, sync.start,units="secs"))/build.counter
             logger( paste0("  Average time per package:", floor(avg.time*100)/100, "s" ))
             logger( paste0("  Expected remaining time:", floor((total.to.build-build.counter)*avg.time*100)/100, "s" ))
         }
