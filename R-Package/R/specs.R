@@ -277,6 +277,7 @@ createEmptySpec <- function(pkg,
     manual.sysreq.pkgs <- c("haven")
     manual.sysreqs <- list(
         haven = list(depends="", builddepends="zlib-devel")
+        ## haven only declares GNU make, but needs zlib also
         )
 
     
@@ -319,7 +320,7 @@ createEmptySpec <- function(pkg,
 
         if (pkg %in% manual.sysreq.pkgs) {
             sysreqs <- manual.sysreqs[[pkg]]
-            logger(paste0("  NOTE: ", pkg, " is using manual sysreqs. Pls check if still needed!"))
+            logger(paste0("  NOTE: ", pkg, " is using manual sysreqs. Check, if still needed!"))
         } else {
             sysreqs <- sysreq2depends( gsub("\n", " ", desc[ "SystemRequirements" ])  )
             ## convert to single line for greping
