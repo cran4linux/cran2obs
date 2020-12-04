@@ -332,7 +332,8 @@ createEmptySpec <- function(pkg,
     spectpl <- gsub( "{{version}}", version, spectpl, fixed=TRUE)	
     
 #    summary.str <- sub( "Title: ", "", description[ grep("Title:", description) ], fixed=TRUE)
-    summary.str <- desc[ "Title"]
+    summary.str <- gsub("\n", " ", desc[ "Title"])
+    ## Summary must be one line
     spectpl <- gsub( "{{summary}}", summary.str, spectpl, fixed=TRUE)
     
 #    license <- sub( "License: ", "", description[ grep("License:", description) ], fixed=TRUE)
