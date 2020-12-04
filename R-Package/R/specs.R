@@ -276,7 +276,7 @@ createEmptySpec <- function(pkg,
                             log = getOption("c2o.logfile")) {
     manual.sysreq.pkgs <- c("haven")
     manual.sysreqs <- list(
-        haven = list(depends=c(), builddepends=c("zlib-devel"))
+        haven = list(depends="", builddepends="zlib-devel")
         )
 
     
