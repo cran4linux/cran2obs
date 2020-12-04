@@ -321,7 +321,8 @@ createEmptySpec <- function(pkg,
             sysreqs <- manual.sysreqs[[pkg]]
             logger(paste0("  NOTE: ", pkg, " is using manual sysreqs. Pls check if still needed!"))
         } else {
-            sysreqs <- sysreq2depends( desc[ "SystemRequirements" ]  )
+            sysreqs <- sysreq2depends( gsub("\n", " ", desc[ "SystemRequirements" ])  )
+            ## convert to single line for greping
         }
     } else {
         sysreqs <- list(depends="", builddepends="")
