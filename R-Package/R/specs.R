@@ -196,6 +196,10 @@ sysreq2depends <- function(line){
         result <- addtoresult( result, "gsl", "gsl-devel")
     }
 
+    if ( grepl( "JAGS", line)){
+        result <- addtoresult( result, "jags jags-devel", "jags jags-devel")
+    }
+    
     if ( grepl( "libcurl", line)){
         result <- addtoresult( result, "", "libcurl-devel")
     }
