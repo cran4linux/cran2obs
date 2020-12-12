@@ -278,14 +278,14 @@ createEmptySpec <- function(pkg,
                             cran=getOption("c2o.cran"),
                             statusfile = getOption("c2o.statusfile"),
                             log = getOption("c2o.logfile")) {
-    manual.sysreq.pkgs <- c("gert", "haven", "sf")
+    manual.sysreq.pkgs <- c("haven", "sf")
     manual.sysreqs <- list(
         haven = list(depends="", builddepends="zlib-devel"),
         ## haven only declares GNU make, but needs zlib also
         sf = list( depends="libgeos-3_8_1 libgeos_c1 proj gdal sqlite3",
-                   builddepends="proj proj-devel gdal gdal-devel geos-devel sqlite3-devel"),
+                   builddepends="proj proj-devel gdal gdal-devel geos-devel sqlite3-devel")
         ## sf fails to declare its dependency on sqlite3
-        gert = list( depends="libgit2-1_1",  builddepends="libgit2-devel")
+        #gert = list( depends="libgit2-1_1",  builddepends="libgit2-devel")
         ## gert fails to declare anything in SystemRequires, usethis depends on gert
         )
 
