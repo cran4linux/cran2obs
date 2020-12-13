@@ -285,9 +285,7 @@ createEmptySpec <- function(pkg,
         sf = list( depends="libgeos-3_8_1 libgeos_c1 proj gdal sqlite3",
                    builddepends="proj proj-devel gdal gdal-devel geos-devel sqlite3-devel")
         ## sf fails to declare its dependency on sqlite3
-        #gert = list( depends="libgit2-1_1",  builddepends="libgit2-devel")
-        ## gert fails to declare anything in SystemRequires, usethis depends on gert
-        )
+    )
 
     
     logger(paste0("** Creating empty spec for pkg ", pkg))
