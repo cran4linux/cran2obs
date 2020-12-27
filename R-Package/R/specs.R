@@ -216,6 +216,10 @@ sysreq2depends <- function(line){
         result <- addtoresult( result, "", "libpng16-devel libpng16-compat-devel")
     }
 
+    if ( grepl( "librsvg2", line)) {
+        result <- addtoresult( result, "", "librsvg-devel")
+    }
+
     if ( grepl( "libSSH2", line)){
         result <- addtoresult( result, "libssh2-1", "libssh2-devel")
     }
