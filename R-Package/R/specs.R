@@ -170,7 +170,7 @@ dropFileSection <- function(speclines){
 #' @export
 sysreq2depends <- function(line){
     result <- list( depends="", builddepends="")
-    addtoresult <- function( r, a, b) { return( list( depends=paste(r$depends, a), builddepends=paste(r$builddepends, b)  ))}
+    addtoresult <- function( r, a, b) { return( list( depends=trimws(paste(r$depends, a)), builddepends=trimws(paste(r$builddepends, b))  ))}
     
     if ( grepl( "ICU4C", line)) {
         result <- addtoresult(result, "icu", "libicu-devel")
@@ -256,8 +256,8 @@ sysreq2depends <- function(line){
         result <- addtoresult( result, "", "zlib-devel")
     }
 
-    result$depends <- trimws(result$depends)
-    result$builddepends <- trimws(result$builddepends)
+#    result$depends <- trimws(result$depends)
+#    result$builddepends <- trimws(result$builddepends)
     result
 }
 
@@ -334,6 +334,8 @@ createEmptySpec <- function(pkg,
             logger(paste0("  NOTE: ", pkg, " is using manual sysreqs. Check, if still needed!"))
         } else {
             sysreqs <- sysreq2depends( gsub("\n", " ", desc[ "SystemRequirements" ])  )
+            cat( sysreqs$depends , "\n")
+            cat( sysreqs$builddepends , "\n")
             ## convert to single line for greping
         }
     } else {
