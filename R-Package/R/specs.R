@@ -187,6 +187,10 @@ sysreq2depends <- function(line){
     if ( grepl( "glpk", line)){
         result <- addtoresult( result, "glpk", "glpk-devel")
     }
+
+   if ( grepl( "GLU", line)){
+        result <- addtoresult( result, "", "freeglut-devel xorg-x11-devel")
+    }
     
     if ( grepl( "gmp", line)){
         result <- addtoresult( result, "libgmp10", "gmp-devel")
