@@ -411,7 +411,7 @@ createEmptySpec <- function(pkg,
             } else { next }
         } else if ( grepl( "{{suggests}}", line, fixed=TRUE) ) {
             if ( length( suggests) > 0)  {
-                for ( item in suggests) cat( "Recommends:\t", item, "\n",  sep="", file=specfile, append=TRUE)
+                for ( item in suggests) cat( "Suggests:\t", item, "\n",  sep="", file=specfile, append=TRUE)
             } else {next}
         } else if ( grepl( "{{needscompilation}}", line, fixed=TRUE) ) {
             if ( needs.compilation == "yes") cat( "BuildRequires:   gcc gcc-c++ gcc-fortran\n", file=specfile, append=TRUE)

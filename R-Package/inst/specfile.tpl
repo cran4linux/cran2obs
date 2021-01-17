@@ -1,8 +1,8 @@
 #
 # spec file for package {{packname}}
-# This file is (mostly) auto-generated using information
-# in the package source, esp. Description and Summary.
-# Improvements in that area should be discussed with upstream.
+# This file is auto-generated using information in the package source,
+# esp. Description and Summary. Improvements in that area should be
+# discussed with upstream.
 #
 # Copyright (c) {{year}} SUSE LINUX GmbH, Nuernberg, Germany.
 #
@@ -29,7 +29,6 @@ Group:          Development/Libraries/Other
 License:        {{license}}
 URL:            http://cran.r-project.org/web/packages/%{packname}
 Source:         {{source0}}
-BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 Requires:       R-base
 {{depends}}
 
