@@ -179,9 +179,13 @@ sysreq2depends <- function(line){
     if ( grepl( "GDAL", line)) {
         result <- addtoresult( result, "gdal", "gdal gdal-devel")
     }
+#
+#    if ( grepl( "GEOS", line)) {
+#        result <- addtoresult( result, "libgeos-3_9_0 libgeos_c1", "geos-devel libgeos-3_9_0 libgeos_c1")
+#    }
 
     if ( grepl( "GEOS", line)) {
-        result <- addtoresult( result, "libgeos-3_8_1 libgeos_c1", "geos-devel libgeos-3_8_1 libgeos_c1")
+        result <- addtoresult( result, "", "geos-devel")
     }
 
     if ( grepl( "glpk", line)){
@@ -290,7 +294,9 @@ createEmptySpec <- function(pkg,
     manual.sysreqs <- list(
         haven = list(depends="", builddepends="zlib-devel"),
         ## haven only declares GNU make, but needs zlib also
-        sf = list( depends="libgeos-3_8_1 libgeos_c1 proj gdal sqlite3",
+        ##sf = list( depends="libgeos-3_8_1 libgeos_c1 proj gdal sqlite3",
+        ##           builddepends="proj proj-devel gdal gdal-devel geos-devel sqlite3-devel")
+        sf = list( depends="proj gdal sqlite3",
                    builddepends="proj proj-devel gdal gdal-devel geos-devel sqlite3-devel")
         ## sf fails to declare its dependency on sqlite3
     )

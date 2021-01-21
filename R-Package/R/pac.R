@@ -267,13 +267,13 @@ setuppac <- function(pkg,
 #' @export
 
 pkg2pac <- function( pkg,
-                      localOBS      = getOption( "c2o.localOBSdir"),
-                      remoteprj     = getOption( "c2o.auto"),
-                      cran          = getOption( "c2o.cran"),
-                      statusfile    = getOption( "c2o.statusfile"),
-                      download.cache= getOption( "c2o.download.cache"),
-                      binary.cache  = getOption( "c2o.binary.cache"),
-                      log           = getOption( "c2o.logfile")) {
+                    localOBS      = getOption( "c2o.localOBSdir"),
+                    remoteprj     = getOption( "c2o.auto"),
+                    cran          = getOption( "c2o.cran"),
+                    statusfile    = getOption( "c2o.statusfile"),
+                    download.cache= getOption( "c2o.download.cache"),
+                    binary.cache  = getOption( "c2o.binary.cache"),
+                    log           = getOption( "c2o.logfile")) {
     
     logger(paste0("* Syncing ", pkg, " to OBS"))
     status <- read.table(statusfile, sep=";", header=TRUE, colClasses="character")

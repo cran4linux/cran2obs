@@ -87,7 +87,7 @@ testbuild <- function(pkg, pac, specfile,
             logger(line)
             logger("testbuild failed: Missing dependency")
         }
-        return(list(status="fail", value="Missing dependencies in R CMD INSTALL", buildlog=buildlog))
+        return(list(status="failed", value="Missing dependencies in R CMD INSTALL", buildlog=buildlog))
     }
     
     if ( any ( grep( "nothing provides", buildlog, fixed=TRUE)) ) { ### missing R-rpms, no chance
@@ -146,5 +146,5 @@ testbuild <- function(pkg, pac, specfile,
     ## if we end here some unknown condition has prevented a successful build
     cat( "Failed to build R-", pkg, " unknown problem\n", sep="")
     cat( "Failed to build R-", pkg, " unknown problem\n", sep="", file=log, append=TRUE)
-    return(list(status="fail", value="unknown problem", buildlog=buildlog))    
+    return(list(status="failed", value="unknown problem", buildlog=buildlog))    
 }
