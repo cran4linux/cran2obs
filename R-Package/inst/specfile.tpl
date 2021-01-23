@@ -1,5 +1,5 @@
 #
-# spec file for package {{packname}}
+# Spec file for package {{packname}}
 # This file is auto-generated using information in the package source,
 # esp. Description and Summary. Improvements in that area should be
 # discussed with upstream.
@@ -32,16 +32,16 @@ Source:         {{source0}}
 Requires:       R-base
 {{depends}}
 
-%if 0%{?sle_version} > 120400 || 0%{?is_opensuse}
-# Three others commonly needed
-BuildRequires:  tex(ae.sty)
-BuildRequires:  tex(fancyvrb.sty)
-BuildRequires:  tex(inconsolata.sty)
-BuildRequires:  tex(natbib.sty)
-%else
-BuildRequires:  texlive
-%endif
-BuildRequires:  texinfo
+# %%if 0%%{?sle_version} > 120400 || 0%%{?is_opensuse}
+# # Three others commonly needed
+# BuildRequires:  tex(ae.sty)
+# BuildRequires:  tex(fancyvrb.sty)
+# BuildRequires:  tex(inconsolata.sty)
+# BuildRequires:  tex(natbib.sty)
+# %else
+# BuildRequires:  texlive
+# %endif
+# BuildRequires:  texinfo
 BuildRequires:  fdupes
 BuildRequires:  R-base
 {{builddepends}}
@@ -61,6 +61,7 @@ mkdir -p %{buildroot}%{rlibdir}
 %{_bindir}/R CMD INSTALL -l %{buildroot}%{rlibdir} %{packname}
 test -d %{packname}/src && (cd %{packname}/src; rm -f *.o *.so)
 rm -f %{buildroot}%{rlibdir}/R.css
+%fdupes -s %{buildroot}%{rlibdir}
 
 #%%check
 #%%{_bindir}/R CMD check %%{packname}

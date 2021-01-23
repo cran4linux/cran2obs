@@ -48,11 +48,12 @@ resetPkgRevDeps <- function(pkg, status){
 cleanBuildlog <- function(buildlog){
     buildlog <- trimws( gsub( "^\\[.*\\]", "", iconv(buildlog, "UTF-8", "UTF-8", sub="")), which="left")
     startoscsetup <- grep("Scanning", buildlog)
-    endoscsetup <- grep("mktexlsr: Done.", buildlog)
+    endoscsetup <- grep("now finalizing build dir", buildlog)
     if ( ( length( startoscsetup) == 1) &
          ( length( endoscsetup) == 1)) {
         buildlog[-(startoscsetup:endoscsetup)]
     }
+    buildlog
 }
 
 #' showPkg return the line of status file for pkg
