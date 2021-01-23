@@ -16,10 +16,10 @@ defineActions <- function(status = getOption("c2o.status")){
     uptodate <- status$Package[ which(obsVersion( status$Version) == status$OBSVersion) ]
     ##logger( paste0( "pkgs uptodate ", uptodate))
     
-    tried <- status$Package[ which(is.na(status$OBSVersion) & ( obsVersion(status$Version) != status$triedVersion  ))  ]
+    tried <- status$Package[ which( obsVersion(status$Version) == status$triedVersion  )  ]
     ##logger( paste0( "pkgs unsuccessful ", tried))
     
-    update <- status$Package[ which( !is.na( status$OBSVersion) & ( obsVersion( status$Version) != status$OBSVersion) )]
+    update <- status$Package[ which( !is.na( status$OBSVersion) & ( obsVersion( status$Version) != status$OBSVersion) & ( obsVersion(status$Version) != status$triedVersion)  )]
     logger( paste0( "pkgs to update ", length(update)))
     logger( paste0( "pkgs to update ", update))
 

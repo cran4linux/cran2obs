@@ -377,6 +377,19 @@ pkg2pac <- function( pkg,
         }
     }
 
+    if (result$value == "lto-no-text-in-archive") { ## may be adding to Makevars helps
+        result <- addMakevarsToSpec(specfile, "mkdir ~/.R/ && echo \"CFLAGS = -ffat-lto-objects\" > ~/.R/Makevars")
+        specfile <- result$value
+        logger("** build with -lto-fat-objects")
+        result <- testbuild(pkg, pac, specfile, ap=status, log=log )
+        if (result$status == "done"){
+            logger( paste0( pkg, " automatically built with -lto-fat-objects"), log)
+            syncresult <- list( status="done", buildtype=buildtype, value=obsVersion(pkg.info$Version), hasDevel=TRUE)
+            return( syncresult)
+        }
+    }
+
+    
     ## if we end here, something went badly wrong.
    
     logger( paste0( "Failed to automatically build ", pkg), log)

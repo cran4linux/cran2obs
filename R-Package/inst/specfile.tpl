@@ -53,6 +53,9 @@ BuildRequires:  R-base
 
 %prep
 %setup -q -c -n %{packname}
+# the next line is needed, because we build without --clean in between two packages
+rm -rf ~/.R 
+
 
 %build
 

@@ -131,6 +131,12 @@ testbuild <- function(pkg, pac, specfile,
         return( list( status="fail", value="split devel", buildlog=buildlog))
     }
 
+    if ( any( grep( "E: lto-no-text-in-archive", buildlog, fixed=TRUE))) {
+        logger( paste0("Error: lto-no-text-in-archive ", pkg))
+        return(list(status="fail", value="lto-no-text-in-archive", buildlog=buildlog)) 
+    }
+
+    
     if ( any( grep( "badness.*exceeds threshold", buildlog))){
         logger( paste0("Some RPMlint problems "))
         return( list( status="fail", value="rpmlint problem", buildlog=buildlog))

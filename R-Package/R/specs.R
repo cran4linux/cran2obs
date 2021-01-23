@@ -1,3 +1,22 @@
+#' addMakevarsToSpec adds a line of CFLAGS, if needed
+#'
+#' @param specfile a specfile
+#' @param makevar what to add to ~/.R/Makevars in specfile
+#'
+#' @return list of status "done" or "fail" and value, the specfile or NA
+#'
+#' @export
+addMakevarsToSpec <- function( specfile, makevar){
+    specLines <- readLines(specfile)
+    split <- grep("rm -rf ~/.R", specLines, fixed=TRUE)
+    specLines <- c( specLines[1:split],
+                   makevar,
+                   specLines[(split+1):length(specLines)]
+                   )
+    writeLines(specLines, con=specfile)
+    return(list(status="done", value=specfile))     
+}
+
 #' expandSpecForDevel takes a specfile and adds a -devel section
 #'
 #' @param specfile A spec file
