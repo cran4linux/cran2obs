@@ -204,11 +204,12 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"),
 ###        cat( pkg , " ",  oldstatus$recDep[ which(oldstatus$Package == pkg)], " ", status$recDep[ which( status$Package == pkg)],"\n")
         if ( is.na(oldstatus$recDep[which(oldstatus$Package == pkg)]) | (oldstatus$recDep[ which(oldstatus$Package == pkg)] != status$recDep[ which( status$Package == pkg)])) {
             upandnewdep <- c(upandnewdep, pkg)
+            logger(paste0("Package ", pkg, " has new dependecies"))
         }
     }   
 
     revdepup <-c()
-    for (pkg in upandnewdep) { revdepup <- c( revdepup, status$Package[ which( grepl( pkg, status$recDep ))]) }
+    for (pkg in upandnewdep) { revdepup <- c( revdepup, status$Package[ which( grepl( paste0("(^| )",pkg,"( |$)"), status$recDep ))]) }
     revdepup <- unique(revdepup)        
     
     for (pkg in revdepup) {
