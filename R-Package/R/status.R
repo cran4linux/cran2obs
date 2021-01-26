@@ -19,7 +19,7 @@ defineActions <- function(status = getOption("c2o.status")){
     tried <- status$Package[ which( obsVersion(status$Version) == status$triedVersion  )  ]
     ##logger( paste0( "pkgs unsuccessful ", tried))
     
-    update <- status$Package[ which( !is.na( status$OBSVersion) & ( obsVersion( status$Version) != status$OBSVersion) & ( obsVersion(status$Version) != status$triedVersion)  )]
+    update <- status$Package[ which( !is.na( status$OBSVersion) & (  ( obsVersion( status$Version) != status$OBSVersion) &  ( is.na(status$triedVersion) | (obsVersion(status$Version) != status$triedVersion))))]
     logger( paste0( "pkgs to update ", length(update)))
     logger( paste0( "pkgs to update ", update))
 
@@ -209,7 +209,7 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"),
     }   
 
     revdepup <-c()
-    for (pkg in upandnewdep) { revdepup <- c( revdepup, status$Package[ which( grepl( paste0("(^| )",pkg,"( |$)"), status$recDep ))]) }
+    for (pkg in upandnewdep) { revdepup <- c( revdepup, status$Package[ which( grepl( paste0("(^| )?",pkg,"( |$)?"), status$recDep ))]) }
     revdepup <- unique(revdepup)        
     
     for (pkg in revdepup) {
