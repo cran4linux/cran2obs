@@ -12,7 +12,7 @@ rmExeFromDoc <- function( specfile, exefiles ){
     split <- grep("fdupes -s", specLines, fixed=TRUE)-1
     exefiles <- gsub("/usr/lib64/R/library/", "", exefiles)
     exefiles <- sapply( strsplit(exefiles, "/"), function(x) paste( x[2:length(x)], sep="", collapse="/"))
-    exefiles <- paste("chmod 644 %{buildroot}%{rlibdir}/", exefiles, sep="")
+    exefiles <- paste("chmod 644 %{buildroot}%{rlibdir}/%{packname}/", exefiles, sep="")
     specLines <- c( specLines[1:split],
                    exefiles,
                    specLines[(split+1):length(specLines)]

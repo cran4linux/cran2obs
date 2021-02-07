@@ -363,18 +363,21 @@ pkg2pac <- function( pkg,
     }
 
     ## there was a build error. Let's see, if it is about splitting in pkg and pkg-devel
-
+    incase.hasDevel <- FALSE ## it may be a -devel package needs rebuilding for some other cause
+                             ## to remember the correct value
+    
     if (result$value == "split devel") { ## may be the split helps
         develfiles <- extractDevelFilesFromLog(result$buildlog, pkg)
         mainfiles <- extractFilesFromSimpleSpec(specfile)
         mainfiles <- setdiff(mainfiles, develfiles)
         result <- expandSpecForDevel(specfile, mainfiles, develfiles)
         specfile <- result$value
+        incase.hasDevel <- TRUE
         logger("** build with -devel package")
         result <- testbuild(pkg, pac, specfile, ap=status, log=log )
         if (result$status == "done"){
             logger( paste0( pkg, " automatically built with -devel"), log)
-            syncresult <- list( status="done", buildtype=buildtype, value=obsVersion(pkg.info$Version), hasDevel=TRUE)
+            syncresult <- list( status="done", buildtype=buildtype, value=obsVersion(pkg.info$Version), hasDevel=incase.hasDevel)
             return( syncresult)
         }
     }
@@ -386,20 +389,20 @@ pkg2pac <- function( pkg,
         result <- testbuild(pkg, pac, specfile, ap=status, log=log )
         if (result$status == "done"){
             logger( paste0( pkg, " automatically built with -lto-fat-objects"), log)
-            syncresult <- list( status="done", buildtype=buildtype, value=obsVersion(pkg.info$Version), hasDevel=TRUE)
+            syncresult <- list( status="done", buildtype=buildtype, value=obsVersion(pkg.info$Version), hasDevel=incase.hasDevel)
             return( syncresult)
         }
     }
 
     if ( result$value == "executable-docs") { ## some docs have the executable bit set
-        exefiles <- sapply( strsplit( buildlog[ grep("E: executable-docs", buildlog)], " "), function(x) x[6])
+        exefiles <- sapply( strsplit( result$buildlog[ grep("E: executable-docs", result$buildlog)], " "), function(x) x[6])
         result <- rmExeFromDoc( specfile, exefiles)
         specfile <- result$value
-        logger("  removed some executable bits")
+        logger("** removed some executable bits")
         result <- testbuild(pkg, pac, specfile, ap=status, log=log )
         if (result$status == "done"){
-            logger( paste0( pkg, " automatically built with -lto-fat-objects"), log)
-            syncresult <- list( status="done", buildtype=buildtype, value=obsVersion(pkg.info$Version), hasDevel=TRUE)
+            logger( paste0( pkg, " built after fixing some executable bits in doc"), log)
+            syncresult <- list( status="done", buildtype=buildtype, value=obsVersion(pkg.info$Version), hasDevel=incase.hasDevel)
             return( syncresult)
         }
     }
