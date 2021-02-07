@@ -9,6 +9,7 @@
 #' @param localOBSdir The top level directory of a checkout of the project
 #' you want to create your package in. 
 #' @param remoteprj Name of the OBS project
+#' @param build.clean default FALSE, wheter obs should be called with --clean
 #'
 #' @return
 #'
@@ -17,7 +18,8 @@ buildforfiles <- function(pkg, pac, specfile, localOBS=getOption("c2o.localOBSdi
                           remoteprj=getOption("c2o.auto"), download.cache=getOption("c2o.download.cache"),
                           binary.cache=getOption("c2o.binary.cache"),
                           ap = getOption("c2o.status"),
-                          log=getOption("c2o.logfile")){
+                          log=getOption("c2o.logfile"),
+                          build.clean=FALSE){
     logger("** Build to construct files section")
     speclines <- readLines( specfile)
     result <- dropFileSection( speclines) ### only needed if manual constructed spec is used
@@ -29,7 +31,7 @@ buildforfiles <- function(pkg, pac, specfile, localOBS=getOption("c2o.localOBSdi
     writeLines( result$speclines, specfile)
     
     result <- testbuild( pkg, pac, specfile, localOBS=localOBS, remoteprj=remoteprj, download.cache=download.cache,
-                        binary.cache=binary.cache, ap=ap, log=log)
+                        binary.cache=binary.cache, ap=ap, log=log, build.clean=build.clean)
     
     ## we dont need to check for success, because %files section is empty and therefore fail by design
     
@@ -57,6 +59,8 @@ buildforfiles <- function(pkg, pac, specfile, localOBS=getOption("c2o.localOBSdi
 #' @param localOBSdir The top level directory of a checkout of the project
 #' you want to create your package in. 
 #' @param remoteprj Name of the OBS project
+#' @param build.clean default FALSE, wheter obs should be called with --clean
+#'
 #' @return list of status, value, buildlog
 #' @export
 testbuild <- function(pkg, pac, specfile,
@@ -65,11 +69,14 @@ testbuild <- function(pkg, pac, specfile,
                       download.cache=getOption("c2o.download.cache"),
                       binary.cache=getOption("c2o.binary.cache"),
                       ap = getOption("c2o.status"),
-                      log=getOption("c2o.logfile")){
+                      log=getOption("c2o.logfile"),
+                      build.clean = FALSE){
     logger(paste0("** testbuild for pkg ", pkg))
+
     cmd <- paste0("\""," cd ", pac,
-                 "; osc build --prefer-pkgs=", binary.cache, " --keep-pkgs=", binary.cache,
-                 " --local-package ", specfile, "\"" )
+                  "; osc build ",  if(build.clean) " --clean " else "" ,
+                  " --prefer-pkgs=", binary.cache, " --keep-pkgs=", binary.cache,
+                  " --local-package ", specfile, "\"" )
 
     suppressWarnings(
         buildlog <- system2("bash", args=c("-c", cmd), stdout=TRUE, stderr=TRUE)

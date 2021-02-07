@@ -16,7 +16,8 @@ pkg2pac(
   statusfile = getOption("c2o.statusfile"),
   download.cache = getOption("c2o.download.cache"),
   binary.cache = getOption("c2o.binary.cache"),
-  log = getOption("c2o.logfile")
+  log = getOption("c2o.logfile"),
+  build.clean = FALSE
 )
 }
 \arguments{
@@ -30,6 +31,8 @@ you want to create your package in.}
 \item{cran}{CRAN mirror to use}
 
 \item{statusfile}{a file holding current syncstate}
+
+\item{build.clean}{default FALSE, wheter obs should be called with --clean}
 
 \item{rpmbuildroot}{The directory where rpmbuild should do its work}
 }

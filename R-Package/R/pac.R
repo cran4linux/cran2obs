@@ -261,6 +261,7 @@ setuppac <- function(pkg,
 #' @param remoteprj Name of the OBS project
 #' @param cran CRAN mirror to use
 #' @param statusfile a file holding current syncstate
+#' @param build.clean default FALSE, wheter obs should be called with --clean
 #' 
 #' @return list of 'status', "done" or "fail", 'buildtype', 'value' set to NA
 #' or character string and 'hasDevel'
@@ -273,7 +274,8 @@ pkg2pac <- function( pkg,
                     statusfile    = getOption( "c2o.statusfile"),
                     download.cache= getOption( "c2o.download.cache"),
                     binary.cache  = getOption( "c2o.binary.cache"),
-                    log           = getOption( "c2o.logfile")) {
+                    log           = getOption( "c2o.logfile"),
+                    build.clean   = FALSE) {
     
     logger(paste0("* Syncing ", pkg, " to OBS"))
     status <- read.table(statusfile, sep=";", header=TRUE, colClasses="character")
@@ -340,7 +342,7 @@ pkg2pac <- function( pkg,
 
 ### first build
     logger("** build for filelist")
-    result <- buildforfiles( pkg, pac, specfile, localOBS=localOBS, remoteprj=remoteprj, download.cache=download.cache, binary.cache=binary.cache, ap=status, log=log)
+    result <- buildforfiles( pkg, pac, specfile, localOBS=localOBS, remoteprj=remoteprj, download.cache=download.cache, binary.cache=binary.cache, ap=status, log=log, build.clean=build.clean)
 
     if (! result$status == "done") {
         logger( paste0( "Failed initial build, probably missing system lib for ", pkg))

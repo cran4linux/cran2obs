@@ -14,7 +14,8 @@ buildforfiles(
   download.cache = getOption("c2o.download.cache"),
   binary.cache = getOption("c2o.binary.cache"),
   ap = getOption("c2o.status"),
-  log = getOption("c2o.logfile")
+  log = getOption("c2o.logfile"),
+  build.clean = FALSE
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ buildforfiles(
 \item{specfile}{Location of created specfile}
 
 \item{remoteprj}{Name of the OBS project}
+
+\item{build.clean}{default FALSE, wheter obs should be called with --clean}
 
 \item{rpmbuildroot}{The directory where rpmbuild should do its work}
 

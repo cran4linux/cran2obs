@@ -55,7 +55,8 @@ cran2repo <- function(cran=getOption("c2o.cran"),
             }
             num <- which(status$Package == pkg)
             result <- pkg2pac(pkg, localOBS=localOBS, remoteprj=remoteprj, statusfile=statusfile,
-                              download.cache=download.cache, binary.cache=binary.cache, log=log)
+                              download.cache=download.cache, binary.cache=binary.cache, log=log,
+                              build.clean=ifelse( build.counter == 1, TRUE, FALSE))
 
             if (result$status == "done") {
                 upresult <- uploadpac( pkg, obsVersion(status$Version[num]), buildtype=result$buildtype, localOBS=localOBS, remoteprj=remoteprj, log=log)
