@@ -81,8 +81,8 @@ cran2repo <- function(cran=getOption("c2o.cran"),
         }
     }
     sync.end <- Sys.time()
-    logger( paste0("  Sync finished at ", sync.end, "after ",
-                   floor(as.numeric(difftime(sync.end, sync.start, units="auto"))*100)/100, "s" ))
+    logger( paste0("  Sync finished at ", sync.end, " after ",
+                   floor(as.numeric(difftime(sync.end, sync.start, units="secs"))*100)/100, "s" ))
     
     return(status)
 }
