@@ -143,6 +143,10 @@ testbuild <- function(pkg, pac, specfile,
         return(list(status="fail", value="lto-no-text-in-archive", buildlog=buildlog)) 
     }
 
+    if ( any( grep( "E: executable-docs", buildlog))){
+        logger( paste0( "Error: executable-docs "))
+        return( list( status="fail", value="executable-docs", buildlog=buildlog))
+    }
     
     if ( any( grep( "badness.*exceeds threshold", buildlog))){
         logger( paste0("Some RPMlint problems "))

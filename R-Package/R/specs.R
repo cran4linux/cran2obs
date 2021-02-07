@@ -1,3 +1,27 @@
+#' rmExeFromDoc removes wrongly set exe bits from
+#' documentation files
+#' 
+#' @param specfile a specfile
+#' @param exefiles vector of fq-filenames
+#'
+#' @return list of status "done" or "fail" and value, the specfile or NA
+#'
+#' @export
+rmExeFromDoc <- function( specfile, exefiles ){
+    specLines <- readLines(specfile)
+    split <- grep("fdupes -s", specLines, fixed=TRUE)-1
+    exefiles <- gsub("/usr/lib64/R/library/", "", exefiles)
+    exefiles <- sapply( strsplit(exefiles, "/"), function(x) paste( x[2:length(x)], sep="", collapse="/"))
+    exefiles <- paste("chmod 644 %{buildroot}%{rlibdir}/", exefiles, sep="")
+    specLines <- c( specLines[1:split],
+                   exefiles,
+                   specLines[(split+1):length(specLines)]
+                   )
+    writeLines(specLines, specfile)
+    return(list(status="done", value=specfile))
+}
+
+
 #' addMakevarsToSpec adds a line of CFLAGS, if needed
 #'
 #' @param specfile a specfile

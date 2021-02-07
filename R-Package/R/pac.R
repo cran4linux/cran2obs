@@ -391,6 +391,18 @@ pkg2pac <- function( pkg,
         }
     }
 
+    if ( result$value == "executable-docs") { ## some docs have the executable bit set
+        exefiles <- sapply( strsplit( buildlog[ grep("E: executable-docs", buildlog)], " "), function(x) x[6])
+        result <- rmExeFromDoc( specfile, exefiles)
+        specfile <- result$value
+        logger("  removed some executable bits")
+        result <- testbuild(pkg, pac, specfile, ap=status, log=log )
+        if (result$status == "done"){
+            logger( paste0( pkg, " automatically built with -lto-fat-objects"), log)
+            syncresult <- list( status="done", buildtype=buildtype, value=obsVersion(pkg.info$Version), hasDevel=TRUE)
+            return( syncresult)
+        }
+    }
     
     ## if we end here, something went badly wrong.
    
