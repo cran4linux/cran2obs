@@ -213,29 +213,42 @@ setuppac <- function(pkg,
 
     ## pac checked out or created, get the sources
 
+    source0 <- paste0( pkg, "_", status[ which( status$Package == pkg), "Version"]   , ".tar.gz")
+    ## this is the source file needed for this build
+    
     if (buildtype == "update") { ## rm old sources
-        oldsource <- list.files(file.path(pac, paste0("R-",pkg)), "\\.*tgz")
+        oldsources <- list.files( file.path( pac, "*.tar.gz")
+        oldsources <- oldsources[ oldsource != source0  ]
         ## CRAN packages have one source file in tgz format
-        if (length(oldsource) > 0) { ## if no source, everthing is fine
-            if (length(oldsource) == 1) { 
-                if ( !file.remove( file.path( pac, paste0( pkg, "_", inOBSVersion, ".tar.gz")))){
+        if (length(oldsource) > 0) { ## there are old sources to remove
+            ## if (length(oldsource) == 1) { 
+            ##     if ( !file.remove( file.path( pac, paste0( pkg, "_", inOBSVersion, ".tar.gz")))){
+            ##         logger(paste0(pkg, ": could not rm old sources"))
+            ##         return( list( status="fail", value="could not rm old sources"))
+            ##     }
+            ## } else {
+            ##     logger(paste0("more than one source file in pkg ", pkg))
+            ##     return( list( status="fail", value="more than one source package"))
+            ## }
+            for (file in oldsources) {
+                if ( !file.remove( file.path( pac, file))){
                     logger(paste0(pkg, ": could not rm old sources"))
                     return( list( status="fail", value="could not rm old sources"))
                 }
-            } else {
-                logger(paste0("more than one source file in pkg ", pkg))
-                return( list( status="fail", value="more than one source package"))
+                else {
+                    logger( paste0( pkg,": removed old source file ", file.path( pac, file)))
+                }
             }
         }
     }
 
-    source0 <- paste0( pkg, "_", status[ which( status$Package == pkg), "Version"]   , ".tar.gz")
-
-    if (! file.exists( file.path( download.cache, source0))) {
-        if ( class( try( download.file( file.path( cran ,"src/contrib", source0),
-                           file.path( download.cache, source0)))) == "try-error"){
-            logger( paste0(pkg, ": sources not found on CRAN"))
-            return( list( status="fail", value="no sources found"))
+    if (! file.exists( file.path( pac, source0) { ## if update because of dependencies, sources may be present already
+        if (! file.exists( file.path( download.cache, source0))) { ## may in cache
+            if ( class( try( download.file( file.path( cran ,"src/contrib", source0),
+                                           file.path( download.cache, source0)))) == "try-error"){
+                logger( paste0(pkg, ": sources not found on CRAN"))
+                return( list( status="fail", value="no sources found"))
+            }
         }
     }
     
