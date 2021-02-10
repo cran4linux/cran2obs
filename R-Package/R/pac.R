@@ -242,7 +242,7 @@ setuppac <- function(pkg,
         }
     }
 
-    if (! file.exists( file.path( pac, source0) { ## if update because of dependencies, sources may be present already
+    if (! file.exists( file.path( pac, source0))) { ## if update because of dependencies, sources may be present already
         if (! file.exists( file.path( download.cache, source0))) { ## may in cache
             if ( class( try( download.file( file.path( cran ,"src/contrib", source0),
                                            file.path( download.cache, source0)))) == "try-error"){
