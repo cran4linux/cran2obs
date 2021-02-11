@@ -218,9 +218,9 @@ setuppac <- function(pkg,
     
     if (buildtype == "update") { ## rm old sources
         oldsources <- list.files( pac, "*.tar.gz")
-        oldsources <- oldsources[ oldsource != source0  ]
+        oldsources <- oldsources[ oldsources != source0  ]
         ## CRAN packages have one source file in tgz format
-        if (length(oldsource) > 0) { ## there are old sources to remove
+        if (length(oldsources) > 0) { ## there are old sources to remove
             ## if (length(oldsource) == 1) { 
             ##     if ( !file.remove( file.path( pac, paste0( pkg, "_", inOBSVersion, ".tar.gz")))){
             ##         logger(paste0(pkg, ": could not rm old sources"))
