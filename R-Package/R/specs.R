@@ -222,10 +222,14 @@ sysreq2depends <- function(line){
     if ( grepl( "GDAL", line)) {
         result <- addtoresult( result, "gdal", "gdal gdal-devel")
     }
-#
-#    if ( grepl( "GEOS", line)) {
-#        result <- addtoresult( result, "libgeos-3_9_0 libgeos_c1", "geos-devel libgeos-3_9_0 libgeos_c1")
-#    }
+
+    if (grepl( "fontconfig", line)){
+       result <- addtoresult( result, "fontconfig", "fontconfig fontconfig-devel")   
+    }
+
+    if (grepl( "freetype2", line)){
+       result <- addtoresult( result, "", "freetype2-devel")   
+    }
 
     if ( grepl( "GEOS", line)) {
         result <- addtoresult( result, "", "geos-devel")
