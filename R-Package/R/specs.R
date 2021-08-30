@@ -283,6 +283,10 @@ sysreq2depends <- function(line){
         result <- addtoresult( result, "", "libxml2-devel")
     }
 
+    if ( grepl( "netcdf", line)) {
+        result <- addtoresult( result, "netcdf", "netcdf netcdf-devel")
+    }
+    
     if ( grepl( "OpenSSL", line)) {
         result <- addtoresult( result, "openssl", "openssl-devel")
     }
