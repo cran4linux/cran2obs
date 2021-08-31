@@ -286,6 +286,10 @@ sysreq2depends <- function(line){
     if ( grepl( "netcdf", line)) {
         result <- addtoresult( result, "netcdf", "netcdf netcdf-devel")
     }
+
+    if ( grepl( "ODBC3", line )) {
+        result <- addtoresult( result, "iodbc", "iodbc libiodbc-devel")
+   }
     
     if ( grepl( "OpenSSL", line)) {
         result <- addtoresult( result, "openssl", "openssl-devel")
