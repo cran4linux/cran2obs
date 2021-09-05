@@ -249,13 +249,11 @@ setuppac <- function(pkg,
                 logger( paste0(pkg, ": sources not found on CRAN"))
                 return( list( status="fail", value="no sources found"))
             }
+        } 
+        if ( !file.copy( file.path( download.cache, source0), file.path( pac, source0), overwrite=TRUE )){
+            logger(paste0(pkg, ": copy of sources failed"))
+            return( list( status="fail", value="copy of sources failed"))
         }
-    }
-    
-    if ( !file.copy( file.path( download.cache, source0), file.path( pac, source0), overwrite=TRUE )){
-        logger(paste0(pkg, ": copy of sources failed"))
-
-        return( list( status="fail", value="copy of sources failed"))
     }
     
     return( list( status="done", buildtype=buildtype, value=pac))
