@@ -345,8 +345,9 @@ createEmptySpec <- function(pkg,
                             cran=getOption("c2o.cran"),
                             statusfile = getOption("c2o.statusfile"),
                             log = getOption("c2o.logfile")) {
-    manual.sysreq.pkgs <- c("haven", "sf")
+    manual.sysreq.pkgs <- c("httpuv", "sf")
     manual.sysreqs <- list(
+        httpuv = list( depends="", build-depends="zlib-devel"), 
         sf = list( depends="proj gdal sqlite3",
                    builddepends="proj proj-devel gdal gdal-devel geos-devel sqlite3-devel")
         ## sf fails to declare its dependency on sqlite3
