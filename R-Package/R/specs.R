@@ -345,9 +345,10 @@ createEmptySpec <- function(pkg,
                             cran=getOption("c2o.cran"),
                             statusfile = getOption("c2o.statusfile"),
                             log = getOption("c2o.logfile")) {
-    manual.sysreq.pkgs <- c("httpuv", "sf")
+    manual.sysreq.pkgs <- c("httpuv", "s2", "sf")
     manual.sysreqs <- list(
-        httpuv = list( depends="", build-depends="zlib-devel"), 
+        httpuv = list( depends="", builddepends="zlib-devel"),
+        s2 = list( depends="openssl", builddepends="openssl-devel"),
         sf = list( depends="proj gdal sqlite3",
                    builddepends="proj proj-devel gdal gdal-devel geos-devel sqlite3-devel")
         ## sf fails to declare its dependency on sqlite3
@@ -387,21 +388,20 @@ createEmptySpec <- function(pkg,
         if ( desc["Encoding"] %in% c("latin1", "latin2")) desc <- iconv( desc, desc["Encoding"], "UTF-8")
     }
 
-    if ( "SystemRequirements" %in% names(desc)) {
-        logger( paste0( pkg, " has non-empty SystemReqirements"))
-        logger( desc[ "SystemRequirements"])
-
-        if (pkg %in% manual.sysreq.pkgs) {
-            sysreqs <- manual.sysreqs[[pkg]]
-            logger(paste0("  NOTE: ", pkg, " is using manual sysreqs. Check, if still needed!"))
-        } else {
+    if (pkg %in% manual.sysreq.pkgs) {
+        sysreqs <- manual.sysreqs[[pkg]]
+        logger(paste0("  NOTE: ", pkg, " is using manual sysreqs. Check, if still needed!"))
+    } else {
+        if ( "SystemRequirements" %in% names(desc)) {
+            logger( paste0( pkg, " has non-empty SystemReqirements"))
+            logger( desc[ "SystemRequirements"])
             sysreqs <- sysreq2depends( gsub("\n", " ", desc[ "SystemRequirements" ])  )
             cat( sysreqs$depends , "\n")
             cat( sysreqs$builddepends , "\n")
             ## convert to single line for greping
+        } else {
+            sysreqs <- list(depends="", builddepends="")
         }
-    } else {
-        sysreqs <- list(depends="", builddepends="")
     }
     
     spectpl <- gsub( "{{year}}", format( Sys.time(), "%Y" ), spectpl, fixed=TRUE)    
