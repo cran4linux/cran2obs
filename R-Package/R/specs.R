@@ -251,6 +251,10 @@ sysreq2depends <- function(line){
         result <- addtoresult( result, "gsl", "gsl-devel")
     }
 
+    if ( grepl( "ImageMagick ", line, fixed=TRUE)){
+        result <- addtoresult( result, "ImageMagick", "")
+    }
+
     if ( grepl( "ImageMagick++", line, fixed=TRUE)){
         result <- addtoresult( result, "", "libMagick++-devel")
     }
