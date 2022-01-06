@@ -219,16 +219,20 @@ sysreq2depends <- function(line){
         result <- addtoresult(result, "icu", "libicu-devel")
     }
 
-    if ( grepl( "GDAL", line)) {
-        result <- addtoresult( result, "gdal", "gdal gdal-devel")
-    }
-
     if (grepl( "fontconfig", line)){
        result <- addtoresult( result, "fontconfig", "fontconfig fontconfig-devel")   
     }
 
     if (grepl( "freetype2", line)){
        result <- addtoresult( result, "", "freetype2-devel")   
+    }
+
+    if ( grepl( "fftw", line)) {
+        result <- addtoresult( result, "", "fftw3-devel")
+    }
+
+    if ( grepl( "GDAL", line)) {
+        result <- addtoresult( result, "gdal", "gdal gdal-devel")
     }
 
     if ( grepl( "GEOS", line)) {
@@ -265,7 +269,7 @@ sysreq2depends <- function(line){
     }
 
     if ( grepl( "libgit2", line)){
-        result <- addtoresult( result, "libgit2-1_1", "libgit2-devel")
+        result <- addtoresult( result, "", "libgit2-devel")
     }
 
     if ( grepl( "libjpeg", line)){
