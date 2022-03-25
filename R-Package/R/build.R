@@ -1,4 +1,3 @@
-
 #' buildforfiles performs a build without %files section
 #' and tries to contstruct all files from the build errors.
 #' 
@@ -153,6 +152,10 @@ testbuild <- function(pkg, pac, specfile,
         return( list( status="fail", value="rpmlint problem", buildlog=buildlog))
     }
 
+    if ( any( grep( "library-without-ldconfig", buildlog))){
+        logger( paste0( "Error: missing ldconfig call"))
+        return( list( status="fail", value="missing-ldconfig", buildlog=buildlog))
+    }
     
     if (length( grep( "Wrote:", buildlog, fixed=TRUE)) > 1) {
         logger( paste0("Success: ", pkg, " rpm package created"))

@@ -3,6 +3,7 @@
 export(CranOBSfromScratch)
 export(CranOBSstatus)
 export(addMakevarsToSpec)
+export(addPost)
 export(available.packages.OBS)
 export(buildforfiles)
 export(check.settings)

@@ -1,3 +1,22 @@
+#' addPost adds sections %post and %postun for
+#' included libraries
+#' 
+#' @param specfile a specfile
+#'
+#' @return list of status "done" or "fail" and value, the specfile or NA
+#'
+#' @export
+addPost <- function( specfile ){
+    specLines <- readLines(specfile)
+    split <- grep("fdupes -s", specLines, fixed=TRUE)-1
+    specLines <- c( specLines[1:split],
+                   "", "%post", "/sbin/ldconfig", "", "%postun", "/sbin/ldconfig",
+                   specLines[(split+1):length(specLines)]
+                   )
+    writeLines(specLines, specfile)
+    return(list(status="done", value=specfile))
+}
+
 #' rmExeFromDoc removes wrongly set exe bits from
 #' documentation files
 #' 
@@ -20,7 +39,6 @@ rmExeFromDoc <- function( specfile, exefiles ){
     writeLines(specLines, specfile)
     return(list(status="done", value=specfile))
 }
-
 
 #' addMakevarsToSpec adds a line of CFLAGS, if needed
 #'
@@ -214,11 +232,11 @@ dropFileSection <- function(speclines){
 sysreq2depends <- function(line){
     result <- list( depends="", builddepends="")
     addtoresult <- function( r, a, b) { return( list( depends=trimws(paste(r$depends, a)), builddepends=trimws(paste(r$builddepends, b))  ))}
-    
-    if ( grepl( "ICU4C", line)) {
-        result <- addtoresult(result, "icu", "libicu-devel")
-    }
 
+    if ( grepl( "cmake", line)) {
+        result <- addtoresult(result, "", "cmake")
+    }
+    
     if (grepl( "fontconfig", line)){
        result <- addtoresult( result, "fontconfig", "fontconfig fontconfig-devel")   
     }
@@ -253,6 +271,10 @@ sysreq2depends <- function(line){
 
     if ( grepl( "Gnu Scientific Library", line)){
         result <- addtoresult( result, "gsl", "gsl-devel")
+    }
+
+    if ( grepl( "ICU4C", line)) {
+        result <- addtoresult(result, "icu", "libicu-devel")
     }
 
     if ( grepl( "ImageMagick ", line, fixed=TRUE)){

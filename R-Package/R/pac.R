@@ -417,7 +417,19 @@ pkg2pac <- function( pkg,
             return( syncresult)
         }
     }
-    
+
+    if ( result$value == "missing-ldconfig") { ## must add %post and %postun sections
+        result <- addPost( specfile)
+        specfile <- result$value
+        logger("** added %post and %postun for included libraries")
+        result <- testbuild(pkg, pac, specfile, ap=status, log=log )
+        if (result$status == "done"){
+            logger( paste0( pkg, " built after adding %post and %postun"), log)
+            syncresult <- list( status="done", buildtype=buildtype, value=obsVersion(pkg.info$Version), hasDevel=incase.hasDevel)
+            return( syncresult)
+        }
+    }
+
     ## if we end here, something went badly wrong.
    
     logger( paste0( "Failed to automatically build ", pkg), log)
