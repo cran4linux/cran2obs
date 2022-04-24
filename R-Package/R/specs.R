@@ -326,6 +326,10 @@ sysreq2depends <- function(line){
         result <- addtoresult( result, "iodbc", "iodbc libiodbc-devel")
    }
     
+    if ( grepl( "OpenCL", line)) {
+        result <- addtoresult( result, "", "ocl-icd-devel opencl-headers")
+    }
+
     if ( grepl( "OpenSSL", line)) {
         result <- addtoresult( result, "openssl", "openssl-devel")
     }
