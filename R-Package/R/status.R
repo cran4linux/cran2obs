@@ -189,7 +189,7 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"),
     logger(paste0("** Number of new packages: ", length( newpkgs)))
     logger(paste0("   New packages: ", newpkgs))
 
-    updatedpkgs <- status$Package[ which( !is.na( status$OBSVersion) & ( obsVersion( status$Version) != status$OBSVersion) )]
+    updatedpkgs <- status$Package[ which( !is.na( status$OBSVersion) & (  ( obsVersion( status$Version) != status$OBSVersion) &  ( is.na(status$triedVersion) | (obsVersion(status$Version) != status$triedVersion))))]
     logger( paste0("** Number of *updated* packages: ", length(updatedpkgs)))
     logger( paste0("   Updated packages: ", updatedpkgs))
 
