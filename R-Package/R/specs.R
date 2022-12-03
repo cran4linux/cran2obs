@@ -245,6 +245,10 @@ sysreq2depends <- function(line){
        result <- addtoresult( result, "", "freetype2-devel")   
     }
 
+    if ( grepl( "fribidi", line)){
+        result <- addtoresult( result, "fribidi", "fribidi-devel")
+    }
+
     if ( grepl( "fftw", line)) {
         result <- addtoresult( result, "", "fftw3-devel")
     }
@@ -271,6 +275,10 @@ sysreq2depends <- function(line){
 
     if ( grepl( "Gnu Scientific Library", line)){
         result <- addtoresult( result, "gsl", "gsl-devel")
+    }
+
+    if ( grepl( "harfbuzz", line)){
+        result <- addtoresult( result, "libharfbuzz0", "harfbuzz-devel")
     }
 
     if ( grepl( "ICU4C", line)) {
@@ -312,6 +320,10 @@ sysreq2depends <- function(line){
 
     if ( grepl( "libSSH2", line)){
         result <- addtoresult( result, "libssh2-1", "libssh2-devel")
+    }
+
+    if ( grepl( "libtiff", line)) {
+        result <- addtoresult( result, "libtiff5", "libtiff-devel")
     }
 
     if ( grepl( "libxml2", line)) {
