@@ -233,6 +233,10 @@ sysreq2depends <- function(line){
     result <- list( depends="", builddepends="")
     addtoresult <- function( r, a, b) { return( list( depends=trimws(paste(r$depends, a)), builddepends=trimws(paste(r$builddepends, b))  ))}
 
+    if ( grepl( "cairo", line)){
+        result <- addtoresult( result, "", "cairo-devel")
+    }
+    
     if ( grepl( "cmake", line)) {
         result <- addtoresult(result, "", "cmake")
     }
@@ -273,7 +277,7 @@ sysreq2depends <- function(line){
         result <- addtoresult( result, "libgmp10", "gmp-devel")
     }
 
-    if ( grepl( "Gnu Scientific Library", line)){
+    if ( grepl( "Gnu Scientific Library", line) | grepl("GSL", line)){
         result <- addtoresult( result, "gsl", "gsl-devel")
     }
 

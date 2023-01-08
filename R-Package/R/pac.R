@@ -394,7 +394,7 @@ pkg2pac <- function( pkg,
     }
 
     if (result$value == "lto-no-text-in-archive") { ## may be adding to Makevars helps
-        result <- addMakevarsToSpec(specfile, "mkdir ~/.R/ && echo \"CFLAGS = -ffat-lto-objects\" > ~/.R/Makevars")
+        result <- addMakevarsToSpec(specfile, "mkdir ~/.R/ && echo \"PKG_CFLAGS += -ffat-lto-objects\" > ~/.R/Makevars\n echo \"PKG_CPPFLAGS += -ffat-lto-objects\" >> ~/.R/Makevars")
         specfile <- result$value
         logger("** build with -lto-fat-objects")
         result <- testbuild(pkg, pac, specfile, ap=status, log=log )

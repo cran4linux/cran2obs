@@ -1,6 +1,6 @@
 Package: CRAN2OBS
 Title: Tools to bridge CRAN (https://cran.r-project.org) and OBS (https://build.opensuse.org/)
-Version: 0.8
+Version: 0.8.1
 Authors	@R: person("Detlef", "Steuer", email = "steuer@hsu-hh.de", role = c("aut", "cre"))
 Description: The package contains functions to generate and work with rpm packages for OpenSUSE from CRAN. 
 Depends: devtools, tools, dplyr
