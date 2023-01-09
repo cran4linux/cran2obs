@@ -70,9 +70,20 @@ addMakevarsToSpec <- function( specfile, makevar){
 #' @export
 expandSpecForDevel <- function(specfile, mainfiles, develfiles){
     specLines <- readLines(specfile)
+
+    ## Add pgk-devel to the requires.
+    ## This is needed, because R-packages do not have the concept
+    ## of devel packages. Therefore a "Require: pkg" must imply a
+    ## "Require: pkg-devel"
+    split <- grep("Source:", specLines)
+    specLines <- c(specLines[1:split],
+                   c("",
+                     "Requires:       R-%{packname}-devel"),
+                   specLines[(split+1):length(specLines)])
+    
+    ## add %package devel
     split <- grep("%description", specLines)
 
-    ## add %package devel
     specLines <- c(specLines[1:(split-1)],
                    c("",
                      "%package        devel",
@@ -527,7 +538,7 @@ createEmptySpec <- function(pkg,
                 for ( item in suggests) cat( "Suggests:\t", item, "\n",  sep="", file=specfile, append=TRUE)
             } else {next}
         } else if ( grepl( "{{needscompilation}}", line, fixed=TRUE) ) {
-            if ( needs.compilation == "yes") cat( "BuildRequires:   gcc gcc-c++ gcc-fortran\n", file=specfile, append=TRUE)
+            if ( needs.compilation == "yes") cat( "BuildRequires:  gcc gcc-c++ gcc-fortran\n", file=specfile, append=TRUE)
         } else if ( grepl( "{{description}}", line, fixed=TRUE) ) {
                                         #for ( item in description.str) cat( item, "\n", file=specfile, append=TRUE)
             for (line in strwrap( gsub("\n", " ", desc[ "Description"]), 72)) cat( line, "\n", file=specfile, append=TRUE)
