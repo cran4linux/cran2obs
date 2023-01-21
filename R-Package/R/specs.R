@@ -337,7 +337,7 @@ sysreq2depends <- function(line){
         result <- addtoresult( result, "libssh2-1", "libssh2-devel")
     }
 
-    if ( grepl( "libtiff", line)) {
+    if ( grepl( "tiff", line)) {
         result <- addtoresult( result, "libtiff6", "libtiff-devel")
     }
 
