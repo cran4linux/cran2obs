@@ -338,7 +338,7 @@ sysreq2depends <- function(line){
     }
 
     if ( grepl( "libtiff", line)) {
-        result <- addtoresult( result, "libtiff5", "libtiff-devel")
+        result <- addtoresult( result, "libtiff6", "libtiff-devel")
     }
 
     if ( grepl( "libxml2", line)) {
