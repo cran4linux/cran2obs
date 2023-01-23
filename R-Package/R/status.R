@@ -10,8 +10,8 @@ defineActions <- function(status = getOption("c2o.status")){
     totry <- status$Package[ which( ( !is.na( status$Version) & is.na( status$OBSVersion)) &
                                     (( is.na( status$triedVersion) |
                                        (obsVersion( status$Version) != status$triedVersion))))]
-    logger( paste0( "pkgs to try ", length(totry)))
-    logger( paste0( "pkgs to try ", totry))
+    logger( paste0( "Number of pkgs to try ", length(totry)))
+    ##logger( paste0( "pkgs to try ", totry))
 
     uptodate <- status$Package[ which(obsVersion( status$Version) == status$OBSVersion) ]
     ##logger( paste0( "pkgs uptodate ", uptodate))
@@ -20,12 +20,12 @@ defineActions <- function(status = getOption("c2o.status")){
     ##logger( paste0( "pkgs unsuccessful ", tried))
     
     update <- status$Package[ which( !is.na( status$OBSVersion) & (  ( obsVersion( status$Version) != status$OBSVersion) &  ( is.na(status$triedVersion) | (obsVersion(status$Version) != status$triedVersion))))]
-    logger( paste0( "pkgs to update ", length(update)))
-    logger( paste0( "pkgs to update ", update))
+    logger( paste0( "number of pkgs to update ", length(update)))
+    ##logger( paste0( "pkgs to update ", update))
 
     retired <- status$Package[ is.na(status$Version) ] 
-    logger( paste0( "pkgs which retired ", length(retired)))
-    logger( paste0( "pkgs which retired ", retired))
+    logger( paste0( "Number of pkgs which retired ", length(retired)))
+    ##logger( paste0( "pkgs which retired ", retired))
     
     return(list(retired=retired, uptodate=uptodate, update=update, tried=tried,
                 totry=totry))
@@ -185,13 +185,13 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"),
                     oldstatus[, c("Package", "OBSVersion", "hasDevel", "triedVersion" )],
                     by="Package", all=TRUE)
     logger(paste0("** Number of retired packages: ", length( retiredpkgs)))
-    logger(paste0("   Retired packages: ", retiredpkgs))
+    ## logger(paste0("   Retired packages: ", retiredpkgs))
     logger(paste0("** Number of new packages: ", length( newpkgs)))
-    logger(paste0("   New packages: ", newpkgs))
+    ## logger(paste0("   New packages: ", newpkgs))
 
     updatedpkgs <- status$Package[ which( !is.na( status$OBSVersion) & (  ( obsVersion( status$Version) != status$OBSVersion) &  ( is.na(status$triedVersion) | (obsVersion(status$Version) != status$triedVersion))))]
     logger( paste0("** Number of *updated* packages: ", length(updatedpkgs)))
-    logger( paste0("   Updated packages: ", updatedpkgs))
+    ## logger( paste0("   Updated packages: ", updatedpkgs))
 
     ## For reverse dependencies of updated packages
     ## if the updated pgk has a different set of packages as dependencies
@@ -218,7 +218,7 @@ repoStatusUpdate <- function(cran=getOption("c2o.cran"),
         status[i, "triedVersion"] <- status[i, "hasDevel"] <- NA 
     }
     logger( paste0("** Number of Packages to be rebuilt: ", length(revdepup)))
-    logger( paste0("   Packages to rebuild because of dependencies: ", revdepup))
+    ## logger( paste0("   Packages to rebuild because of dependencies: ", revdepup))
         
     write.table(status, file=file, row.names=FALSE, sep=";")
     logger("new status file written")

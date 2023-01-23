@@ -81,13 +81,9 @@ testbuild <- function(pkg, pac, specfile,
         buildlog <- system2("bash", args=c("-c", cmd), stdout=TRUE, stderr=TRUE)
     )
 
-##    logger(buildlog, log)
-##    writeLines(buildlog, "./buildlog")
-    
     buildlog <- cleanBuildlog(buildlog) ## lots of lines, usually no useful info
     
-    logger( buildlog, log)
-##    writeLines(buildlog, "./buildlog.clean")                         
+    ## logger( buildlog, log)
     
     if ( any ( grep( "ERROR: dependency", buildlog, fixed=TRUE)) ) { ### missing some dependency, no chance
         logger(paste0( "The following missing dependencies must be available to build R-", pkg, "\n", sep=""))
