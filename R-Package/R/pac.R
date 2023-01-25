@@ -286,7 +286,7 @@ pkg2pac <- function( pkg,
                     download.cache= getOption( "c2o.download.cache"),
                     binary.cache  = getOption( "c2o.binary.cache"),
                     log           = getOption( "c2o.logfile"),
-                    build.clean   = FALSE) {
+                    additional.osc.flags = "") {
     
     logger(paste0("* Syncing ", pkg, " to OBS"))
     status <- read.table(statusfile, sep=";", header=TRUE, colClasses="character")
@@ -353,7 +353,7 @@ pkg2pac <- function( pkg,
 
 ### first build
     logger("** build for filelist")
-    result <- buildforfiles( pkg, pac, specfile, localOBS=localOBS, remoteprj=remoteprj, download.cache=download.cache, binary.cache=binary.cache, ap=status, log=log, build.clean=build.clean)
+    result <- buildforfiles( pkg, pac, specfile, localOBS=localOBS, remoteprj=remoteprj, download.cache=download.cache, binary.cache=binary.cache, ap=status, log=log, additional.osc.flags = additional.osc.flags)
 
     if (! result$status == "done") {
         logger( paste0( "Failed initial build, probably missing system lib for ", pkg))
@@ -365,7 +365,7 @@ pkg2pac <- function( pkg,
     
     ## second build!
     logger("** build with file list")
-    result <- testbuild( pkg, pac, specfile, ap=status, log=log)
+    result <- testbuild( pkg, pac, specfile, ap=status, log=log, additional.osc.flags = " --no-init " )
 
     if (result$status == "done") { ## pkg successfully built!
         logger( paste0( pkg, " automatically built"), log)
@@ -385,7 +385,7 @@ pkg2pac <- function( pkg,
         specfile <- result$value
         incase.hasDevel <- TRUE
         logger("** build with -devel package")
-        result <- testbuild(pkg, pac, specfile, ap=status, log=log )
+        result <- testbuild(pkg, pac, specfile, ap=status, log=log, additional.osc.flags = " --no-init ")
         if (result$status == "done"){
             logger( paste0( pkg, " automatically built with -devel"), log)
             syncresult <- list( status="done", buildtype=buildtype, value=obsVersion(pkg.info$Version), hasDevel=incase.hasDevel)
@@ -397,7 +397,7 @@ pkg2pac <- function( pkg,
         result <- addMakevarsToSpec(specfile, "mkdir ~/.R/ && echo \"PKG_CFLAGS += -ffat-lto-objects\" > ~/.R/Makevars\n echo \"PKG_CPPFLAGS += -ffat-lto-objects\" >> ~/.R/Makevars")
         specfile <- result$value
         logger("** build with -lto-fat-objects")
-        result <- testbuild(pkg, pac, specfile, ap=status, log=log )
+        result <- testbuild(pkg, pac, specfile, ap=status, log=log, additional.osc.flags = " --no-init " )
         if (result$status == "done"){
             logger( paste0( pkg, " automatically built with -lto-fat-objects"), log)
             syncresult <- list( status="done", buildtype=buildtype, value=obsVersion(pkg.info$Version), hasDevel=incase.hasDevel)
@@ -410,7 +410,7 @@ pkg2pac <- function( pkg,
         result <- rmExeFromDoc( specfile, exefiles)
         specfile <- result$value
         logger("** removed some executable bits")
-        result <- testbuild(pkg, pac, specfile, ap=status, log=log )
+        result <- testbuild(pkg, pac, specfile, ap=status, log=log,  additional.osc.flags = " --no-init " )
         if (result$status == "done"){
             logger( paste0( pkg, " built after fixing some executable bits in doc"), log)
             syncresult <- list( status="done", buildtype=buildtype, value=obsVersion(pkg.info$Version), hasDevel=incase.hasDevel)
@@ -422,7 +422,7 @@ pkg2pac <- function( pkg,
         result <- addPost( specfile)
         specfile <- result$value
         logger("** added %post and %postun for included libraries")
-        result <- testbuild(pkg, pac, specfile, ap=status, log=log )
+        result <- testbuild(pkg, pac, specfile, ap=status, log=log,  additional.osc.flags = " --no-init " )
         if (result$status == "done"){
             logger( paste0( pkg, " built after adding %post and %postun"), log)
             syncresult <- list( status="done", buildtype=buildtype, value=obsVersion(pkg.info$Version), hasDevel=incase.hasDevel)
